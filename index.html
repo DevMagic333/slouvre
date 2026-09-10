@@ -1406,7 +1406,7 @@ const MONO=['SERRA \u2020','VOSS','K.','HOLM','NN','ORTA','B\u00c4R','LUM'];
 let cur={}, acquired=false, lang='en';
 
 function newWork(text){
-  if(text&&text.trim()){
+  if(typeof text==='string'&&text.trim()){
     /* the words steer. the roll is new every time, so no two
        visitors ever leave with the same cat. */
     const variant=Math.floor(Math.random()*4294967296);
@@ -1507,7 +1507,7 @@ document.getElementById('deskGo').onclick=()=>{
    numbers, and thrown away. it never leaves the device. */
 /* stamped on saved images only. the gallery itself stays unstamped,
    the way a museum does not sign other people's canvases. */
-const MARK='$SLOUVRE · theslouvre.com';
+const MARK='$SLOUVRE';
 function setMode(b){ if(BANNER===b)return; BANNER=b; CW=b?900:300; CH=300; rerender(); }
 function rerender(){
   if(cur.seed===null||cur.seed===undefined){newWork();return;}
@@ -1519,18 +1519,24 @@ document.getElementById('saveBtn').onclick=()=>{
   const svg=document.getElementById('art').cloneNode(true);
   svg.setAttribute('xmlns','http://www.w3.org/2000/svg');
   svg.setAttribute('width',CW);svg.setAttribute('height',CH);
+  /* the plate sits well inside the edge. social sites crop banners
+     hard at the corners, so a corner mark is a mark you lose. */
   const ns='http://www.w3.org/2000/svg';
+  const fsz=BANNER?CH*.062:10.5;
+  const padX=BANNER?CW*.05:11, padY=BANNER?CH*.13:13;
+  const tw=MARK.length*fsz*.55+fsz*1.5;
+  const px=CW-tw-padX, py=CH-padY-fsz*1.45;
   const plate=document.createElementNS(ns,'rect');
-  const tw=MARK.length*5.6+14;
-  plate.setAttribute('x',CW-tw-8);plate.setAttribute('y',CH-20);
-  plate.setAttribute('width',tw);plate.setAttribute('height',13);
-  plate.setAttribute('fill','#FBFAF7');plate.setAttribute('opacity','.82');
+  plate.setAttribute('x',px);plate.setAttribute('y',py);
+  plate.setAttribute('width',tw);plate.setAttribute('height',fsz*1.72);
+  plate.setAttribute('fill','#FBFAF7');plate.setAttribute('opacity','.9');
+  plate.setAttribute('stroke','#111');plate.setAttribute('stroke-width',fsz*.06);
   svg.appendChild(plate);
   const t=document.createElementNS(ns,'text');
-  t.setAttribute('x',CW-tw-1);t.setAttribute('y',CH-10.5);
+  t.setAttribute('x',px+fsz*.75);t.setAttribute('y',py+fsz*1.22);
   t.setAttribute('font-family','Georgia,serif');
-  t.setAttribute('font-size','9.5');
-  t.setAttribute('letter-spacing','.9');
+  t.setAttribute('font-size',fsz);
+  t.setAttribute('letter-spacing',fsz*.07);
   t.setAttribute('fill','#111');
   t.textContent=MARK;
   svg.appendChild(t);
@@ -1538,8 +1544,9 @@ document.getElementById('saveBtn').onclick=()=>{
   const url=URL.createObjectURL(new Blob([str],{type:'image/svg+xml;charset=utf-8'}));
   const im=new Image();
   im.onload=()=>{
-    const k=3,c=document.createElement('canvas');
-    c.width=CW*k;c.height=CH*k;
+    /* 1500x500 is exactly what X wants for a header. */
+    const c=document.createElement('canvas');
+    c.width=BANNER?1500:900; c.height=BANNER?500:900;
     const x=c.getContext('2d');
     x.fillStyle='#ffffff';x.fillRect(0,0,c.width,c.height);
     x.drawImage(im,0,0,c.width,c.height);
@@ -1558,7 +1565,8 @@ document.getElementById('camIn').addEventListener('change',e=>{
   const f=e.target.files&&e.target.files[0]; if(!f)return;
   const img=new Image(), url=URL.createObjectURL(f);
   img.onload=()=>{
-    try{ fromPhoto(img); }catch(err){}
+    try{ fromPhoto(img); }
+    catch(err){ document.getElementById('seedline').textContent='That image could not be read. Try another.'; }
     URL.revokeObjectURL(url);
     e.target.value='';
   };
