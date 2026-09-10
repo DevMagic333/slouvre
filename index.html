@@ -1120,6 +1120,27 @@ function scenery(W,H,small){
   return g;
 }
 
+/* the photograph, redrawn badly: one wobbly blob per cell of a
+   coarse grid, then the strong edges scribbled over the top. */
+function photoGround(w,h,grid,edges){
+  let s=`<rect width="${w}" height="${h}" fill="${grid.base}"/>`;
+  const n=grid.n, cw=w/n, ch=h/n, rr=Math.max(cw,ch);
+  for(let i=0;i<grid.cells.length;i++){
+    const c=grid.cells[i]; if(!c)continue;
+    const gx=i%n, gy=Math.floor(i/n);
+    s+=`<path d="${blob((gx+.5)*cw,(gy+.5)*ch,rr*R(.52,.74),RI(5,7),rr*.18)}" fill="${c}" opacity="${F(R(.9,1))}"/>`;
+  }
+  /* the ink pass. strong edges get a heavy line, so the thing you
+     photographed keeps its outline even after everything else melts. */
+  if(edges)edges.forEach(e=>{
+    const strong=e[3]===1;
+    if(!chance(strong?.95:.6))return;
+    const x=e[0]*w,y=e[1]*h,a=e[2],len=rr*(strong?R(.9,1.9):R(.5,1.1));
+    s+=`<path d="M${F(x-Math.cos(a)*len/2)} ${F(y-Math.sin(a)*len/2)} Q${F(x+R(-4,4))} ${F(y+R(-4,4))} ${F(x+Math.cos(a)*len/2)} ${F(y+Math.sin(a)*len/2)}" fill="none" stroke="#111" stroke-width="${F(strong?R(2,4):R(.9,1.9))}" stroke-linecap="round" opacity="${F(strong?R(.7,.95):R(.3,.6))}"/>`;
+  });
+  return s;
+}
+
 function generate(){
   const w=CW,h=CH;let s='';
   TR={};
@@ -1135,7 +1156,12 @@ function generate(){
   ACC=pickAcc();
 
   /* ground */
+  const PH=(FORCE&&FORCE.grid)?FORCE.grid:null;
   const style=RI(0,3);
+  if(PH){
+    TR.ground='photographic';
+    s+=photoGround(w,h,PH,FORCE.edges);
+  }else
   TR.ground=dark?'nocturne':['gradient','aureole','colour field','flat'][style];
   if(style===0){
     const c1=P(PAL),c2=dark?'#1A1A22':P(BG);
@@ -1150,14 +1176,14 @@ function generate(){
   }
 
   /* colour that actually lands */
-  const blobs=Math.max(2,Math.round(RI(3,9)*DENS));
+  const blobs=PH?RI(1,3):Math.max(2,Math.round(RI(3,9)*DENS));
   TR.palette=blobs>=7?'saturated':blobs>=5?'mixed':'restrained';
   for(let i=0;i<blobs;i++){
     const c=P(PAL),x=R(0,w),y=R(0,h),r=R(10,64);
     s+=`<path d="${blob(x,y,r,RI(6,10),r*.4)}" fill="${c}" opacity="${F(R(.45,.95))}"/>`;
     for(let d=0;d<RI(0,3);d++)s+=drip(x+R(-r,r),y+r*.7,R(20,90),c,R(2,7));
   }
-  for(let i=0;i<Math.round(RI(4,16)*DENS*(w/300));i++)
+  for(let i=0;i<(PH?RI(2,6):Math.round(RI(4,16)*DENS*(w/300)));i++)
     s+=`<circle cx="${F(R(0,w))}" cy="${F(R(0,h))}" r="${F(R(1.5,9))}" fill="${P(PAL)}" opacity="${F(R(.5,1))}"/>`;
   for(let i=0;i<RI(0,3);i++)
     s+=`<rect x="${F(R(-20,w))}" y="${F(R(-20,h))}" width="${F(R(24,150))}" height="${F(R(12,130))}" fill="${P(PAL)}" opacity="${F(R(.25,.7))}" transform="rotate(${F(R(-45,45))} ${F(R(0,w))} ${F(R(0,h))})"/>`;
@@ -1169,14 +1195,15 @@ function generate(){
   const AN=(FORCE&&FORCE.anchor)?FORCE.anchor:null;
   const fx=w/300, fy=h/300;
   if(mode==='landscape'){
-    s+=scenery(w,h,true);
+    if(!PH)s+=scenery(w,h,true);
     picks=[];
   }else if(mode==='portrait'){
     /* the sitter, three-quarter, with a view behind them */
-    s+=`<g opacity=".85">${scenery(w,h,false)}</g>`;
-    picks=[[w*.5+R(-14,14)*fx, h*R(.52,.6), R(1.15,1.5)*Math.min(fx,fy)]];
+    if(!PH)s+=`<g opacity=".85">${scenery(w,h,false)}</g>`;
+    picks=[[AN?AN[0]*fx:w*.5+R(-14,14)*fx, AN?AN[1]*fy:h*R(.52,.6),
+            (FORCE&&FORCE.scale?FORCE.scale:R(1.15,1.5))*Math.min(fx,fy)]];
   }
-  else if(mode==='center')picks=[[AN?AN[0]*fx:w*.5,AN?AN[1]*fy:h*.5,R(.95,1.25)*Math.min(fx,fy)]];
+  else if(mode==='center')picks=[[AN?AN[0]*fx:w*.5,AN?AN[1]*fy:h*.5,(FORCE&&FORCE.scale?FORCE.scale:R(.95,1.25))*Math.min(fx,fy)]];
   else if(mode==='tiny')picks=[[R(w*.3,w*.7),R(h*.3,h*.7),R(.28,.45)]];
   else if(mode==='diptych')picks=[[R(w*.2,w*.34),R(h*.4,h*.57),R(.55,.8)],[R(w*.66,w*.8),R(h*.4,h*.57),R(.55,.8)]];
   else if(mode==='crowd')picks=[...Array(RI(3,5)+(BANNER?2:0))].map(()=>[R(w*.08,w*.92),R(h*.2,h*.63),R(.34,.6)]);
@@ -1573,48 +1600,92 @@ document.getElementById('camIn').addEventListener('change',e=>{
   img.onerror=()=>{URL.revokeObjectURL(url);e.target.value='';};
   img.src=url;
 });
-function sat(r,g,b){
+function sat(r,g,b,k){
+  k=k===undefined?1.9:k;
   const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2;
-  if(mx===mn)return `rgb(${r|0},${g|0},${b|0})`;
-  const k=1.9;
+  if(mx===mn||k===1)return `rgb(${r|0},${g|0},${b|0})`;
   const push=v=>Math.max(0,Math.min(255,l+(v-l)*k));
   return `rgb(${push(r)|0},${push(g)|0},${push(b)|0})`;
 }
 function fromPhoto(img){
-  const N=48,c=document.createElement('canvas');
+  const N=96,c=document.createElement('canvas');
   c.width=N;c.height=N;
   const x=c.getContext('2d',{willReadFrequently:true});
   x.drawImage(img,0,0,N,N);
   const d=x.getImageData(0,0,N,N).data;
-  const buck={};let lum=0,mx=0,my=0,w=0,edge=0,prev=0,hsh=2166136261;
+
+  const lum=new Float32Array(N*N);
+  let total=0,hsh=2166136261;
+  let skinN=0,skinX=0,skinY=0,skMinX=N,skMaxX=0,skMinY=N,skMaxY=0;
   for(let i=0;i<N*N;i++){
     const r=d[i*4],g=d[i*4+1],b=d[i*4+2];
     const L=r*.299+g*.587+b*.114;
-    lum+=L;
-    const key=[Math.round(r/42),Math.round(g/42),Math.round(b/42)].join(',');
-    buck[key]=(buck[key]||0)+1;
-    const px=i%N,py=(i/N)|0;
-    mx+=px*L;my+=py*L;w+=L;
-    if(px>0&&Math.abs(L-prev)>26)edge++;
-    prev=L;
+    lum[i]=L;total+=L;
     hsh^=(r<<16|g<<8|b);hsh=Math.imul(hsh,16777619);
+    /* skin, and not merely something brown. wood and rust pass the
+       classic test, so the ratios and saturation are bounded too. */
+    const mx=Math.max(r,g,b),mn=Math.min(r,g,b);
+    if(r>95&&g>40&&b>20&&mx-mn>15&&r>g&&r>b&&Math.abs(r-g)>15
+       &&r/g<1.85&&r/b<2.5&&(mx-mn)/mx<.62){
+      const px=i%N,py=(i/N)|0;
+      skinN++;skinX+=px;skinY+=py;
+      if(px<skMinX)skMinX=px; if(px>skMaxX)skMaxX=px;
+      if(py<skMinY)skMinY=py; if(py>skMaxY)skMaxY=py;
+    }
   }
-  const avg=lum/(N*N);
-  const pal=Object.entries(buck).sort((a,b)=>b[1]-a[1]).slice(0,6)
-    .map(([k])=>{const p=k.split(',').map(Number);return sat(p[0]*42,p[1]*42,p[2]*42);});
-  const cxp=(mx/w)/N, cyp=(my/w)/N;
-  const busy=edge/(N*N);
+  const avg=total/(N*N);
+
+  /* the grid the picture gets redrawn on */
+  const G=30, cells=[], step=N/G;
+  let edgeCount=0;
+  for(let gy=0;gy<G;gy++)for(let gx=0;gx<G;gx++){
+    let r=0,g=0,b=0,cnt=0;
+    for(let yy=Math.floor(gy*step);yy<Math.floor((gy+1)*step);yy++)
+      for(let xx=Math.floor(gx*step);xx<Math.floor((gx+1)*step);xx++){
+        const i=yy*N+xx;r+=d[i*4];g+=d[i*4+1];b+=d[i*4+2];cnt++;
+      }
+    cells.push(sat(r/cnt,g/cnt,b/cnt,1.35));
+  }
+
+  /* strong edges, kept with the direction they run in */
+  const cand=[];
+  for(let y=1;y<N-1;y++)for(let xx=1;xx<N-1;xx++){
+    const i=y*N+xx;
+    const gxv=lum[i+1]-lum[i-1], gyv=lum[i+N]-lum[i-N];
+    const m=Math.hypot(gxv,gyv);
+    if(m>22){cand.push([xx/N,y/N,Math.atan2(gxv,-gyv),m]);edgeCount++;}
+  }
+  cand.sort((a,b)=>b[3]-a[3]);
+  const keep=cand.slice(0,560);
+  const edges=keep.map((e,i)=>[e[0],e[1],e[2],i<180?1:0]);
+
+  const busy=edgeCount/(N*N);
+  const skAsp=(skMaxX-skMinX+1)/(skMaxY-skMinY+1);
+  const isFace=skinN>N*N*.045 && skAsp>.45 && skAsp<2.2;
   const force={
-    pal:pal.length>=3?pal:BAD,
-    ground:avg<86?'nocturne':(busy>.12?'gradient':'aureole'),
-    composition:busy>.17?'crowd':(busy<.05?'tiny':'center'),
-    subject:P(['brainlet','brainlet','brainlet','animal','block','hand','object']),
-    wob:.7+busy*7,
-    dens:.7+busy*4.5,
-    anchor:[40+cxp*220,50+cyp*180]
+    grid:{n:G,cells:cells,base:sat(avg,avg,avg,1)},
+    edges:edges,
+    pal:cells.filter((_,i)=>i%23===0).slice(0,6),
+    wob:.8+busy*2.6,
+    dens:.8
   };
-  if(avg>212)force.condition='overpainted';
-  if(avg<48)force.condition='foxing';
+  if(isFace){
+    const fw=(skMaxX-skMinX)/N, fh=(skMaxY-skMinY)/N;
+    force.subject='brainlet';
+    force.composition='portrait';
+    force.anchor=[(skinX/skinN/N)*300,(skinY/skinN/N)*300];
+    force.scale=Math.max(.6,Math.min(2.1,Math.max(fw,fh)*2.4));
+  }else{
+    /* whatever you shot stays the subject. the invented thing is a
+       small intruder off to one side, not a lid over the top. */
+    force.composition='center';
+    force.subject=P(['brainlet','animal','block','object','cactus','hand']);
+    force.scale=R(.3,.55);
+    const corner=P([[52,232],[248,236],[58,74],[244,70],[150,254]]);
+    force.anchor=[corner[0]+R(-16,16),corner[1]+R(-12,12)];
+  }
+  if(avg>214)force.condition='overpainted';
+  if(avg<44)force.condition='foxing';
   const seed=((hsh>>>0)^Math.floor(Math.random()*4294967296))>>>0;
   newWork({seedOnly:seed,force:force,label:'__photo__'});
 }
