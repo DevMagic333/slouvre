@@ -1,0 +1,1368 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Slouvre</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
+
+:root{
+  --wall:#D9D6CD;
+  --wall-lit:#E4E1D9;
+  --ink:#000000;
+  --oxblood:#6B1E22;
+  --brass:#7E6A2E;
+  --label:#FBFAF7;
+  --sold:#C0221F;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--wall);
+  background-image:radial-gradient(120% 70% at 50% 0%, var(--wall-lit) 0%, var(--wall) 62%);
+  background-attachment:fixed;
+  color:var(--ink);
+  font-family:'EB Garamond',Georgia,serif;
+  font-size:17px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---------- top ---------- */
+header{
+  display:flex;align-items:baseline;justify-content:space-between;
+  gap:12px;padding:18px 20px 14px;
+  border-bottom:1px solid rgba(0,0,0,.35);
+}
+.mark{
+  font-family:'Bodoni Moda',serif;
+  font-weight:600;
+  font-size:20px;
+  letter-spacing:.20em;
+  text-transform:uppercase;
+  line-height:1;
+}
+.mark small{
+  display:block;
+  font-family:'EB Garamond',serif;
+  font-weight:400;font-size:11.5px;letter-spacing:.06em;
+  text-transform:none;font-style:italic;
+  opacity:.62;margin-top:5px;
+}
+.lang{display:flex;gap:0;border:1px solid rgba(0,0,0,.4)}
+.lang button{
+  font-family:'EB Garamond',serif;font-size:13px;
+  background:none;border:0;padding:5px 10px;cursor:pointer;color:var(--ink);
+}
+.lang button[aria-pressed="true"]{background:var(--ink);color:var(--wall-lit)}
+.lang button:focus-visible{outline:2px solid var(--oxblood);outline-offset:2px}
+
+/* ---------- gallery ---------- */
+main{padding:34px 20px 10px;max-width:760px;margin:0 auto}
+
+.hang{display:flex;flex-direction:column;align-items:center}
+
+.frame{
+  background:#111;
+  padding:13px;
+  border:1px solid #000;
+  box-shadow:0 22px 34px -20px rgba(0,0,0,.75), 0 3px 6px rgba(0,0,0,.28);
+  width:100%;max-width:430px;
+}
+.mat{background:#fff;padding:16px}
+.canvas{display:block;width:100%;height:auto;background:#fff}
+
+/* wall label */
+.placard{
+  background:var(--label);
+  border:1px solid rgba(0,0,0,.22);
+  box-shadow:0 1px 2px rgba(0,0,0,.16);
+  padding:15px 17px 16px;
+  margin:26px 0 0;
+  width:100%;max-width:430px;
+  position:relative;
+}
+.dot{
+  position:absolute;top:15px;right:15px;
+  width:11px;height:11px;border-radius:50%;
+  background:var(--sold);
+  opacity:0;transform:scale(.4);
+  transition:opacity .32s ease,transform .32s cubic-bezier(.2,1.4,.4,1);
+}
+.placard.acquired .dot{opacity:1;transform:scale(1)}
+
+.p-artist{font-variant:small-caps;letter-spacing:.06em;font-size:15px;line-height:1.25}
+.p-title{
+  font-family:'Bodoni Moda',serif;
+  font-style:italic;font-size:21px;line-height:1.2;margin:3px 0 1px;
+  padding-right:16px;
+}
+.p-meta{font-size:14.5px;opacity:.72;line-height:1.4}
+.p-stmt{
+  font-size:15px;line-height:1.5;margin-top:11px;
+  padding-top:11px;border-top:1px solid rgba(0,0,0,.16);
+}
+.p-foot{
+  display:flex;justify-content:space-between;gap:10px;
+  margin-top:11px;font-size:13.5px;
+}
+.p-val{color:var(--brass);font-variant:small-caps;letter-spacing:.05em}
+.p-status{font-style:italic;opacity:.66;text-align:right}
+
+/* ---------- rarity: the frame does the talking ---------- */
+.wall{position:relative;display:flex;flex-direction:column;align-items:center;width:100%}
+.frame.t1{background:#9C8358;padding:8px;box-shadow:0 10px 18px -14px rgba(0,0,0,.6)}
+.frame.t2{background:#141414;padding:13px}
+.frame.t3{background:#080808;padding:20px;box-shadow:0 26px 40px -22px rgba(0,0,0,.8),0 3px 7px rgba(0,0,0,.3)}
+.frame.t4,.frame.t5,.frame.t6{
+  background:linear-gradient(150deg,#8A6E22 0%,#E3C86A 22%,#A8842C 48%,#F0DC9A 68%,#8A6E22 100%);
+  border:1px solid #4E3D10;padding:18px;
+  box-shadow:0 26px 42px -22px rgba(0,0,0,.8),0 3px 8px rgba(0,0,0,.35);
+}
+.frame.t5{padding:22px}
+.frame.t6{padding:26px;outline:3px double #6B5518;outline-offset:5px}
+.frame.t4 .mat,.frame.t5 .mat,.frame.t6 .mat{box-shadow:inset 0 0 0 2px #4E3D10}
+
+.plight{display:none}
+.frame-wrap{position:relative;width:100%;display:flex;justify-content:center}
+.lit .plight{
+  display:block;position:absolute;top:-26px;left:50%;transform:translateX(-50%);
+  width:44%;height:26px;pointer-events:none;
+}
+.lit .plight::before{
+  content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:74px;height:7px;border-radius:3px;
+  background:linear-gradient(#E3C86A,#8A6E22);border:1px solid #4E3D10;
+}
+.lit .plight::after{
+  content:"";position:absolute;top:7px;left:50%;transform:translateX(-50%);
+  width:100%;height:120px;
+  background:radial-gradient(60% 100% at 50% 0%, rgba(255,246,214,.62), rgba(255,246,214,0) 72%);
+}
+.rope{margin-top:14px;opacity:.9}
+.rope.hide{display:none}
+
+/* ---------- object file ---------- */
+.file{
+  width:100%;max-width:430px;margin:16px 0 0;
+  border-top:1px solid rgba(0,0,0,.3);padding-top:11px;
+}
+.file-h{font-variant:small-caps;letter-spacing:.07em;font-size:13.5px;opacity:.62;margin-bottom:5px}
+.row{display:flex;align-items:baseline;gap:10px;padding:4px 0;border-bottom:1px dotted rgba(0,0,0,.18);font-size:14.5px}
+.row:last-child{border-bottom:0}
+.row b{font-weight:400;font-variant:small-caps;letter-spacing:.05em;opacity:.58;flex:none;width:104px}
+.row i{font-style:normal;flex:1}
+.row u{text-decoration:none;color:var(--brass);font-variant:small-caps;flex:none;width:50px;text-align:right}
+.row.key i{font-style:italic}
+
+.p-tier{
+  font-variant:small-caps;letter-spacing:.09em;font-size:13px;
+  color:var(--oxblood);margin-bottom:5px;padding-right:16px;
+}
+
+/* ---------- actions ---------- */
+.acts{display:flex;gap:9px;margin:22px 0 6px;width:100%;max-width:430px}
+.acts button{
+  flex:1;font-family:'EB Garamond',serif;font-size:15.5px;
+  padding:11px 8px;cursor:pointer;
+  border:1px solid var(--ink);background:transparent;color:var(--ink);
+  transition:background .16s ease,color .16s ease;
+}
+.acts button:hover{background:var(--ink);color:var(--wall-lit)}
+.acts .buy{background:var(--oxblood);border-color:var(--oxblood);color:#F3EFE6}
+.acts .buy:hover{background:#000;border-color:#000}
+.acts button:disabled{opacity:.34;cursor:default}
+.acts button:disabled:hover{background:transparent;color:var(--ink)}
+.acts button:focus-visible{outline:2px solid var(--oxblood);outline-offset:2px}
+
+.note{
+  max-width:430px;font-size:13.5px;font-style:italic;opacity:.6;
+  text-align:center;margin:2px auto 0;
+}
+
+/* ---------- commission desk ---------- */
+.desk{
+  width:100%;max-width:430px;margin:30px auto 0;
+  border-top:1px solid rgba(0,0,0,.3);padding-top:14px;
+}
+.desk-h{font-variant:small-caps;letter-spacing:.07em;font-size:13.5px;opacity:.62;margin-bottom:3px}
+.desk-p{font-size:14.5px;opacity:.72;font-style:italic;margin:0 0 9px;line-height:1.4}
+.desk-row{display:flex;gap:8px}
+.desk input{
+  flex:1;min-width:0;font-family:'EB Garamond',serif;font-size:16px;
+  padding:9px 11px;border:1px solid rgba(0,0,0,.45);background:var(--label);color:var(--ink);
+}
+.desk input:focus{outline:2px solid var(--oxblood);outline-offset:1px}
+.desk button{
+  font-family:'EB Garamond',serif;font-size:15px;padding:9px 14px;cursor:pointer;
+  border:1px solid var(--oxblood);background:var(--oxblood);color:#F3EFE6;flex:none;
+}
+.desk button:hover{background:#000;border-color:#000}
+.desk button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.seedline{
+  font-size:13px;opacity:.55;margin-top:8px;font-style:italic;min-height:1.3em;
+}
+
+/* ---------- curator ---------- */
+.curator{
+  max-width:430px;margin:44px auto 0;padding-top:22px;
+  border-top:1px solid rgba(0,0,0,.3);
+  display:flex;gap:15px;align-items:flex-start;
+}
+.curator svg{width:92px;flex:none}
+.c-name{font-variant:small-caps;letter-spacing:.06em;font-size:15px}
+.c-role{font-size:13.5px;opacity:.65;font-style:italic;margin-bottom:7px}
+.c-quote{font-size:15px;line-height:1.45}
+
+/* ---------- donors ---------- */
+.donors{
+  margin-top:40px;border-top:1px solid rgba(0,0,0,.3);
+  overflow:hidden;padding:9px 0 12px;
+}
+.donors-in{
+  display:inline-block;white-space:nowrap;
+  font-variant:small-caps;letter-spacing:.07em;font-size:13px;color:var(--oxblood);
+  animation:scroll 64s linear infinite;
+}
+.donors-in span{padding:0 22px}
+@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+footer{
+  max-width:760px;margin:0 auto;padding:0 20px 40px;
+  font-size:13px;opacity:.55;display:flex;justify-content:space-between;gap:12px;
+}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+@media (min-width:640px){
+  main{padding-top:48px}
+  .mark{font-size:25px}
+  .frame{max-width:470px}
+  .placard,.acts,.note,.curator{max-width:470px}
+}
+</style>
+
+<style>
+#intro{
+  position:fixed;inset:0;z-index:90;
+  background:#171310;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+#intro.gone{display:none}
+.doors{position:absolute;inset:0;z-index:4;pointer-events:none}
+.door{
+  position:absolute;top:0;bottom:0;width:50.6%;
+  background:linear-gradient(100deg,#3A2A1C,#241A11 40%,#4A3624 70%,#2A1E14);
+  transition:transform 2.1s cubic-bezier(.7,0,.3,1);
+}
+.door::after{
+  content:"";position:absolute;top:8%;bottom:8%;left:12%;right:12%;
+  border:2px solid rgba(227,200,106,.28);
+}
+.door.l{left:0;transform:translateX(-101%)}
+.door.r{right:0;transform:translateX(101%)}
+#intro.shut .door.l,#intro.shut .door.r{transform:translateX(0)}
+#intro.opening .door.l{transform:translateX(-101%)}
+#intro.opening .door.r{transform:translateX(101%)}
+
+.stage{
+  position:relative;z-index:2;flex:1;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  gap:16px;padding:26px 22px;max-width:520px;margin:0 auto;width:100%;
+  text-align:center;
+}
+.tstage{width:118px;flex:none}
+.tstage .blink{animation:blink 6.5s infinite}
+@keyframes blink{0%,96%,100%{transform:scaleY(1)}98%{transform:scaleY(.08)}}
+.tstage g.body{animation:bob 7s ease-in-out infinite;transform-origin:60px 140px}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-3px) rotate(.5deg)}}
+
+.beat{
+  font-family:'EB Garamond',Georgia,serif;
+  color:#EDE4D2;font-size:19px;line-height:1.5;
+  max-width:30em;min-height:4.6em;
+  opacity:0;transform:translateY(9px);
+  transition:opacity .75s ease,transform .75s ease;
+}
+.beat.on{opacity:1;transform:none}
+.vig{
+  height:118px;display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;transform:translateY(8px);transition:opacity .8s ease,transform .8s ease;
+}
+.vig.on{opacity:1;transform:none}
+.vig svg{height:100%;width:auto}
+
+.ictl{
+  position:absolute;z-index:6;display:flex;gap:10px;align-items:center;
+}
+.ictl.tl{top:14px;left:16px}
+.ictl.tr{top:14px;right:16px}
+.ictl button{
+  font-family:'EB Garamond',serif;font-size:13.5px;
+  background:none;border:1px solid rgba(237,228,210,.36);color:#EDE4D2;
+  padding:5px 11px;cursor:pointer;letter-spacing:.05em;
+}
+#iSkip{border-color:rgba(237,228,210,.85);background:rgba(237,228,210,.12);font-size:14.5px;padding:7px 15px}
+#iSkip:hover{background:#EDE4D2;color:#171310}
+.ictl button:hover{background:rgba(237,228,210,.13)}
+.ictl button[aria-pressed="true"]{background:#EDE4D2;color:#171310}
+.ictl button:focus-visible{outline:2px solid #E3C86A;outline-offset:2px}
+
+.tap{
+  position:absolute;bottom:20px;left:0;right:0;z-index:5;text-align:center;
+  font-family:'EB Garamond',serif;font-size:13px;color:rgba(237,228,210,.5);
+  font-style:italic;pointer-events:none;
+}
+#sound{
+  position:fixed;bottom:14px;right:14px;z-index:40;
+  font-family:'EB Garamond',serif;font-size:13px;
+  background:var(--label);border:1px solid rgba(0,0,0,.3);color:var(--ink);
+  padding:5px 10px;cursor:pointer;display:none;
+}
+#sound.show{display:block}
+@media (prefers-reduced-motion:reduce){
+  .door{transition:none}
+  .beat,.vig{transition:none}
+  .tstage .blink,.tstage g.body{animation:none}
+}
+@media (max-width:420px){
+  .beat{font-size:17.5px}
+  .tstage{width:96px}
+  .vig{height:96px}
+}
+</style>
+
+<div id="intro" class="shut">
+  <div class="doors"><div class="door l"></div><div class="door r"></div></div>
+
+  <div class="ictl tl">
+    <button id="iEn" aria-pressed="true">EN</button>
+    <button id="iEs" aria-pressed="false">ES</button>
+  </div>
+  <div class="ictl tr"><button id="iSkip"></button></div>
+
+  <div class="stage">
+    <svg class="tstage" viewBox="0 0 120 190" xmlns="http://www.w3.org/2000/svg">
+      <g class="body" fill="none" stroke="#EDE4D2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M34 44c-4-16 6-30 24-31 19-1 30 10 30 24 0 8-3 12-2 18 1 5-4 9-11 10-3 6-13 8-22 6-9-2-15-8-16-15-1-6-2-8-3-12z"/>
+        <path d="M36 27c8-6 22-9 34-5 5 2 8 5 9 8"/>
+        <path d="M55 15c-6 6-14 9-19 11"/>
+        <circle cx="49" cy="47" r="7.5"/><circle cx="72" cy="46" r="6"/>
+        <path d="M56.5 47h9"/><path d="M41.5 45l-6-3"/>
+        <g class="blink" style="transform-origin:60px 47px">
+          <path d="M47 47.5h4" stroke-width="3.4"/><path d="M70 46.5h3.4" stroke-width="3.4"/>
+        </g>
+        <path d="M52 66c5 4 13 4 17 0"/>
+        <path d="M42 79c6 5 22 6 30 0"/><path d="M40 86c8 6 26 7 34 0"/>
+        <path d="M40 86c-13 5-20 16-22 30-1 9-1 22 0 36"/>
+        <path d="M74 86c14 5 22 16 24 31 1 9 1 22 0 35"/>
+        <path d="M66 118c-8-3-12-10-9-17 2-5 7-6 10-3"/>
+        <path d="M67 98c4-1 7 1 7 4 0 4-3 6-7 6"/>
+        <path d="M60 104h9M61 109h8"/>
+      </g>
+    </svg>
+    <div class="vig" id="vig"></div>
+    <p class="beat" id="beat"></p>
+  </div>
+
+  <div class="tap" id="tapHint"></div>
+</div>
+<button id="sound">&#9834;</button>
+
+<header>
+  <div class="mark">The Slouvre<small data-i="sub">Museum of Generated Art · founded 2026</small></div>
+  <div class="lang">
+    <button id="en" aria-pressed="true">EN</button>
+    <button id="es" aria-pressed="false">ES</button>
+  </div>
+</header>
+
+<main>
+  <div class="hang">
+    <div class="wall" id="wall">
+      <div class="frame-wrap">
+        <span class="plight"></span>
+        <div class="frame t2" id="frame">
+          <div class="mat"><svg class="canvas" id="art" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"></svg></div>
+        </div>
+      </div>
+      <svg class="rope hide" id="rope" width="220" height="34" viewBox="0 0 220 34" aria-hidden="true">
+        <path d="M22 9 Q110 34 198 9" fill="none" stroke="#6B1E22" stroke-width="6" stroke-linecap="round"/>
+        <path d="M22 9 Q110 34 198 9" fill="none" stroke="#8B2E32" stroke-width="2" stroke-linecap="round"/>
+        <g fill="#A8842C" stroke="#4E3D10" stroke-width="1.4">
+          <rect x="18" y="6" width="8" height="26" rx="2"/><circle cx="22" cy="5" r="4.4"/>
+          <rect x="194" y="6" width="8" height="26" rx="2"/><circle cx="198" cy="5" r="4.4"/>
+        </g>
+      </svg>
+    </div>
+
+    <div class="placard" id="placard">
+      <span class="dot" id="dot"></span>
+      <div class="p-tier" id="pTier"></div>
+      <div class="p-artist" id="pArtist"></div>
+      <div class="p-title" id="pTitle"></div>
+      <div class="p-meta" id="pMeta"></div>
+      <div class="p-stmt" id="pStmt"></div>
+      <div class="p-foot">
+        <span class="p-val" id="pVal"></span>
+        <span class="p-status" id="pStatus"></span>
+      </div>
+    </div>
+
+    <div class="file">
+      <div class="file-h" id="fileH"></div>
+      <div id="rows"></div>
+    </div>
+
+    <div class="acts">
+      <button class="buy" id="buy"></button>
+      <button id="next"></button>
+    </div>
+    <p class="note" id="note"></p>
+  </div>
+
+  <div class="desk">
+    <div class="desk-h" id="deskH"></div>
+    <p class="desk-p" id="deskP"></p>
+    <div class="desk-row">
+      <input id="deskIn" maxlength="140" autocomplete="off">
+      <button id="deskGo"></button>
+    </div>
+    <div class="desk-row" style="margin-top:8px">
+      <button id="camGo" style="flex:1;background:transparent;color:var(--ink);border-color:var(--ink)"></button>
+      <input type="file" id="camIn" accept="image/*" capture="environment" style="display:none">
+    </div>
+    <div class="seedline" id="seedline"></div>
+    <div class="seedline" id="tagline" style="opacity:.45"></div>
+  </div>
+
+  <div class="curator">
+    <svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg" aria-label="Thierry, curator">
+      <g fill="none" stroke="#000" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+        <!-- lumpy head -->
+        <path d="M34 44c-4-16 6-30 24-31 19-1 30 10 30 24 0 8-3 12-2 18 1 5-4 9-11 10-3 6-13 8-22 6-9-2-15-8-16-15-1-6-2-8-3-12z"/>
+        <!-- severe side part -->
+        <path d="M36 27c8-6 22-9 34-5 5 2 8 5 9 8"/>
+        <path d="M55 15c-6 6-14 9-19 11"/>
+        <!-- tiny round glasses -->
+        <circle cx="49" cy="47" r="7.5"/>
+        <circle cx="72" cy="46" r="6"/>
+        <path d="M56.5 47h9"/>
+        <path d="M41.5 45l-6-3"/>
+        <!-- eyes -->
+        <path d="M47 47.5h4" stroke-width="3.4"/>
+        <path d="M70 46.5h3.4" stroke-width="3.4"/>
+        <!-- smug little mouth -->
+        <path d="M52 66c5 4 13 4 17 0"/>
+        <!-- turtleneck -->
+        <path d="M42 79c6 5 22 6 30 0"/>
+        <path d="M40 86c8 6 26 7 34 0"/>
+        <!-- shoulders / body -->
+        <path d="M40 86c-13 5-20 16-22 30-1 9-1 20 0 32"/>
+        <path d="M74 86c14 5 22 16 24 31 1 9 1 20 0 31"/>
+        <!-- hand permanently under chin -->
+        <path d="M66 118c-8-3-12-10-9-17 2-5 7-6 10-3"/>
+        <path d="M67 98c4-1 7 1 7 4 0 4-3 6-7 6"/>
+        <path d="M60 104h9M61 109h8"/>
+      </g>
+    </svg>
+    <div>
+      <div class="c-name" id="cName">Thierry</div>
+      <div class="c-role" id="cRole"></div>
+      <div class="c-quote" id="cQuote"></div>
+    </div>
+  </div>
+
+  <div class="donors"><div class="donors-in" id="donors"></div></div>
+</main>
+
+<footer>
+  <span id="fLeft"></span>
+  <span>La Bolsa · $SLOUVRE</span>
+</footer>
+
+<script>
+
+/* ============ the slop engine, v2 ============ */
+/* procedural SVG. no model, no API, no cost per image. */
+
+const BAD=['#C9A227','#8E4FA8','#5FA83E','#E0417A','#25A7B0','#E2711D','#3F52C4','#C43A3A','#7BC043','#F2C511','#FF5EA8','#00C2A8','#9B5DE5','#F15BB5'];
+const BG=['#F0E6D2','#D8E6E0','#EFD9E6','#DCE6F2','#F5E3CE','#E6E6DC','#F2D9D9','#1A1A22','#2B1F3A','#E8F0C8'];
+const SKIN=['#F2D2B6','#E0B08A','#C98C63','#8D5A3B','#B4E07A','#D9A8E0','#EDEDED'];
+const GIBBER=['GALERIE','MUSSEUM','ARTT','EXHIBTION','ORIGNAL','MASTERPEICE','SGNATURE','COLLECTON','ARTISTE','LIMITEDD','AUTHENTC','PAINTNG'];
+
+/* one generator, three inputs: a free roll, a description, a photograph.
+   each one only has to produce a seed. */
+let RNG=Math.random, FORCE=null, SEED=null, PAL=null, WOB=1, DENS=1;
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;
+  var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;
+  return ((t^t>>>14)>>>0)/4294967296;};}
+function norm(t){return t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+  .replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();}
+function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
+
+const R=(a,b)=>a+RNG()*(b-a);
+const RI=(a,b)=>Math.floor(R(a,b+1));
+const P=a=>a[Math.floor(RNG()*a.length)];
+const chance=p=>RNG()<p;
+
+/* the museum's reading of your words. it is confident and it is wrong. */
+const LEX=[
+  [/\b(dog|perro|cat|gato|bird|pajaro|ave|pez|fish|horse|caballo|animal|pet|mascota|cow|vaca|rat|raton|bear|oso|wolf|lobo|frog|rana|snake|vibora|pig|puerco|chicken|pollo)\b/,{subject:'animal'}],
+  [/\b(hand|hands|mano|manos|finger|dedo|dedos|grab|hold|touch|tocar|palm|fist|pu(n|nn)o|wave)\b/,{subject:'hand'}],
+  [/\b(cactus|nopal|plant|planta|tree|arbol|desert|desierto|garden|jardin|flower|flor|texas|arizona|sun|sol|hot|calor|green|verde|weed|hierba)\b/,{subject:'cactus'}],
+  [/\b(robot|block|blocks|cube|caja|box|brick|ladrillo|machine|maquina|computer|compu|pixel|minecraft|lego|building|edificio|city|ciudad|phone|telefono|tv|screen|pantalla)\b/,{subject:'block'}],
+  [/\b(banana|platano|food|comida|hotdog|egg|huevo|coffee|cafe|chair|silla|shoe|zapato|taco|pizza|beer|cerveza|burger|torta|drink|bebida|cup|taza|table|mesa|car|carro|fish|shrimp)\b/,{subject:'object'}],
+  [/\b(anime|waifu|manga|kawaii|cute|linda|bonita|girl|chica|senpai|otaku|weeb|cosplay)\b/,{subject:'anime'}],
+  [/\b(me|myself|man|woman|guy|dude|person|hombre|mujer|persona|gente|face|cara|yo|bro|homie|friend|amigo|boss|jefe|dad|papa|mom|mama|kid|nino|baby|bebe)\b/,{subject:'brainlet'}],
+
+  [/\b(night|noche|dark|oscuro|black|negro|midnight|madrugada|sleep|dormir|dream|sueno|void|vacio|death|muerte|evil|space|espacio|cave|basement)\b/,{ground:'nocturne'}],
+  [/\b(sunset|atardecer|sunrise|amanecer|sky|cielo|beach|playa|ocean|mar|fire|fuego|warm|glow)\b/,{ground:'gradient'}],
+  [/\b(spotlight|halo|holy|santo|god|dios|light|luz|angel|heaven|cielo|blessed|bendecido)\b/,{ground:'aureole'}],
+
+  [/\b(everyone|todos|crowd|multitud|family|familia|team|equipo|party|fiesta|friends|amigos|gente|market|mercado|group|grupo|army|club|concert|stadium)\b/,{composition:'crowd'}],
+  [/\b(alone|solo|lonely|solitario|small|tiny|pequeno|chiquito|empty|vacio|quiet|silence|silencio|nothing|nada|lost|perdido|far|lejos)\b/,{composition:'tiny'}],
+  [/\b(two|dos|both|ambos|couple|pareja|versus|vs|fight|pelea|twins|gemelos|before|after|left|right)\b/,{composition:'diptych'}],
+
+  [/\b(sad|triste|cry|llorar|llorando|dead|muerto|died|murio|grief|luto|funeral|broke|quebrado|depressed|deprimido|hurt|dolor|rain|lluvia|flood|tears|lagrimas)\b/,{condition:'water damage'}],
+  [/\b(old|viejo|ancient|antiguo|memory|recuerdo|childhood|infancia|grandma|abuela|grandpa|abuelo|history|historia|vintage|retro|dusty|forgotten|olvidado)\b/,{condition:'craquelure'}],
+  [/\b(rich|rico|money|dinero|luxury|lujo|gold|oro|expensive|caro|rug|scam|estafa|fake|falso|liar|mentira|cover|hide|esconder)\b/,{condition:'overpainted'}],
+  [/\b(sick|enfermo|rot|podrido|mold|moho|stain|mancha|dirty|sucio|gross|asco|smell|nasty)\b/,{condition:'foxing'}],
+
+  [/\b(red|rojo|blood|sangre|angry|enojado|rage|hot|love|amor|heart|corazon)\b/,{pal:['#C43A3A','#E0417A','#8E2B2B','#FF5EA8','#E2711D']}],
+  [/\b(blue|azul|cold|frio|water|agua|ice|hielo|sea|mar|sky|cielo|calm|sad)\b/,{pal:['#3F52C4','#25A7B0','#5B6BB5','#00C2A8','#4FA3D8']}],
+  [/\b(green|verde|money|dinero|nature|naturaleza|grass|pasto|forest|bosque|slime|toxic)\b/,{pal:['#5FA83E','#7BC043','#6E8F3E','#B4E07A','#00C2A8']}],
+  [/\b(pink|rosa|purple|morado|violeta|girly|dream|vapor|neon|magic|magia)\b/,{pal:['#FF5EA8','#9B5DE5','#8E4FA8','#F15BB5','#D2557A']}],
+  [/\b(yellow|amarillo|gold|oro|sun|sol|piss|cheese|queso|bright|shiny)\b/,{pal:['#F2C511','#C9A227','#E2711D','#C4713A','#E3C86A']}]
+];
+function readWords(t){
+  const n=' '+norm(t)+' ',f={};
+  LEX.forEach(([re,set])=>{ if(re.test(n)) Object.keys(set).forEach(k=>{ if(!f[k]) f[k]=set[k]; }); });
+  /* every word does something, listed or not: the letters themselves
+     set how badly the piece is drawn and how crowded it gets. */
+  const s=norm(t)||' ';
+  const vow=(s.match(/[aeiou]/g)||[]).length/Math.max(s.length,1);
+  const uniq=new Set(s.replace(/ /g,'')).size;
+  f.wob=0.55+vow*2.4+(uniq%5)*0.11;
+  f.dens=0.6+Math.min(s.length,90)/60;
+  return f;
+}
+const F=n=>n.toFixed(1);
+
+let HANDS=0;
+function wobble(pts,amt){return pts.map(p=>[p[0]+R(-amt,amt),p[1]+R(-amt,amt)]);}
+
+function blob(cx,cy,r,n,amt){ amt*=WOB;
+  const pts=[];
+  for(let i=0;i<n;i++){
+    const a=(i/n)*Math.PI*2, rr=r*R(.7,1.32);
+    pts.push([cx+Math.cos(a)*rr,cy+Math.sin(a)*rr*R(.78,1.28)]);
+  }
+  const w=wobble(pts,amt);
+  let d=`M${F(w[0][0])} ${F(w[0][1])}`;
+  for(let i=1;i<=w.length;i++){
+    const a=w[i%w.length],b=w[(i+1)%w.length];
+    d+=` Q${F(a[0])} ${F(a[1])} ${F((a[0]+b[0])/2)} ${F((a[1]+b[1])/2)}`;
+  }
+  return d+'Z';
+}
+function scrawl(x,y,len,segs){
+  let d=`M${F(x)} ${F(y)}`,cx=x,cy=y;
+  for(let i=0;i<segs;i++){
+    const nx=cx+R(-len,len),ny=cy+R(-len,len);
+    d+=` Q${F(cx+R(-len,len))} ${F(cy+R(-len,len))} ${F(nx)} ${F(ny)}`;
+    cx=nx;cy=ny;
+  }
+  return d;
+}
+function ink(s){return `fill="none" stroke="#111" stroke-width="${F(s)}" stroke-linecap="round" stroke-linejoin="round"`;}
+
+/* wrong eyes — the house style */
+function eyes(cx,cy,r,s){
+  let g='';
+  const e=[[cx-r*R(.28,.58),cy-r*R(0,.3)],[cx+r*R(.14,.52),cy-r*R(-.16,.34)]];
+  e.forEach(p=>{
+    const k=R(.12,.44);
+    if(chance(.36)){
+      g+=`<ellipse cx="${F(p[0])}" cy="${F(p[1])}" rx="${F(r*k)}" ry="${F(r*k*R(.4,1.6))}" fill="#111"/>`;
+    }else{
+      g+=`<ellipse cx="${F(p[0])}" cy="${F(p[1])}" rx="${F(r*k)}" ry="${F(r*k*R(.5,1.3))}" fill="#fff" ${chance(.5)?`stroke="#111" stroke-width="${F(s*.7)}"`:''}/>`;
+      g+=`<circle cx="${F(p[0]+R(-5,5))}" cy="${F(p[1]+R(-4,4))}" r="${F(r*k*.4)}" fill="#111"/>`;
+    }
+  });
+  return g;
+}
+function mouth(cx,cy,r,s){
+  const w=r*R(.35,1.0);
+  if(chance(.3)){
+    return `<path d="${blob(cx,cy,r*R(.15,.3),6,3)}" fill="#8E2B2B" ${chance(.5)?`stroke="#111" stroke-width="${F(s*.7)}"`:''}/>`;
+  }
+  return `<path d="M${F(cx-w/2)} ${F(cy)} Q${F(cx+R(-16,16))} ${F(cy+r*R(.15,.6))} ${F(cx+w/2)} ${F(cy+R(-8,8))}" ${ink(s)}/>`;
+}
+function drip(x,y,len,col,w){
+  return `<path d="M${F(x)} ${F(y)} q${F(R(-4,4))} ${F(len*.5)} ${F(R(-6,6))} ${F(len)}" fill="none" stroke="${col}" stroke-width="${F(w)}" stroke-linecap="round" opacity="${F(R(.5,.95))}"/>`;
+}
+
+/* ---------- subjects ---------- */
+
+function subjBrainlet(cx,cy,s){
+  let g='';const sw=R(2.4,4.6)*s,hr=36*s;
+  g+=`<path d="${blob(cx,cy,hr,RI(6,9),4*s)}" fill="${P(SKIN)}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
+  g+=eyes(cx,cy,hr,sw);
+  g+=mouth(cx,cy+hr*R(.36,.62),hr,sw);
+  if(chance(.4))g+=`<path d="M${F(cx-hr*.5)} ${F(cy+hr*.35)} q${F(R(-6,6))} ${F(hr*.5)} ${F(R(-5,5))} ${F(hr*R(.7,1.3))}" ${ink(sw)} stroke="#4FA3D8"/>`;
+  const by=cy+hr*R(1.0,1.3);
+  g+=`<path d="M${F(cx+R(-8,8)*s)} ${F(cy+hr*.9)} L${F(cx+R(-14,14)*s)} ${F(by+70*s)}" ${ink(sw)}/>`;
+  for(let a=0;a<RI(1,3);a++){
+    const dir=chance(.5)?-1:1,ex=cx+dir*R(42,90)*s,ey=by+R(-28,58)*s;
+    g+=`<path d="M${F(cx)} ${F(by+R(2,20)*s)} Q${F(cx+dir*R(30,66)*s)} ${F(by+R(-32,26)*s)} ${F(ex)} ${F(ey)}" ${ink(sw)}/>`;
+    for(let i=0;i<RI(2,7);i++){const an=R(-1.5,1.5);
+      g+=`<path d="M${F(ex)} ${F(ey)} l${F(Math.cos(an)*R(9,24)*s*dir)} ${F(Math.sin(an)*R(9,24)*s)}" ${ink(sw)}/>`;}
+  }
+  if(chance(.5))for(let l=0;l<2;l++)
+    g+=`<path d="M${F(cx+R(-10,10)*s)} ${F(by+68*s)} q${F(R(-20,20))} ${F(40*s)} ${F(R(-26,26)*s)} ${F(R(50,80)*s)}" ${ink(sw)}/>`;
+  return g;
+}
+
+function subjCube(cx,cy,s){
+  let g='';const sw=R(2.6,4.4)*s,hw=54*s,hh=48*s;
+  const rot=R(-12,12);
+  g+=`<g transform="rotate(${F(rot)} ${F(cx)} ${F(cy)})">`;
+  g+=`<rect x="${F(cx-hw/2)}" y="${F(cy-hh/2)}" width="${F(hw)}" height="${F(hh)}" fill="${P(SKIN)}" stroke="#111" stroke-width="${F(sw)}"/>`;
+  // pixel eyes
+  g+=`<rect x="${F(cx-hw*.3)}" y="${F(cy-hh*.16)}" width="${F(hw*R(.1,.22))}" height="${F(hh*R(.1,.3))}" fill="#111"/>`;
+  g+=`<rect x="${F(cx+hw*.08)}" y="${F(cy-hh*R(.05,.24))}" width="${F(hw*R(.1,.26))}" height="${F(hh*R(.08,.26))}" fill="#111"/>`;
+  g+=`<rect x="${F(cx-hw*.2)}" y="${F(cy+hh*.2)}" width="${F(hw*R(.2,.55))}" height="${F(hh*R(.06,.16))}" fill="#111"/>`;
+  g+=`</g>`;
+  const by=cy+hh*.5+R(6,16)*s;
+  g+=`<rect x="${F(cx-hw*.42)}" y="${F(by)}" width="${F(hw*.84)}" height="${F(hh*R(1.0,1.5))}" fill="${P(PAL)}" stroke="#111" stroke-width="${F(sw)}" transform="rotate(${F(R(-8,8))} ${F(cx)} ${F(by)})"/>`;
+  for(let a=0;a<2;a++){const dir=a?1:-1;
+    g+=`<rect x="${F(cx+dir*hw*.42-(dir<0?26*s:0))}" y="${F(by+R(4,26)*s)}" width="${F(26*s)}" height="${F(11*s)}" fill="${P(SKIN)}" stroke="#111" stroke-width="${F(sw*.8)}" transform="rotate(${F(R(-40,40))} ${F(cx+dir*hw*.42)} ${F(by+10*s)})"/>`;}
+  for(let l=0;l<2;l++)
+    g+=`<rect x="${F(cx-hw*.3+l*hw*.36)}" y="${F(by+hh*1.3)}" width="${F(13*s)}" height="${F(R(26,54)*s)}" fill="#111"/>`;
+  return g;
+}
+
+function subjCactus(cx,cy,s){
+  let g='';const sw=R(2.6,4.2)*s,w=40*s,h=92*s,col=P(['#4E9B3E','#6FBF4E','#3E7B45','#8FD16B']);
+  g+=`<rect x="${F(cx-w/2)}" y="${F(cy-h/2)}" width="${F(w)}" height="${F(h)}" rx="${F(w/2)}" fill="${col}" stroke="#111" stroke-width="${F(sw)}"/>`;
+  const arms=RI(1,2);
+  for(let a=0;a<arms;a++){const dir=a?1:-1,ay=cy-h*R(0,.25);
+    g+=`<path d="M${F(cx+dir*w*.4)} ${F(ay)} h${F(dir*R(18,34)*s)} v${F(-R(22,44)*s)}" fill="none" stroke="${col}" stroke-width="${F(20*s)}" stroke-linecap="round"/>`;
+    g+=`<path d="M${F(cx+dir*w*.4)} ${F(ay)} h${F(dir*R(18,34)*s)} v${F(-R(22,44)*s)}" fill="none" stroke="#111" stroke-width="${F(sw)}" stroke-linecap="round" opacity=".5"/>`;}
+  for(let i=0;i<RI(6,16);i++){const px=cx+R(-w/2,w/2),py=cy+R(-h/2,h/2);
+    g+=`<path d="M${F(px)} ${F(py)} l${F(R(-7,7))} ${F(R(-7,7))}" ${ink(sw*.5)}/>`;}
+  g+=eyes(cx,cy-h*.1,26*s,sw);
+  g+=mouth(cx,cy+h*.06,26*s,sw);
+  // pot
+  g+=`<path d="M${F(cx-w*.85)} ${F(cy+h/2)} L${F(cx+w*.85)} ${F(cy+h/2)} L${F(cx+w*.6)} ${F(cy+h/2+38*s)} L${F(cx-w*.6)} ${F(cy+h/2+38*s)} Z" fill="${P(['#C4713A','#A85B5B','#8E6FA8'])}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
+  if(chance(.4))g+=`<circle cx="${F(cx+R(-14,14)*s)}" cy="${F(cy-h/2-10*s)}" r="${F(11*s)}" fill="${P(['#FF5EA8','#F2C511'])}" stroke="#111" stroke-width="${F(sw*.8)}"/>`;
+  return g;
+}
+
+function subjHand(cx,cy,s){
+  let g='';const sw=R(2.6,4.4)*s,r=32*s,col=P(SKIN);
+  g+=`<path d="${blob(cx,cy+r*.5,r,7,4*s)}" fill="${col}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
+  const n=RI(5,8); HANDS=Math.max(HANDS,n);
+  for(let i=0;i<n;i++){
+    const a=-Math.PI*.92+ (i/(n-1))*Math.PI*.84;
+    const len=R(30,70)*s, bx=cx+Math.cos(a)*r*.85, by=cy+r*.5+Math.sin(a)*r*.85;
+    const tx=bx+Math.cos(a+R(-.4,.4))*len, ty=by+Math.sin(a+R(-.4,.4))*len;
+    g+=`<path d="M${F(bx)} ${F(by)} Q${F(bx+R(-14,14))} ${F((by+ty)/2)} ${F(tx)} ${F(ty)}" fill="none" stroke="${col}" stroke-width="${F(15*s)}" stroke-linecap="round"/>`;
+    g+=`<path d="M${F(bx)} ${F(by)} Q${F(bx+R(-14,14))} ${F((by+ty)/2)} ${F(tx)} ${F(ty)}" fill="none" stroke="#111" stroke-width="${F(sw*.7)}" stroke-linecap="round" opacity=".55"/>`;
+    // a finger growing out of a finger
+    if(chance(.18)){const mx=(bx+tx)/2,my=(by+ty)/2;
+      g+=`<path d="M${F(mx)} ${F(my)} l${F(R(-30,30))} ${F(R(-28,10))}" fill="none" stroke="${col}" stroke-width="${F(12*s)}" stroke-linecap="round"/>`;}
+  }
+  g+=`<path d="M${F(cx-r*.5)} ${F(cy+r*1.3)} q${F(r*.5)} ${F(r*.3)} ${F(r)} 0" ${ink(sw*.6)} opacity=".5"/>`;
+  return g;
+}
+
+function subjAnimal(cx,cy,s){
+  let g='';const sw=R(2.4,4.2)*s,col=P(['#E2C08A','#9A9A9A','#D9743A','#EDEDED','#5B4636','#F2C511']);
+  const bw=52*s;
+  g+=`<path d="${blob(cx,cy+26*s,bw,8,5*s)}" fill="${col}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
+  const hx=cx+R(-24,24)*s,hy=cy-R(24,42)*s,hr=28*s;
+  g+=`<path d="${blob(hx,hy,hr,7,4*s)}" fill="${col}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
+  for(let e=0;e<2;e++){const dir=e?1:-1;
+    g+=`<path d="M${F(hx+dir*hr*.55)} ${F(hy-hr*.6)} l${F(dir*R(6,20)*s)} ${F(-R(16,34)*s)} l${F(-dir*R(10,22)*s)} ${F(R(4,14)*s)} Z" fill="${col}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;}
+  g+=eyes(hx,hy,hr,sw);
+  g+=`<path d="${blob(hx+R(-6,6)*s,hy+hr*.42,hr*.16,5,2)}" fill="#111"/>`;
+  for(let i=0;i<RI(4,6);i++)
+    g+=`<path d="M${F(hx+R(-6,6)*s)} ${F(hy+hr*.5)} l${F(R(-28,28)*s)} ${F(R(-8,10)*s)}" ${ink(sw*.5)}/>`;
+  const legs=RI(3,6);
+  for(let l=0;l<legs;l++)
+    g+=`<path d="M${F(cx-bw*.6+l*(bw*1.2/legs))} ${F(cy+26*s+bw*.5)} q${F(R(-8,8))} ${F(20*s)} ${F(R(-10,10)*s)} ${F(R(24,46)*s)}" fill="none" stroke="${col}" stroke-width="${F(11*s)}" stroke-linecap="round"/>`;
+  g+=`<path d="M${F(cx+bw*.8)} ${F(cy+20*s)} q${F(R(20,44)*s)} ${F(R(-30,10)*s)} ${F(R(10,40)*s)} ${F(R(-40,20)*s)}" fill="none" stroke="${col}" stroke-width="${F(10*s)}" stroke-linecap="round"/>`;
+  return g;
+}
+
+function subjAnime(cx,cy,s){
+  let g='';const sw=R(2,3.4)*s,hr=40*s;
+  const hair=P(['#FF5EA8','#9B5DE5','#25A7B0','#F2C511','#3F52C4']);
+  // hair, not quite attached
+  g+=`<path d="${blob(cx+R(-8,8)*s,cy-hr*.5,hr*1.35,RI(7,11),9*s)}" fill="${hair}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
+  g+=`<path d="${blob(cx,cy,hr,9,2.5*s)}" fill="${P(['#F7DCC6','#FBE6D4'])}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
+  // enormous glossy eyes, different sizes
+  for(let e=0;e<2;e++){const dir=e?1:-1,ex=cx+dir*hr*R(.3,.44),ey=cy+hr*R(.02,.16),rx=hr*R(.2,.34),ry=rx*R(1.1,1.7);
+    g+=`<ellipse cx="${F(ex)}" cy="${F(ey)}" rx="${F(rx)}" ry="${F(ry)}" fill="#fff" stroke="#111" stroke-width="${F(sw)}"/>`;
+    g+=`<ellipse cx="${F(ex)}" cy="${F(ey+ry*.1)}" rx="${F(rx*.6)}" ry="${F(ry*.6)}" fill="${P(['#3F52C4','#8E4FA8','#25A7B0'])}"/>`;
+    g+=`<circle cx="${F(ex-rx*.3)}" cy="${F(ey-ry*.35)}" r="${F(rx*.24)}" fill="#fff"/>`;}
+  g+=`<path d="M${F(cx-hr*.1)} ${F(cy+hr*.5)} q${F(hr*.1)} ${F(hr*.12)} ${F(hr*.2)} 0" ${ink(sw)}/>`;
+  // spikes
+  for(let i=0;i<RI(3,7);i++){const a=R(-Math.PI,0);
+    g+=`<path d="M${F(cx+Math.cos(a)*hr)} ${F(cy-hr*.4+Math.sin(a)*hr*.7)} l${F(Math.cos(a)*R(16,40)*s)} ${F(Math.sin(a)*R(16,40)*s)} l${F(R(-14,14)*s)} ${F(R(6,18)*s)} Z" fill="${hair}" stroke="#111" stroke-width="${F(sw*.8)}" stroke-linejoin="round"/>`;}
+  g+=`<path d="M${F(cx)} ${F(cy+hr)} l${F(R(-16,16)*s)} ${F(R(40,70)*s)}" ${ink(sw*2)}/>`;
+  return g;
+}
+
+function subjObject(cx,cy,s){
+  const kind=P(['banana','hotdog','egg','cup','chair','fish','shoe']);
+  const sw=R(2.4,4)*s;let g='';
+  const rot=R(-40,40);
+  g+=`<g transform="rotate(${F(rot)} ${F(cx)} ${F(cy)}) scale(${F(s)}) translate(${F(cx/s-cx)} ${F(cy/s-cy)})">`;
+  if(kind==='banana'){
+    g+=`<path d="M${F(cx-40)} ${F(cy-16)} Q${F(cx)} ${F(cy+44)} ${F(cx+46)} ${F(cy+8)} Q${F(cx+12)} ${F(cy+34)} ${F(cx-30)} ${F(cy-6)} Z" fill="#E2C13F" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
+    g+=`<path d="M${F(cx-40)} ${F(cy-16)} l-8 -12" stroke="#5A4A22" stroke-width="${F(sw*2)}" stroke-linecap="round"/>`;
+    g+=`<rect x="${F(cx-20)}" y="${F(cy-24)}" width="40" height="16" fill="#D8D2C0" stroke="#111" stroke-width="${F(sw*.6)}" opacity=".9"/>`;
+  }else if(kind==='hotdog'){
+    g+=`<rect x="${F(cx-46)}" y="${F(cy-14)}" width="92" height="30" rx="15" fill="#E0A756" stroke="#111" stroke-width="${F(sw)}"/>`;
+    g+=`<rect x="${F(cx-40)}" y="${F(cy-20)}" width="80" height="20" rx="10" fill="#C4523A" stroke="#111" stroke-width="${F(sw)}"/>`;
+    g+=`<path d="${scrawl(cx-32,cy-12,14,6)}" fill="none" stroke="#F2C511" stroke-width="${F(sw*1.6)}" stroke-linecap="round"/>`;
+  }else if(kind==='egg'){
+    g+=`<path d="${blob(cx,cy,42,9,7)}" fill="#FBFBF4" stroke="#111" stroke-width="${F(sw)}"/>`;
+    g+=`<circle cx="${F(cx+R(-10,10))}" cy="${F(cy+R(-8,8))}" r="17" fill="#F2B411" stroke="#111" stroke-width="${F(sw*.7)}"/>`;
+  }else if(kind==='cup'){
+    g+=`<path d="M${F(cx-26)} ${F(cy-24)} L${F(cx+26)} ${F(cy-24)} L${F(cx+18)} ${F(cy+30)} L${F(cx-18)} ${F(cy+30)} Z" fill="${P(PAL)}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
+    g+=`<path d="M${F(cx+26)} ${F(cy-14)} q22 12 -4 26" fill="none" stroke="#111" stroke-width="${F(sw)}"/>`;
+    for(let i=0;i<3;i++)g+=`<path d="${scrawl(cx-14+i*14,cy-34,9,4)}" fill="none" stroke="#111" stroke-width="${F(sw*.6)}" opacity=".6"/>`;
+  }else if(kind==='chair'){
+    g+=`<rect x="${F(cx-30)}" y="${F(cy-6)}" width="60" height="12" fill="${P(PAL)}" stroke="#111" stroke-width="${F(sw)}"/>`;
+    g+=`<rect x="${F(cx+18)}" y="${F(cy-56)}" width="12" height="52" fill="${P(PAL)}" stroke="#111" stroke-width="${F(sw)}"/>`;
+    for(let l=0;l<RI(3,6);l++)g+=`<path d="M${F(cx-26+l*R(12,20))} ${F(cy+6)} l${F(R(-8,8))} ${F(R(26,48))}" ${ink(sw*1.4)}/>`;
+  }else if(kind==='fish'){
+    g+=`<path d="${blob(cx,cy,36,8,6)}" fill="${P(PAL)}" stroke="#111" stroke-width="${F(sw)}"/>`;
+    g+=`<path d="M${F(cx+30)} ${F(cy)} l30 -20 l0 40 Z" fill="${P(PAL)}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
+    g+=`<circle cx="${F(cx-14)}" cy="${F(cy-8)}" r="6" fill="#111"/>`;
+  }else{
+    g+=`<path d="M${F(cx-40)} ${F(cy+14)} L${F(cx+10)} ${F(cy+14)} Q${F(cx+46)} ${F(cy+10)} ${F(cx+44)} ${F(cy-8)} L${F(cx-34)} ${F(cy-12)} Z" fill="${P(PAL)}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
+    g+=`<path d="M${F(cx-30)} ${F(cy-2)} h40" ${ink(sw*.7)}/>`;
+  }
+  g+=`</g>`;
+  return g;
+}
+
+const SUBJECTS=[
+  [subjBrainlet,'brainlet',26],[subjCube,'block',13],[subjCactus,'cactus',11],
+  [subjHand,'hand',11],[subjAnimal,'animal',13],[subjObject,'object',20],[subjAnime,'anime',6]
+];
+function pickSubject(){
+  const tot=SUBJECTS.reduce((a,b)=>a+b[2],0);let r=R(0,tot);
+  for(const e of SUBJECTS){if((r-=e[2])<=0)return e;}
+  return SUBJECTS[0];
+}
+
+/* traits recorded as the piece is made */
+let TR={};
+
+function condition(w,h){
+  let r=RNG();
+  if(FORCE&&FORCE.condition)r={'craquelure':.7,'foxing':.85,'overpainted':.95,'water damage':.99}[FORCE.condition];
+  let k,s='';
+  if(r<.60){k='pristine';}
+  else if(r<.80){
+    k='craquelure';
+    for(let i=0;i<RI(30,70);i++)
+      s+=`<path d="${scrawl(R(0,w),R(0,h),R(4,13),RI(2,4))}" fill="none" stroke="#2A1F14" stroke-width="${F(R(.4,1))}" opacity="${F(R(.25,.55))}"/>`;
+  }else if(r<.92){
+    k='foxing';
+    for(let i=0;i<RI(6,16);i++)
+      s+=`<path d="${blob(R(0,w),R(0,h),R(4,15),7,4)}" fill="#7A5A33" opacity="${F(R(.16,.4))}"/>`;
+  }else if(r<.98){
+    k='overpainted';
+    for(let i=0;i<RI(1,3);i++)
+      s+=`<rect x="${F(R(0,w-70))}" y="${F(R(0,h-60))}" width="${F(R(40,110))}" height="${F(R(30,90))}" fill="${P(BG)}" opacity=".96" transform="rotate(${F(R(-6,6))} 150 150)"/>`;
+  }else{
+    k='water damage';
+    s+=`<path d="${blob(R(60,240),R(180,300),R(70,120),10,26)}" fill="#6B4A28" opacity=".28"/>`;
+    s+=`<path d="${blob(R(60,240),R(200,300),R(45,80),9,20)}" fill="#4E3417" opacity=".2"/>`;
+  }
+  TR.condition=k;
+  return s;
+}
+
+function generate(){
+  const w=300,h=300;let s='';
+  TR={};
+  const dark=(FORCE&&FORCE.ground==='nocturne')?true:chance(.16);
+  const gid='g'+Math.floor(RNG()*1e6);
+  let mode=P(['center','scatter','diptych','tiny','crowd']);
+  if(FORCE&&FORCE.composition)mode=FORCE.composition;
+  TR.composition=mode;
+
+  /* ground */
+  const style=RI(0,3);
+  TR.ground=dark?'nocturne':['gradient','aureole','colour field','flat'][style];
+  if(style===0){
+    const c1=P(PAL),c2=dark?'#1A1A22':P(BG);
+    s+=`<defs><linearGradient id="${gid}" x1="0" y1="0" x2="${F(R(0,1))}" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs><rect width="${w}" height="${h}" fill="url(#${gid})"/>`;
+  }else if(style===1){
+    s+=`<defs><radialGradient id="${gid}"><stop offset="0" stop-color="${P(PAL)}"/><stop offset="1" stop-color="${dark?'#1A1A22':P(BG)}"/></radialGradient></defs><rect width="${w}" height="${h}" fill="url(#${gid})"/>`;
+  }else if(style===2){
+    s+=`<rect width="${w}" height="${h}" fill="${dark?'#1A1A22':P(BG)}"/>`;
+    s+=`<rect width="${w}" height="${F(R(80,200))}" y="${F(R(0,120))}" fill="${P(PAL)}" opacity="${F(R(.4,.9))}"/>`;
+  }else{
+    s+=`<rect width="${w}" height="${h}" fill="${dark?'#2B1F3A':P(BG)}"/>`;
+  }
+
+  /* colour that actually lands */
+  const blobs=Math.max(2,Math.round(RI(3,9)*DENS));
+  TR.palette=blobs>=7?'saturated':blobs>=5?'mixed':'restrained';
+  for(let i=0;i<blobs;i++){
+    const c=P(PAL),x=R(0,w),y=R(0,h),r=R(10,64);
+    s+=`<path d="${blob(x,y,r,RI(6,10),r*.4)}" fill="${c}" opacity="${F(R(.45,.95))}"/>`;
+    for(let d=0;d<RI(0,3);d++)s+=drip(x+R(-r,r),y+r*.7,R(20,90),c,R(2,7));
+  }
+  for(let i=0;i<Math.round(RI(4,16)*DENS);i++)
+    s+=`<circle cx="${F(R(0,w))}" cy="${F(R(0,h))}" r="${F(R(1.5,9))}" fill="${P(PAL)}" opacity="${F(R(.5,1))}"/>`;
+  for(let i=0;i<RI(0,3);i++)
+    s+=`<rect x="${F(R(-20,w))}" y="${F(R(-20,h))}" width="${F(R(24,150))}" height="${F(R(12,130))}" fill="${P(PAL)}" opacity="${F(R(.25,.7))}" transform="rotate(${F(R(-45,45))} ${F(R(0,w))} ${F(R(0,h))})"/>`;
+  for(let i=0;i<RI(1,5);i++)
+    s+=`<path d="${scrawl(R(20,280),R(20,280),R(20,58),RI(3,10))}" fill="none" stroke="${chance(.45)?'#111':P(PAL)}" stroke-width="${F(R(1.6,8))}" stroke-linecap="round" opacity="${F(R(.6,1))}"/>`;
+
+  /* subjects */
+  let picks=[];
+  const AN=(FORCE&&FORCE.anchor)?FORCE.anchor:null;
+  if(mode==='center')picks=[[AN?AN[0]:150,AN?AN[1]:150,R(.95,1.25)]];
+  else if(mode==='tiny')picks=[[R(90,210),R(90,210),R(.28,.45)]];
+  else if(mode==='diptych')picks=[[R(60,100),R(120,170),R(.55,.8)],[R(200,240),R(120,170),R(.55,.8)]];
+  else if(mode==='crowd')picks=[...Array(RI(3,5))].map(()=>[R(50,250),R(60,190),R(.34,.6)]);
+  else picks=[...Array(RI(2,3))].map(()=>[R(60,240),R(70,180),R(.5,.85)]);
+
+  HANDS=0;
+  const names=[];
+  const forced=FORCE&&FORCE.subject?SUBJECTS.find(e=>e[1]===FORCE.subject):null;
+  picks.forEach((p,ix)=>{const e=(forced&&ix===0)?forced:pickSubject();names.push(e[1]);s+=e[0](p[0],p[1],p[2]);});
+  TR.subject=[...new Set(names)].sort().join(' + ');
+  TR.figures=String(picks.length);
+  TR.hands=HANDS?String(HANDS):'—';
+
+  /* doodles in the margins, because someone always draws on it */
+  const DOOD=['star','spiral','heart','arrow','smiley','x','cloud'];
+  for(let i=0;i<RI(0,Math.round(3*DENS));i++){
+    const k=P(DOOD),x=R(14,286),y=R(14,286),z=R(.55,1.5),c=chance(.55)?'#111':P(PAL);
+    const st=`fill="none" stroke="${c}" stroke-width="${F(R(1.4,3.2))}" stroke-linecap="round" stroke-linejoin="round" opacity="${F(R(.6,1))}"`;
+    if(k==='star'){let d='';for(let p=0;p<5;p++){const a=-Math.PI/2+p*4*Math.PI/5;d+=(p?'L':'M')+F(x+Math.cos(a)*13*z)+' '+F(y+Math.sin(a)*13*z);}s+=`<path d="${d}Z" ${st}/>`;}
+    else if(k==='spiral'){let d=`M${F(x)} ${F(y)}`;for(let p=1;p<26;p++){const a=p*.55,r=p*.9*z;d+=`L${F(x+Math.cos(a)*r)} ${F(y+Math.sin(a)*r)}`;}s+=`<path d="${d}" ${st}/>`;}
+    else if(k==='heart'){s+=`<path d="M${F(x)} ${F(y+9*z)} q${F(-13*z)} ${F(-10*z)} ${F(-6*z)} ${F(-17*z)} q${F(6*z)} ${F(-6*z)} ${F(6*z)} ${F(2*z)} q0 ${F(-8*z)} ${F(6*z)} ${F(-2*z)} q${F(7*z)} ${F(7*z)} ${F(-6*z)} ${F(17*z)} Z" ${st}/>`;}
+    else if(k==='arrow'){const a=R(0,6.28);s+=`<path d="M${F(x)} ${F(y)} l${F(Math.cos(a)*26*z)} ${F(Math.sin(a)*26*z)} m0 0 l${F(-Math.cos(a-.6)*10*z)} ${F(-Math.sin(a-.6)*10*z)} m${F(Math.cos(a-.6)*10*z)} ${F(Math.sin(a-.6)*10*z)} l${F(-Math.cos(a+.6)*10*z)} ${F(-Math.sin(a+.6)*10*z)}" ${st}/>`;}
+    else if(k==='smiley'){s+=`<circle cx="${F(x)}" cy="${F(y)}" r="${F(13*z)}" ${st}/><circle cx="${F(x-4.5*z)}" cy="${F(y-4*z)}" r="${F(1.6*z)}" fill="${c}"/><circle cx="${F(x+4.5*z)}" cy="${F(y-4*z)}" r="${F(1.6*z)}" fill="${c}"/><path d="M${F(x-6*z)} ${F(y+4*z)} q${F(6*z)} ${F(6*z)} ${F(12*z)} 0" ${st}/>`;}
+    else if(k==='x'){s+=`<path d="M${F(x-10*z)} ${F(y-10*z)} l${F(20*z)} ${F(20*z)} M${F(x+10*z)} ${F(y-10*z)} l${F(-20*z)} ${F(20*z)}" ${st}/>`;}
+    else{s+=`<path d="M${F(x-16*z)} ${F(y)} q${F(2*z)} ${F(-12*z)} ${F(12*z)} ${F(-8*z)} q${F(6*z)} ${F(-9*z)} ${F(15*z)} ${F(1*z)} q${F(9*z)} ${F(1*z)} ${F(5*z)} ${F(7*z)} Z" ${st}/>`;}
+  }
+
+  /* the tells */
+  if(chance(.34)){
+    const t=P(GIBBER);TR.inscription=t;
+    s+=`<text x="${F(R(20,190))}" y="${F(R(40,280))}" font-family="Georgia,serif" font-size="${F(R(15,38))}" fill="${chance(.5)?'#111':P(PAL)}" opacity="${F(R(.5,.95))}" transform="rotate(${F(R(-14,14))} 150 150)" letter-spacing="${F(R(-1,4))}">${t}</text>`;
+  }else TR.inscription='none';
+
+  const sg=RNG();
+  if(sg<.42){TR.signature='signed';}
+  else if(sg<.52){TR.signature='signed and dated';}
+  else TR.signature='unsigned';
+  if(TR.signature!=='unsigned')
+    s+=`<path d="${scrawl(R(200,255),R(255,285),R(8,16),RI(4,8))}" fill="none" stroke="#111" stroke-width="${F(R(1.2,2.6))}" stroke-linecap="round" opacity=".8"/>`;
+  if(TR.signature==='signed and dated')
+    s+=`<text x="${F(R(196,232))}" y="296" font-family="Georgia,serif" font-size="11" fill="#111" opacity=".7">'${RI(61,99)}</text>`;
+
+  if(chance(.18))
+    s+=`<rect width="${w}" height="${h}" fill="${P(PAL)}" opacity="${F(R(.08,.2))}"/>`;
+
+  s+=condition(w,h);
+
+  document.getElementById('art').innerHTML=s;
+}
+
+/* ============ rarity ============ */
+/* every trait carries its own odds; the score is the sum of their
+   inverses, which is how the rest of the market does it too. */
+const ODDS={
+  subject:{brainlet:.26,object:.20,block:.13,animal:.13,cactus:.11,hand:.11,anime:.06},
+  composition:{center:.20,scatter:.20,diptych:.20,tiny:.20,crowd:.20},
+  ground:{gradient:.21,aureole:.21,'colour field':.21,flat:.21,nocturne:.16},
+  condition:{pristine:.60,craquelure:.20,foxing:.12,overpainted:.06,'water damage':.02},
+  signature:{unsigned:.48,signed:.42,'signed and dated':.10},
+  inscription:{none:.66},
+  palette:{restrained:.29,mixed:.28,saturated:.43},
+  figures:{'1':.40,'2':.24,'3':.24,'4':.06,'5':.06},
+  hands:{'—':.80}
+};
+function oddsOf(k,v){
+  const t=ODDS[k]; if(!t) return .5;
+  if(t[v]!==undefined) return t[v];
+  if(k==='subject'){ // combinations are rarer than any single subject
+    return v.split(' + ').reduce((a,n)=>a*(ODDS.subject[n]||.1),1);
+  }
+  if(k==='inscription') return .34/12;
+  if(k==='hands') return .20/8;
+  return .05;
+}
+const TIERS=[
+  {en:'Study collection',   es:'Colecci\u00f3n de estudio',        t:1},
+  {en:'General display',    es:'Exhibici\u00f3n general',          t:2},
+  {en:'Permanent collection',es:'Colecci\u00f3n permanente',       t:3},
+  {en:'On loan, private lender',es:'En pr\u00e9stamo, prestamista privado',t:4},
+  {en:'Disputed attribution',es:'Atribuci\u00f3n disputada',       t:5},
+  {en:'The Vault',          es:'La B\u00f3veda',                   t:6}
+];
+const CUTS=[0,67,134,381,1668,5937];
+function rarity(){
+  let score=0, rows=[];
+  ['subject','figures','hands','composition','ground','palette','inscription','signature','condition'].forEach(k=>{
+    if(TR[k]===undefined) return;
+    const p=oddsOf(k,TR[k]);
+    score+=1/p;
+    rows.push([k,TR[k],p]);
+  });
+  let ti=0;
+  for(let i=CUTS.length-1;i>=0;i--){ if(score>=CUTS[i]){ti=i;break;} }
+  return {score,tier:TIERS[ti],rows};
+}
+
+/* ============ the placards ============ */
+const D={
+  en:{
+    sub:'Museum of Generated Art · founded 2026',
+    buy:'Acquire this work', next:'Next work',
+    held:'Remains in the permanent collection',
+    got:'Acquired · private collection',
+    note:'Admission is free. The art is not.',
+    role:'Curator, The Slouvre',
+    quotes:[
+      'You do not understand it. That is correct.',
+      'I have been asked to explain the collection. I have declined.',
+      'Nothing here is for sale. Everything here is available.',
+      'The frame is doing nothing. The frame is doing everything.',
+      'If it were pleasant it would be furniture.'
+    ],
+    foot:'Open daily until it isn\u2019t · Denton, TX',
+    fileH:'Object file',
+    unacc:'Unaccessioned study',
+    deskH:'Commissions desk',
+    deskP:'Describe anything. The museum will interpret it, badly, and identically every time.',
+    deskGo:'Commission',
+    after:'after a description by a visitor',
+    seeded:'Seed',
+    camGo:'Photograph something',
+    camNote:'Read on your device and discarded. Nothing is uploaded or kept.',
+    fromPhoto:'after a photograph submitted by a visitor',
+    lab:{subject:'Subject',figures:'Figures',hands:'Fingers',composition:'Composition',
+         ground:'Ground',palette:'Palette',inscription:'Inscription',signature:'Signature',condition:'Condition'},
+    val:{},
+    tA:['untitled','study for','after','notes toward','the','remains of'],
+    tB:['descent','the body','a threshold','appetite','the mother','rupture','absence','hunger','the wound','exit','a small betrayal','the father','silence','collapse'],
+    med:['oil','ash','latex','industrial felt','beeswax','pigment','toner','iron oxide','human hair','dial-up','motor oil','gesso','dust','wax crayon'],
+    surf:['reclaimed canvas','unprimed linen','particleboard','a salvaged door','cotton duck','gallery wall','found cardboard'],
+    s1:['The work interrogates the body as a site of late-capital exhaustion.',
+        'Here the artist refuses resolution.',
+        'The picture plane is not a window but a wound.',
+        'This is not composition. It is sedimentation.',
+        'The gesture arrives already exhausted.',
+        'The artist works in the register of the unfinished.'],
+    s2:['What remains is not an image but the residue of one.',
+        'We are asked to look, and then punished for looking.',
+        'The viewer completes nothing.',
+        'Meaning is withheld, deliberately and at cost.',
+        'It is a negation that does not announce itself.',
+        'Legibility would have been a concession.']
+  },
+  es:{
+    sub:'Museo de Arte Generado · fundado en 2026',
+    buy:'Adquirir esta obra', next:'Siguiente obra',
+    held:'Permanece en la colecci\u00f3n permanente',
+    got:'Adquirida · colecci\u00f3n privada',
+    note:'La entrada es gratis. El arte no.',
+    role:'Curador, The Slouvre',
+    quotes:[
+      'Usted no la entiende. Eso es correcto.',
+      'Me pidieron explicar la colecci\u00f3n. Me negu\u00e9.',
+      'Aqu\u00ed nada est\u00e1 a la venta. Todo est\u00e1 disponible.',
+      'El marco no hace nada. El marco lo hace todo.',
+      'Si fuera agradable ser\u00eda un mueble.'
+    ],
+    foot:'Abierto todos los d\u00edas hasta que no · Denton, TX',
+    fileH:'Ficha de la obra',
+    unacc:'Estudio sin registrar',
+    deskH:'Mesa de encargos',
+    deskP:'Describa lo que sea. El museo lo interpretar\u00e1, mal, e igual cada vez.',
+    deskGo:'Encargar',
+    after:'seg\u00fan la descripci\u00f3n de un visitante',
+    seeded:'Semilla',
+    camGo:'Fotografiar algo',
+    camNote:'Se lee en su dispositivo y se descarta. Nada se sube ni se guarda.',
+    fromPhoto:'seg\u00fan una fotograf\u00eda de un visitante',
+    lab:{subject:'Tema',figures:'Figuras',hands:'Dedos',composition:'Composici\u00f3n',
+         ground:'Fondo',palette:'Paleta',inscription:'Inscripci\u00f3n',signature:'Firma',condition:'Conservaci\u00f3n'},
+    val:{brainlet:'cerebrito',object:'objeto',block:'bloque',animal:'animal',cactus:'cactus',
+         hand:'mano',anime:'anime',center:'centro',scatter:'dispersi\u00f3n',diptych:'d\u00edptico',
+         tiny:'miniatura',crowd:'multitud',gradient:'degradado',aureole:'aureola',
+         'colour field':'campo de color',flat:'plano',nocturne:'nocturno',
+         restrained:'contenida',mixed:'mixta',saturated:'saturada',
+         unsigned:'sin firma',signed:'firmada','signed and dated':'firmada y fechada',
+         none:'ninguna',pristine:'impecable',craquelure:'craquelado',foxing:'manchas de humedad',
+         overpainted:'repintada','water damage':'da\u00f1o por agua'},
+    tA:['sin t\u00edtulo','estudio para','despu\u00e9s de','apuntes hacia','el','restos de'],
+    tB:['descenso','el cuerpo','un umbral','apetito','la madre','ruptura','ausencia','hambre','la herida','salida','una peque\u00f1a traici\u00f3n','el padre','silencio','derrumbe'],
+    med:['\u00f3leo','ceniza','l\u00e1tex','fieltro industrial','cera de abeja','pigmento','t\u00f3ner','\u00f3xido de hierro','cabello humano','conexi\u00f3n telef\u00f3nica','aceite de motor','yeso','polvo','crayola'],
+    surf:['lienzo recuperado','lino sin imprimar','aglomerado','una puerta rescatada','algod\u00f3n crudo','muro de galer\u00eda','cart\u00f3n encontrado'],
+    s1:['La obra interroga el cuerpo como sitio de agotamiento tardocapitalista.',
+        'Aqu\u00ed el artista se niega a resolver.',
+        'El plano pict\u00f3rico no es una ventana sino una herida.',
+        'Esto no es composici\u00f3n. Es sedimentaci\u00f3n.',
+        'El gesto llega ya agotado.',
+        'El artista trabaja en el registro de lo inconcluso.'],
+    s2:['Lo que queda no es una imagen sino su residuo.',
+        'Se nos pide mirar, y luego se nos castiga por mirar.',
+        'El espectador no completa nada.',
+        'El sentido se retiene, deliberadamente y a un costo.',
+        'Es una negaci\u00f3n que no se anuncia.',
+        'La legibilidad habr\u00eda sido una concesi\u00f3n.']
+  }
+};
+
+const FIRST=['Anneke','Bruno','Cosima','Dieter','Elke','Fabien','Greta','Henning','Ines','Joris','Katrien','Lars','Margit','Nils','Otto','Pia','Rutger','Sanne','Thijs','Ulrike','Vera','Wim','Yara','Zoltan','Mireia','Sol','Ren\u00e9'];
+const LAST=['Vandenhaus','Brekker','Oostrum','Halvard','Maeterlin','Ronsdorf','Kjelling','Vermeulen','Sattler','Duvivier','Nachtwey','Oberkamp','Stroeve','Leclos','Brandhof','Wintermans','Aguirre-B\u00f6hm','Delvaux'];
+const MONO=['SERRA \u2020','VOSS','K.','HOLM','NN','ORTA','B\u00c4R','LUM'];
+
+let cur={}, acquired=false, lang='en';
+
+function newWork(text){
+  if(text&&text.trim()){
+    /* the words steer. the roll is new every time, so no two
+       visitors ever leave with the same cat. */
+    const variant=Math.floor(Math.random()*4294967296);
+    SEED=(hash(norm(text))^variant)>>>0;
+    RNG=mulberry32(SEED); FORCE=readWords(text); cur.src=text.trim();
+  }else if(text&&text.seedOnly){
+    SEED=text.seedOnly; RNG=mulberry32(SEED); FORCE=text.force||null; cur.src=text.label||null;
+  }else{
+    SEED=null; RNG=Math.random; FORCE=null; cur.src=null;
+  }
+  PAL=(FORCE&&FORCE.pal)?FORCE.pal:BAD;
+  WOB=(FORCE&&FORCE.wob)?FORCE.wob:1;
+  DENS=(FORCE&&FORCE.dens)?FORCE.dens:1;
+  const seedA=RI(0,5), seedB=RI(0,13), num=RI(2,97);
+  cur={
+    a:seedA,b:seedB,num:num,
+    artist: chance(.16)?P(MONO):`${P(FIRST)} ${P(LAST)}`,
+    year: RI(1961,2027),
+    m1:RI(0,13), m2:RI(0,13), m3:RI(0,13), sf:RI(0,6),
+    dim:`${RI(18,320)} \u00d7 ${(R(3,240)).toFixed(1)} cm`,
+    st1:RI(0,5), st2:RI(0,5),
+    src:cur.src||null, seed:SEED
+  };
+  cur.rar=null;
+  acquired=false;
+  generate();
+  cur.rar=rarity();
+  const band=[[180,900],[900,2400],[2400,6000],[6000,14000],[14000,40000],[40000,120000]][cur.rar.tier.t-1];
+  cur.val=RI(band[0],band[1])*1000+RI(1,9)*100;
+  render();
+}
+
+function render(){
+  const d=D[lang], p=document.getElementById('placard');
+  const a=d.tA[cur.a], b=d.tB[cur.b];
+  const title = a==='untitled'||a==='sin t\u00edtulo' ? `${a} (n.\u00ba ${cur.num})` : `${a} ${b}`;
+
+  document.querySelector('[data-i="sub"]').textContent=d.sub;
+  document.getElementById('pArtist').textContent=cur.artist;
+  document.getElementById('pTitle').textContent=title;
+  const credit=cur.src?`<br><span style="opacity:.8">${cur.src==='__photo__'?d.fromPhoto:d.after}</span>`:'';
+  document.getElementById('pMeta').innerHTML=
+    `${cur.year}<br>${d.med[cur.m1]}, ${d.med[cur.m2]} ${lang==='en'?'and':'y'} ${d.med[cur.m3]} ${lang==='en'?'on':'sobre'} ${d.surf[cur.sf]}<br>${cur.dim}${credit}`;
+  document.getElementById('pStmt').textContent=`${d.s1[cur.st1]} ${d.s2[cur.st2]}`;
+  document.getElementById('pVal').textContent='$'+cur.val.toLocaleString('en-US')+' USD';
+
+  const rar=cur.rar, t=rar.tier.t;
+  document.getElementById('pTier').textContent=rar.tier[lang]+'  ·  '+d.unacc;
+  document.getElementById('frame').className='frame t'+t;
+  document.getElementById('wall').classList.toggle('lit',t>=5);
+  document.getElementById('rope').classList.toggle('hide',t<6);
+  document.getElementById('fileH').textContent=d.fileH;
+
+  const tr=v=>d.val&&d.val[v]?d.val[v]:v;
+  document.getElementById('rows').innerHTML=rar.rows.map(([k,v,p])=>{
+    const shown=k==='subject'?v.split(' + ').map(tr).join(' + '):tr(v);
+    const pct=p<.01?(p*100).toFixed(2):(p*100).toFixed(0);
+    const key=p<=.06?' key':'';
+    return `<div class="row${key}"><b>${d.lab[k]}</b><i>${shown}</i><u>${pct}%</u></div>`;
+  }).join('');
+  document.getElementById('pStatus').textContent=acquired?d.got:d.held;
+  p.classList.toggle('acquired',acquired);
+
+  const buy=document.getElementById('buy');
+  buy.textContent=d.buy; buy.disabled=acquired;
+  document.getElementById('next').textContent=d.next;
+  document.getElementById('note').textContent=d.note;
+  document.getElementById('deskH').textContent=d.deskH;
+  document.getElementById('deskP').textContent=d.deskP;
+  document.getElementById('deskGo').textContent=d.deskGo;
+  document.getElementById('camGo').textContent=d.camGo;
+  document.getElementById('tagline').textContent=d.camNote+'   #Slouvred';
+  document.getElementById('seedline').textContent=
+    (cur.seed===null||cur.seed===undefined)?'' :
+    (cur.src==='__photo__'?`${d.seeded} ${cur.seed}`:`\u201c${cur.src}\u201d \u00b7 ${d.seeded} ${cur.seed}`);
+  document.getElementById('cRole').textContent=d.role;
+  document.getElementById('cQuote').textContent=P(d.quotes);
+  document.getElementById('fLeft').textContent=d.foot;
+
+  const names=[];
+  for(let i=0;i<14;i++) names.push(`${P(FIRST)} ${P(LAST)}`);
+  const row=names.map(n=>`<span>${n}</span>`).join('');
+  document.getElementById('donors').innerHTML=row+row;
+}
+
+document.getElementById('next').onclick=()=>newWork();
+document.getElementById('deskGo').onclick=()=>{
+  const v=document.getElementById('deskIn').value;
+  if(v.trim())newWork(v);
+};
+/* ---- the portrait service ----
+   the photograph is read into a 48x48 grid in the browser, turned into
+   numbers, and thrown away. it never leaves the device. */
+document.getElementById('camGo').onclick=()=>document.getElementById('camIn').click();
+document.getElementById('camIn').addEventListener('change',e=>{
+  const f=e.target.files&&e.target.files[0]; if(!f)return;
+  const img=new Image(), url=URL.createObjectURL(f);
+  img.onload=()=>{
+    try{ fromPhoto(img); }catch(err){}
+    URL.revokeObjectURL(url);
+    e.target.value='';
+  };
+  img.onerror=()=>{URL.revokeObjectURL(url);e.target.value='';};
+  img.src=url;
+});
+function sat(r,g,b){
+  const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2;
+  if(mx===mn)return `rgb(${r|0},${g|0},${b|0})`;
+  const k=1.9;
+  const push=v=>Math.max(0,Math.min(255,l+(v-l)*k));
+  return `rgb(${push(r)|0},${push(g)|0},${push(b)|0})`;
+}
+function fromPhoto(img){
+  const N=48,c=document.createElement('canvas');
+  c.width=N;c.height=N;
+  const x=c.getContext('2d',{willReadFrequently:true});
+  x.drawImage(img,0,0,N,N);
+  const d=x.getImageData(0,0,N,N).data;
+  const buck={};let lum=0,mx=0,my=0,w=0,edge=0,prev=0,hsh=2166136261;
+  for(let i=0;i<N*N;i++){
+    const r=d[i*4],g=d[i*4+1],b=d[i*4+2];
+    const L=r*.299+g*.587+b*.114;
+    lum+=L;
+    const key=[Math.round(r/42),Math.round(g/42),Math.round(b/42)].join(',');
+    buck[key]=(buck[key]||0)+1;
+    const px=i%N,py=(i/N)|0;
+    mx+=px*L;my+=py*L;w+=L;
+    if(px>0&&Math.abs(L-prev)>26)edge++;
+    prev=L;
+    hsh^=(r<<16|g<<8|b);hsh=Math.imul(hsh,16777619);
+  }
+  const avg=lum/(N*N);
+  const pal=Object.entries(buck).sort((a,b)=>b[1]-a[1]).slice(0,6)
+    .map(([k])=>{const p=k.split(',').map(Number);return sat(p[0]*42,p[1]*42,p[2]*42);});
+  const cxp=(mx/w)/N, cyp=(my/w)/N;
+  const busy=edge/(N*N);
+  const force={
+    pal:pal.length>=3?pal:BAD,
+    ground:avg<86?'nocturne':(busy>.12?'gradient':'aureole'),
+    composition:busy>.17?'crowd':(busy<.05?'tiny':'center'),
+    subject:P(['brainlet','brainlet','brainlet','animal','block','hand','object']),
+    wob:.7+busy*7,
+    dens:.7+busy*4.5,
+    anchor:[40+cxp*220,50+cyp*180]
+  };
+  if(avg>212)force.condition='overpainted';
+  if(avg<48)force.condition='foxing';
+  const seed=((hsh>>>0)^Math.floor(Math.random()*4294967296))>>>0;
+  newWork({seedOnly:seed,force:force,label:'__photo__'});
+}
+
+document.getElementById('deskIn').addEventListener('keydown',e=>{
+  if(e.key==='Enter'){const v=e.target.value;if(v.trim())newWork(v);}
+});
+document.getElementById('buy').onclick=()=>{acquired=true;render();};
+document.getElementById('en').onclick=()=>{lang='en';setLang();};
+document.getElementById('es').onclick=()=>{lang='es';setLang();};
+function setLang(){
+  document.getElementById('en').setAttribute('aria-pressed',lang==='en');
+  document.getElementById('es').setAttribute('aria-pressed',lang==='es');
+  render();
+}
+newWork();
+</script>
+
+<script>
+/* ================= the entrance ================= */
+(function(){
+const intro=document.getElementById('intro');
+const beatEl=document.getElementById('beat');
+const vigEl=document.getElementById('vig');
+const tapEl=document.getElementById('tapHint');
+const skipEl=document.getElementById('iSkip');
+const soundBtn=document.getElementById('sound');
+
+/* ---- the loafers ---- */
+const S='stroke="#EDE4D2" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"';
+function loafer(x,flip,tilt){
+  const d=flip?-1:1;
+  return `<g transform="translate(${x} 0) scale(${d} 1) rotate(${tilt||0} 0 60)" ${S}>
+    <ellipse cx="0" cy="18" rx="11" ry="13"/>
+    <path d="M-9 12c4-6 14-6 18 0"/>
+    <path d="M-5 17h3M3 17h3" stroke-width="3.2"/>
+    <path d="M-2 24c2 2 5 2 7 0"/>
+    <path d="M0 31v10"/>
+    <path d="M-14 44c4-4 24-4 28 0 3 3 4 16 3 26h-34c-1-10 0-23 3-26z"/>
+    <path d="M-14 52c-8 6-10 14-4 18 5 3 12 1 16-2"/>
+    <path d="M14 52c8 6 10 14 4 18-5 3-12 1-16-2"/>
+    <path d="M-7 70v22M7 70v22"/>
+    <ellipse cx="-10" cy="97" rx="13" ry="5.5"/>
+    <ellipse cx="10" cy="97" rx="13" ry="5.5"/>
+    <path d="M-14 95h8M6 95h8"/>
+  </g>`;
+}
+const VIGS={
+  nodding:`<svg viewBox="0 0 260 110">
+    <rect x="8" y="12" width="62" height="76" ${S}/>
+    <rect x="16" y="20" width="46" height="60" stroke="#EDE4D2" stroke-width="1.2" fill="none" opacity=".45"/>
+    ${loafer(115,false,0)}${loafer(163,false,-3)}${loafer(211,true,2)}
+  </svg>`,
+  banana:`<svg viewBox="0 0 240 110">
+    <rect x="150" y="8" width="82" height="86" ${S}/>
+    <path d="M172 44 Q186 70 208 54 Q192 66 176 50 Z" ${S}/>
+    <path d="M172 44l-5-7" stroke="#EDE4D2" stroke-width="3.4" stroke-linecap="round"/>
+    <rect x="178" y="32" width="22" height="9" ${S} opacity=".7"/>
+    ${loafer(60,false,0)}
+    <g ${S}><rect x="72" y="30" width="20" height="14" rx="2"/><circle cx="82" cy="37" r="4"/></g>
+  </svg>`,
+  silence:`<svg viewBox="0 0 220 110">
+    ${loafer(40,false,-4)}${loafer(96,false,3)}${loafer(152,true,-2)}
+    <g ${S} opacity=".55">
+      <ellipse cx="40" cy="6" rx="15" ry="8"/><path d="M34 6h12"/>
+      <ellipse cx="152" cy="4" rx="15" ry="8"/><path d="M146 4h12"/>
+    </g>
+  </svg>`
+};
+
+/* ---- the script ---- */
+const BEATS={en:[
+  ['You are early. The museum does not open for eleven minutes. Come in anyway.',null],
+  ['For thirty years I watched men in soft leather shoes stand before a canvas and say nothing, for a very long time, on purpose.','nodding'],
+  ['They did not understand it either. They had only learned that silence looks like understanding.','silence'],
+  ['One of them paid four million dollars for a banana. He did not eat it. That, I think, was his mistake.','banana'],
+  ['So I built this. Everything here is bad. Genuinely, thoroughly bad.',null],
+  ['And it is hung, and lit, and labelled, and insured \u2014 because that is all a masterpiece has ever been.',null],
+  ['Look at it properly. It cost no one anything, and it is yours to judge.',null],
+  ['The doors are open. Mind the rope.',null]
+],es:[
+  ['Lleg\u00f3 temprano. El museo no abre hasta dentro de once minutos. Pase de todos modos.',null],
+  ['Durante treinta a\u00f1os vi a hombres de zapatos suaves pararse ante un lienzo y no decir nada, mucho rato, a prop\u00f3sito.','nodding'],
+  ['Ellos tampoco la entend\u00edan. Solo hab\u00edan aprendido que el silencio parece entendimiento.','silence'],
+  ['Uno pag\u00f3 cuatro millones de d\u00f3lares por un pl\u00e1tano. No se lo comi\u00f3. Ese, creo yo, fue su error.','banana'],
+  ['As\u00ed que constru\u00ed esto. Todo aqu\u00ed es malo. Genuina y completamente malo.',null],
+  ['Y est\u00e1 colgado, iluminado, etiquetado y asegurado \u2014 porque eso es todo lo que una obra maestra ha sido siempre.',null],
+  ['M\u00edrela bien. No le cost\u00f3 nada a nadie, y es suya para juzgarla.',null],
+  ['Las puertas est\u00e1n abiertas. Cuidado con el cord\u00f3n.',null]
+]};
+const UI={en:{skip:'Skip',tap:'tap to continue'},es:{skip:'Saltar',tap:'toque para continuar'}};
+
+let iLang='en', i=-1, timer=null, done=false;
+const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+/* ---- the score: four bars, no samples ---- */
+let AC=null,master=null,filt=null,musicOn=true,barTimer=null;
+const CH=[[110,261.63,329.63,392],[174.61,261.63,349.23,440],[130.81,246.94,329.63,392],[98,246.94,293.66,392]];
+let bar=0;
+function startAudio(){
+  if(AC||!musicOn)return;
+  try{
+    AC=new (window.AudioContext||window.webkitAudioContext)();
+    filt=AC.createBiquadFilter();filt.type='lowpass';filt.frequency.value=1500;
+    master=AC.createGain();master.gain.value=0;
+    filt.connect(master);master.connect(AC.destination);
+    master.gain.linearRampToValueAtTime(.075,AC.currentTime+3);
+    playBar();barTimer=setInterval(playBar,3600);
+  }catch(e){}
+}
+function tone(f,at,dur,vel){
+  const o=AC.createOscillator(),g=AC.createGain();
+  o.type='triangle';o.frequency.value=f;
+  g.gain.setValueAtTime(0,at);
+  g.gain.linearRampToValueAtTime(vel,at+.012);
+  g.gain.exponentialRampToValueAtTime(.0001,at+dur);
+  o.connect(g);g.connect(filt);o.start(at);o.stop(at+dur+.1);
+}
+function playBar(){
+  if(!AC)return;
+  const t=AC.currentTime+.05,c=CH[bar%CH.length];
+  tone(c[0],t,3.4,.20);
+  tone(c[1],t+.45,2.8,.13);
+  tone(c[2],t+.95,2.5,.11);
+  if(Math.random()<.7)tone(c[3],t+1.6,2.2,.085);
+  bar++;
+}
+soundBtn.onclick=()=>{
+  musicOn=!musicOn;
+  soundBtn.textContent=musicOn?'\u266a':'\u266a\u0338';
+  if(!AC&&musicOn){startAudio();return;}
+  if(master)master.gain.linearRampToValueAtTime(musicOn?.055:0,AC.currentTime+.5);
+};
+
+/* ---- beats ---- */
+function show(n){
+  const list=BEATS[iLang];
+  if(n>=list.length){enter();return;}
+  i=n;
+  const [txt,vig]=list[n];
+  beatEl.classList.remove('on');vigEl.classList.remove('on');
+  const paint=()=>{
+    beatEl.textContent=txt;
+    vigEl.innerHTML=vig?VIGS[vig]:'';
+    beatEl.classList.add('on');if(vig)vigEl.classList.add('on');
+  };
+  reduce?paint():setTimeout(paint,340);
+  clearTimeout(timer);
+  timer=setTimeout(()=>show(n+1), n===0?4200:(txt.length>110?6200:5000));
+}
+function advance(){ if(done)return; clearTimeout(timer); show(i+1); }
+function enter(){
+  if(done)return;done=true;
+  clearTimeout(timer);
+  intro.classList.remove('shut');intro.classList.add('opening');
+  if(master&&AC)master.gain.linearRampToValueAtTime(musicOn?.055:0,AC.currentTime+2);
+  soundBtn.classList.add('show');
+  setTimeout(()=>intro.classList.add('gone'), reduce?60:2200);
+}
+intro.addEventListener('click',e=>{
+  if(e.target.closest('.ictl'))return;
+  startAudio();advance();
+});
+skipEl.onclick=()=>{startAudio();enter();};
+
+function setIntroLang(l){
+  iLang=l;
+  document.getElementById('iEn').setAttribute('aria-pressed',l==='en');
+  document.getElementById('iEs').setAttribute('aria-pressed',l==='es');
+  skipEl.textContent=UI[l].skip;tapEl.textContent=UI[l].tap;
+  document.getElementById(l).click();
+  if(i>=0){const cur=i;i=-1;show(cur);}
+}
+document.getElementById('iEn').onclick=e=>{e.stopPropagation();startAudio();setIntroLang('en');};
+document.getElementById('iEs').onclick=e=>{e.stopPropagation();startAudio();setIntroLang('es');};
+
+skipEl.textContent=UI.en.skip;tapEl.textContent=UI.en.tap;
+setTimeout(()=>show(0),700);
+})();
+</script>
