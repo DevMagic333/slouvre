@@ -1656,33 +1656,69 @@ function photoGround(w,h,grid){
 /* Style builders. Each fills a rectangle, so any of them can stand alone
    as a whole work or sit inside the frame of another. That crossing is
    where the collection stops looking like one machine. */
+/* Pixel sprites of the actual cast, not invented shapes. Legend:
+   . transparent · B body · D outline · E eye white · P pupil · A accent */
+const SPRITES={
+ brainlet:["....DDDDD...","...DBBBBBD..","..DBBBBBBBD.",".DBBBBBBBBBD",
+           ".DBEEBBBEEBD",".DBEPBBBEPBD",".DBBBBBBBBBD","..DBBDDDBBD.",
+           "...DBBBBBD..","....DDDDD...",".....DBD....","....DBBBD...",
+           "...DBBBBBD..","...D.....D..","..DD.....DD."],
+ coyote:  ["..D......D..","..DD....DD..",".DBD...DBD..",".DBBD.DBBD..",
+           "..DBBBBBBD..",".DBBEBBEBBD.",".DBBBBBBBBD.","..DBBDDBBD..",
+           "...DBBBBBD..","DDBBBBBBBBDD","DBBBBBBBBBBD","DBBBBBBBBBBA",
+           ".D.D....D.D.","..D.D..D.D..",".DD.DD.DD.DD"],
+ owl:     ["..D......D..",".DBD....DBD.","..DBBBBBBD..",".DBBBBBBBBD.",
+           ".DBEEBBEEBD.",".DBEPBBEPBD.",".DBBBABBBBD.","..DBBBBBBD..",
+           "..DBBBBBBD..","..DBDBDBBD..","..DBBBBBBD..","...DBBBBD...",
+           "....DDDD....","...D.DD.D...","..DD....DD.."],
+ frog:    ["..DD....DD..",".DEED..DEED.",".DEPD..DEPD.","..DBBBBBBD..",
+           ".DBBBBBBBBD.","DBBBBBBBBBBD","DBBDDDDDDBBD","DBBBBBBBBBBD",
+           ".DBBBBBBBBD.","..DBBBBBBD..",".DD.DBBD.DD.","DBBD.DD.DBBD",
+           "DBBD....DBBD",".DD......DD.","............"],
+ cactus:  ["....DBBD....","..DDDBBDDD..",".DBBDBBDBBD.","DBBBDBBDBBBD",
+           "DBBBDBBDBBBD","DBBBDBBDBBBD",".DBBDBBDBBD.","..DDDBBDDD..",
+           "....DBEBD...","....DBPBD...","....DBBBD...","....DBBBD...",
+           "...DDBBBDD..","..DAAAAAAAD.","..DAAAAAAAD."],
+ cube:    ["............",".DDDDDDDDDD.",".DBBBBBBBBD.",".DBDDBBDDBD.",
+           ".DBDDBBDDBD.",".DBBBBBBBBD.",".DBBDDDDBBD.",".DBBBBBBBBD.",
+           ".DDDDDDDDDD.","....DBBD....","...DBBBBD...","..DBBBBBBD..",
+           "..DBBBBBBD..","...D....D...","..DD....DD.."],
+ hand:    ["..D.D.D.D...",".DBDBDBDBD..",".DBDBDBDBD..",".DBBBBBBBD..",
+           "DBDBBBBBBBD.","DBBBBBBBBBD.","DBBBBBBBBBD.",".DBBBBBBBD..",
+           "..DBBBBBD...","...DBBBD....","....DBD.....","....DBD.....",
+           "....DBD.....","...DDDD.....","............"]
+};
 function buildPixel(ox,oy,w,h,names){
   let s='';
-  const G2=RI(14,26), cw2=w/G2, ch2=h/G2;
-  const pal=[P(PAL),P(PAL),P(PAL),P(BG),P(BG)];
+  const names2=Object.keys(SPRITES);
+  const which=P(names2);
+  if(names)names.push(which);
+  const sp=SPRITES[which];
+  const sh=sp.length, sw2=sp[0].length;
+  /* the grid is sized so the sprite sits comfortably with room around it */
+  const G2=Math.max(sw2,sh)+RI(3,9);
+  const cw2=w/G2, ch2=h/G2;
+  const gx0=Math.floor((G2-sw2)/2), gy0=Math.floor((G2-sh)/2);
+  const body=P(PAL), dark=P(['#1A1A22','#16161C','#241C28']);
+  const accent=P(PAL), eyeW='#F4F1E8', pup='#111';
+  const COLS={B:body,D:dark,E:eyeW,P:pup,A:accent};
   s+=`<rect x="${F(ox)}" y="${F(oy)}" width="${F(w)}" height="${F(h)}" fill="${P(BG)}"/>`;
-  const fw=RI(6,10), fh=RI(8,13);
-  const gx0=Math.floor((G2-fw)/2), gy0=Math.floor((G2-fh)/2)+RI(-1,2);
-  const body=P(PAL), dark='#1A1A22';
-  const X=(i)=>ox+i*cw2, Y=(j)=>oy+j*ch2;
-  for(let y=0;y<fh;y++)for(let x=0;x<fw;x++){
-    const edge=(x===0||y===0||x===fw-1||y===fh-1);
-    if(edge&&chance(.45))continue;
-    const isHead=y<Math.floor(fh*.45);
-    s+=`<rect x="${F(X(gx0+x))}" y="${F(Y(gy0+y))}" width="${F(cw2+.5)}" height="${F(ch2+.5)}" fill="${isHead?body:(chance(.22)?P(pal):dark)}"/>`;
+  const X=i=>ox+i*cw2, Y=j=>oy+j*ch2;
+  for(let y=0;y<sh;y++)for(let x=0;x<sw2;x++){
+    const c=sp[y][x]; if(c==='.')continue;
+    s+=`<rect x="${F(X(gx0+x))}" y="${F(Y(gy0+y))}" width="${F(cw2+.6)}" height="${F(ch2+.6)}" fill="${COLS[c]||body}"/>`;
   }
-  const ey=gy0+Math.floor(fh*.2);
-  [gx0+Math.floor(fw*.25), gx0+Math.floor(fw*.68)].forEach(ex=>{
-    s+=`<rect x="${F(X(ex))}" y="${F(Y(ey))}" width="${F(cw2+.5)}" height="${F(ch2*RI(1,2)+.5)}" fill="#111"/>`;});
-  const my=gy0+Math.floor(fh*.34);
-  for(let x=0;x<RI(2,4);x++)
-    s+=`<rect x="${F(X(gx0+Math.floor(fw*.3)+x))}" y="${F(Y(my))}" width="${F(cw2+.5)}" height="${F(ch2+.5)}" fill="#111"/>`;
-  for(let i=0;i<RI(14,50);i++)
-    s+=`<rect x="${F(X(RI(0,G2-1)))}" y="${F(Y(RI(0,G2-1)))}" width="${F(cw2+.5)}" height="${F(ch2+.5)}" fill="${P(pal)}" opacity="${F(R(.4,1))}"/>`;
+  /* loose cells around it — the corrupted-cartridge look */
+  for(let i=0;i<RI(8,26);i++){
+    const rx=RI(0,G2-1), ry=RI(0,G2-1);
+    const inside=(rx>=gx0&&rx<gx0+sw2&&ry>=gy0&&ry<gy0+sh&&sp[ry-gy0][rx-gx0]!=='.');
+    if(inside)continue;
+    s+=`<rect x="${F(X(rx))}" y="${F(Y(ry))}" width="${F(cw2+.6)}" height="${F(ch2+.6)}" fill="${P([body,accent,P(PAL),P(BG)])}" opacity="${F(R(.5,1))}"/>`;
+  }
   return s;
 }
 
-function buildPanels(ox,oy,w,h,names){
+function buildPanels(ox,oy,w,h,names,skip){
   let s='';
   const cols=RI(2,3), rows=RI(2,3);
   const gap=Math.min(w,h)*R(.004,.016);
@@ -1691,13 +1727,21 @@ function buildPanels(ox,oy,w,h,names){
   let n=0;
   for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
     const px=ox+gap+c*(cw+gap), py=oy+gap+r*(ch+gap);
+    if(skip&&chance(skip)){
+      s+=`<rect x="${F(px)}" y="${F(py)}" width="${F(cw)}" height="${F(ch)}" fill="none" stroke="#111" stroke-width="${F(R(1.6,3))}"/>`;
+      continue;
+    }
     s+=`<rect x="${F(px)}" y="${F(py)}" width="${F(cw)}" height="${F(ch)}" fill="${chance(.5)?P(PAL):P(BG)}" stroke="#111" stroke-width="${F(R(1.6,3))}"/>`;
     if(chance(.55)){
       const id='pz'+uid+'-'+(n++);
       const z=R(2.2,4.4)*Math.min(cw,ch)/110;
       const e=pickSubject(); if(names)names.push(e[1]);
+      /* some cells hang the fragment upside down or mirrored */
+      const fx2=chance(.26)?-1:1, fy2=chance(.18)?-1:1;
+      const mcx=px+cw/2, mcy=py+ch/2;
+      const flip=(fx2<0||fy2<0)?` transform="translate(${F(mcx)} ${F(mcy)}) scale(${fx2} ${fy2}) translate(${F(-mcx)} ${F(-mcy)})"`:'';
       s+=`<clipPath id="${id}"><rect x="${F(px)}" y="${F(py)}" width="${F(cw)}" height="${F(ch)}"/></clipPath>`;
-      s+=`<g clip-path="url(#${id})">${e[0](px+cw*R(.2,.8), py+ch*R(.25,.85), z)}</g>`;
+      s+=`<g clip-path="url(#${id})"${flip}>${e[0](px+cw*R(.2,.8), py+ch*R(.25,.85), z)}</g>`;
     }else if(chance(.5)){
       const gx=px+cw/2, gy=py+ch/2, gr=Math.min(cw,ch)*R(.18,.36);
       const gst=`fill="${P(PAL)}" fill-opacity="${F(R(.5,.9))}" stroke="#111" stroke-width="${F(R(1.4,2.6))}" stroke-linejoin="round"`;
@@ -1758,10 +1802,15 @@ function grainDefs(id,kind){
      needs no blend mode. Blend modes on SVG elements are the least
      reliably supported part of the spec and not worth depending on. */
   if(kind==='glitter')
+    /* gamma on the alpha channel keeps only the brightest tail of the
+       noise. A linear matrix averages out to a flat gold veil; sparkle
+       has to be sparse or it is just a tint. */
     return `<filter id="${id}" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">`+
-      `<feTurbulence type="fractalNoise" baseFrequency="${F(R(.6,1.0))}" numOctaves="3" seed="${RI(1,9999)}" result="n"/>`+
+      `<feTurbulence type="fractalNoise" baseFrequency="${F(R(.7,1.1))}" numOctaves="4" seed="${RI(1,9999)}" result="n"/>`+
       `<feColorMatrix in="n" type="matrix" values="`+
-        `0 0 0 0 1   0 0 0 0 .90   0 0 0 0 .52   1.9 1.9 1.9 0 -2.35"/></filter>`;
+        `0 0 0 0 1   0 0 0 0 .93   0 0 0 0 .62   .34 .34 .34 0 0" result="c"/>`+
+      `<feComponentTransfer in="c"><feFuncA type="gamma" exponent="${F(R(7,10))}" amplitude="1.7"/></feComponentTransfer>`+
+      `</filter>`;
   return `<filter id="${id}" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">`+
     `<feTurbulence type="fractalNoise" baseFrequency="${F(R(.8,1.2))}" numOctaves="2" seed="${RI(1,9999)}" result="n"/>`+
     `<feColorMatrix in="n" type="matrix" values="`+
@@ -1774,9 +1823,9 @@ function generate(){
   const dark=(FORCE&&FORCE.ground==='nocturne')?true:chance(.16);
   const gid='g'+Math.floor(RNG()*1e6);
   const names=[];
-  const COMPW=[['center',.105],['scatter',.085],['diptych',.077],['tiny',.068],
-               ['crowd',.085],['portrait',.115],['landscape',.175],['panels',.18],
-               ['illumination',.07],['pixel',.04]];
+  const COMPW=[['center',.098],['scatter',.079],['diptych',.072],['tiny',.063],
+               ['crowd',.079],['portrait',.107],['landscape',.163],['panels',.17],
+               ['illumination',.066],['pixel',.038],['aurora',.065]];
   let mode=(()=>{let r=R(0,1);for(const[k,w]of COMPW){if((r-=w)<=0)return k;}return 'center';})();
   if(FORCE&&FORCE.composition)mode=FORCE.composition;
   if(BANNER&&!(FORCE&&FORCE.composition)){
@@ -1828,7 +1877,44 @@ function generate(){
   let picks=[];
   const AN=(FORCE&&FORCE.anchor)?FORCE.anchor:null;
   const fx=w/300, fy=h/300;
-  if(mode==='illumination'){
+  if(mode==='aurora'){
+    /* Night, and something happening at the bottom of it. Glow is drawn
+       as stacked shapes rather than a blur filter — filters are the least
+       portable thing in SVG and this has to survive every browser. */
+    const ink=P(['#06070C','#0A0610','#080C0A','#0C0810']);
+    s+=`<rect width="${w}" height="${h}" fill="${ink}"/>`;
+    const glowCols=P([['#4DFF7A','#3DE0FF','#FF3D6E'],['#8BFF3D','#3D7AFF','#FF9A3D'],
+                      ['#3DFFD4','#C43DFF','#FFE03D']]);
+    /* the specks, falling in loose vertical runs */
+    const runs=RI(14,34);
+    for(let r=0;r<runs;r++){
+      const x=R(0,w), top=R(0,h*.72), len=RI(2,7), col=P(glowCols);
+      const cw2=R(2.5,5.5)*(w/300), chh=R(3,7)*(h/300);
+      for(let i=0;i<len;i++){
+        const y=top+i*chh*R(1.1,2.2);
+        if(y>h*.92)break;
+        const a=R(.25,1)*(1-i/len*.6);
+        s+=`<rect x="${F(x-cw2*.9)}" y="${F(y-chh*.7)}" width="${F(cw2*2.8)}" height="${F(chh*2.4)}" fill="${col}" opacity="${F(a*.16)}"/>`;
+        s+=`<rect x="${F(x)}" y="${F(y)}" width="${F(cw2)}" height="${F(chh)}" fill="${col}" opacity="${F(a)}"/>`;
+      }
+    }
+    /* the ribbons */
+    const bands=RI(5,10), baseY=h*R(.6,.78);
+    const ribbon=P([['#2E7D4F','#8E2B2B','#2E4A8E','#5E2E8E'],
+                    ['#1F6E52','#B8452B','#2B4FB8','#8E2B6E'],
+                    ['#3A7D2E','#7D2E5A','#2E5A7D','#7D5A2E']]);
+    for(let b=0;b<bands;b++){
+      const off=b*h*R(.02,.045), amp=h*R(.05,.13), ph=R(0,6.28), fr=R(1.2,2.6);
+      let d=`M0 ${F(h)}L0 ${F(baseY+off+Math.sin(ph)*amp)}`;
+      for(let x=0;x<=w;x+=w/14)
+        d+=`L${F(x)} ${F(baseY+off+Math.sin(ph+x/w*fr*6.28)*amp)}`;
+      d+=`L${F(w)} ${F(h)}Z`;
+      s+=`<path d="${d}" fill="${ribbon[b%ribbon.length]}" opacity="${F(R(.55,.92))}"/>`;
+    }
+    TR.ground='nocturne';
+    /* a silhouette or two standing in it, sometimes */
+    picks = chance(.55) ? [[w*R(.3,.7), baseY+h*R(.02,.1), R(.34,.62)*Math.min(fx,fy)]] : [];
+  }else if(mode==='illumination'){
     /* The manuscript page. The frame is always the frame; what it holds
        is whichever style the roll lands on. */
     const fr=buildFrame(w,h); s+=fr.svg;
@@ -1848,8 +1934,14 @@ function generate(){
       picks=[];
     }else if(inner==='vista'){
       s+=`<clipPath id="${uid}"><rect x="${F(ix)}" y="${F(iy)}" width="${F(iw)}" height="${F(ih)}"/></clipPath>`;
+      /* scenery draws from the horizon down and leaves the sky to the
+         ground layer, which a framed work never runs — so paint one. */
+      /* a framed view needs a bright sky — the dark entries in BG read as
+         another void inside an already dark frame */
+      s+=`<rect x="${F(ix)}" y="${F(iy)}" width="${F(iw)}" height="${F(ih)}" fill="${P(BG.filter(c=>c[1]>'8'))}"/>`;
       s+=`<g clip-path="url(#${uid})" transform="translate(${F(ix)},${F(iy)})">${scenery(iw,ih,true)}</g>`;
-      picks=SCENEPOP>0?[[ix+iw*.5, iy+ih*.72, R(.3,.5)*Math.min(fx,fy)]]:[];
+      /* and a figure big enough to be the subject of its own painting */
+      picks=[[ix+iw*.5+R(-iw*.12,iw*.12), iy+ih*R(.68,.78), R(.5,.78)*Math.min(fx,fy)]];
     }else{
       const nw=iw*.56, nh=ih*.72, nx=ix+iw/2-nw/2, ny=iy+ih/2-nh/2;
       s+=`<path d="M${F(nx)} ${F(ny+nh)} L${F(nx)} ${F(ny+nh*.34)} Q${F(nx+nw/2)} ${F(ny-nh*.16)} ${F(nx+nw)} ${F(ny+nh*.34)} L${F(nx+nw)} ${F(ny+nh)} Z" fill="${P(['#2A1C2E','#1E1A16','#2E2418'])}" stroke="${fr.gold}" stroke-width="${F(Math.min(w,h)*.012)}"/>`;
@@ -1860,7 +1952,13 @@ function generate(){
     TR.ground='pixelated'; picks=[];
   }else if(mode==='panels'){
     /* one panel grid in eight gets the gilt treatment around it */
-    if(chance(.12)){
+    if(chance(.14)){
+      /* the grid cuts straight across the frame instead of sitting inside
+         it, so the gilt border survives only in the cells left open */
+      const fr=buildFrame(w,h); s+=fr.svg;
+      s+=buildPanels(0,0,w,h,names,.34);
+      TR.ground='illuminated';
+    }else if(chance(.14)){
       const fr=buildFrame(w,h); s+=fr.svg;
       const [ix,iy,iw,ih]=fr.inner;
       const uid='pf'+Math.floor(R(1000,99999));
@@ -1908,7 +2006,7 @@ function generate(){
   if(gr!=='none'){
     const gid='gr'+Math.floor(R(1000,99999));
     s+=`<defs>${grainDefs(gid,gr)}</defs>`;
-    s+=`<rect width="${w}" height="${h}" filter="url(#${gid})" opacity="${F(gr==='glitter'?R(.55,.85):R(.35,.60))}" pointer-events="none"/>`;
+    s+=`<rect width="${w}" height="${h}" filter="url(#${gid})" opacity="${F(gr==='glitter'?R(.75,1):R(.35,.60))}" pointer-events="none"/>`;
   }
   TR.subject=names.length?[...new Set(names)].sort().join(' + '):'scenery';
   TR.figures=String(picks.length);
