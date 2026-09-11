@@ -1128,7 +1128,7 @@ function photoGround(w,h,grid,edges){
   for(let i=0;i<grid.cells.length;i++){
     const c=grid.cells[i]; if(!c)continue;
     const gx=i%n, gy=Math.floor(i/n);
-    s+=`<path d="${blob((gx+.5)*cw,(gy+.5)*ch,rr*R(.52,.74),RI(5,7),rr*.18)}" fill="${c}" opacity="${F(R(.9,1))}"/>`;
+    s+=`<path d="${blob((gx+.5)*cw,(gy+.5)*ch,rr*R(.66,.86),RI(5,7),rr*.2)}" fill="${c}" opacity="${F(R(.9,1))}"/>`;
   }
   /* the ink pass. strong edges get a heavy line, so the thing you
      photographed keeps its outline even after everything else melts. */
@@ -1161,7 +1161,7 @@ function generate(){
   if(PH){
     TR.ground='photographic';
     s+=photoGround(w,h,PH,FORCE.edges);
-  }else
+  }else{
   TR.ground=dark?'nocturne':['gradient','aureole','colour field','flat'][style];
   if(style===0){
     const c1=P(PAL),c2=dark?'#1A1A22':P(BG);
@@ -1173,6 +1173,7 @@ function generate(){
     s+=`<rect width="${w}" height="${F(R(80,200))}" y="${F(R(0,120))}" fill="${P(PAL)}" opacity="${F(R(.4,.9))}"/>`;
   }else{
     s+=`<rect width="${w}" height="${h}" fill="${dark?'#2B1F3A':P(BG)}"/>`;
+  }
   }
 
   /* colour that actually lands */
@@ -1611,7 +1612,9 @@ function fromPhoto(img){
   const N=96,c=document.createElement('canvas');
   c.width=N;c.height=N;
   const x=c.getContext('2d',{willReadFrequently:true});
-  x.drawImage(img,0,0,N,N);
+  const sw=img.naturalWidth||img.width||N, sh=img.naturalHeight||img.height||N;
+  const side=Math.min(sw,sh);
+  x.drawImage(img,(sw-side)/2,(sh-side)/2,side,side,0,0,N,N);
   const d=x.getImageData(0,0,N,N).data;
 
   const lum=new Float32Array(N*N);
@@ -1660,8 +1663,13 @@ function fromPhoto(img){
   const edges=keep.map((e,i)=>[e[0],e[1],e[2],i<180?1:0]);
 
   const busy=edgeCount/(N*N);
-  const skAsp=(skMaxX-skMinX+1)/(skMaxY-skMinY+1);
-  const isFace=skinN>N*N*.045 && skAsp>.45 && skAsp<2.2;
+  const bw=skMaxX-skMinX+1, bh=skMaxY-skMinY+1;
+  const skAsp=bw/bh, skArea=(bw*bh)/(N*N), skFill=skinN/(bw*bh);
+  const frac=skinN/(N*N);
+  /* a face is a compact patch. a cream wall under warm light passes the
+     colour test but sprawls across the whole frame, so bound it. */
+  const isFace = frac>.045 && frac<.42 && skAsp>.45 && skAsp<2.2
+                 && skArea<.60 && skFill>.34;
   const force={
     grid:{n:G,cells:cells,base:sat(avg,avg,avg,1)},
     edges:edges,
@@ -1785,17 +1793,33 @@ const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
 let AC=null,master=null,filt=null,musicOn=true,barTimer=null;
 const CH=[[110,261.63,329.63,392],[174.61,261.63,349.23,440],[130.81,246.94,329.63,392],[98,246.94,293.66,392]];
 let bar=0;
+const LEVEL=.085;
 function startAudio(){
-  if(AC||!musicOn)return;
+  if(!musicOn)return;
   try{
-    AC=new (window.AudioContext||window.webkitAudioContext)();
-    filt=AC.createBiquadFilter();filt.type='lowpass';filt.frequency.value=1500;
-    master=AC.createGain();master.gain.value=0;
-    filt.connect(master);master.connect(AC.destination);
-    master.gain.linearRampToValueAtTime(.075,AC.currentTime+3);
-    playBar();barTimer=setInterval(playBar,3600);
+    if(!AC){
+      AC=new (window.AudioContext||window.webkitAudioContext)();
+      filt=AC.createBiquadFilter();filt.type='lowpass';filt.frequency.value=2200;
+      master=AC.createGain();
+      filt.connect(master);master.connect(AC.destination);
+      master.gain.setValueAtTime(0,AC.currentTime);
+      master.gain.linearRampToValueAtTime(LEVEL,AC.currentTime+.7);
+    }
+    /* safari hands back a suspended context even inside a gesture, so it
+       has to be resumed explicitly or nothing ever sounds. */
+    if(AC.state!=='running'){
+      AC.resume().then(runBars).catch(()=>{});
+    }else runBars();
   }catch(e){}
 }
+function runBars(){
+  if(!AC||barTimer)return;
+  playBar();barTimer=setInterval(playBar,3600);
+}
+/* any later tap is another chance to unstick it */
+addEventListener('pointerdown',()=>{
+  if(AC&&musicOn&&AC.state!=='running')AC.resume().then(runBars).catch(()=>{});
+},{passive:true});
 function tone(f,at,dur,vel){
   const o=AC.createOscillator(),g=AC.createGain();
   o.type='triangle';o.frequency.value=f;
@@ -1816,8 +1840,8 @@ function playBar(){
 soundBtn.onclick=()=>{
   musicOn=!musicOn;
   soundBtn.textContent=musicOn?'\u266a':'\u266a\u0338';
-  if(!AC&&musicOn){startAudio();return;}
-  if(master)master.gain.linearRampToValueAtTime(musicOn?.055:0,AC.currentTime+.5);
+  if(musicOn&&(!AC||AC.state!=='running')){startAudio();return;}
+  if(master&&AC)master.gain.linearRampToValueAtTime(musicOn?LEVEL:0,AC.currentTime+.4);
 };
 
 /* ---- beats ---- */
@@ -1841,7 +1865,7 @@ function enter(){
   if(done)return;done=true;
   clearTimeout(timer);
   intro.classList.remove('shut');intro.classList.add('opening');
-  if(master&&AC)master.gain.linearRampToValueAtTime(musicOn?.055:0,AC.currentTime+2);
+  if(master&&AC)master.gain.linearRampToValueAtTime(musicOn?LEVEL:0,AC.currentTime+1.2);
   soundBtn.classList.add('show');
   setTimeout(()=>intro.classList.add('gone'), reduce?60:2200);
 }
