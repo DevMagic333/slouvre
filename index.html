@@ -1206,7 +1206,7 @@ function subjObject(cx,cy,s){
     g+=`<path d="M${F(cx-24)} ${F(cy-18)} L${F(cx+24)} ${F(cy-18)} L${F(cx+18)} ${F(cy+38)} L${F(cx-18)} ${F(cy+38)} Z" fill="#8E9AA0" ${O}/>`;
     g+=`<rect x="${F(cx-29)}" y="${F(cy-27)}" width="58" height="10" rx="3" fill="#7A868C" ${O}/>`;
     for(let i=0;i<3;i++)g+=`<path d="M${F(cx-13+i*13)} ${F(cy-10)} v${F(40)}" stroke="#111" stroke-width="${F(sw*.7)}" opacity=".45"/>`;
-    if(chance(.5))g+=`<path d="${scrawl(cx+R(-14,14),cy-34,10,5)}" fill="none" ${ink(sw*.8)}/>`;
+    if(chance(.5))g+=`<path d="${scrawl(cx+R(-14,14),cy-34,10,5)}" ${ink(sw*.8)}/>`;
   }else if(kind==='ladder'){
     g+=`<path d="M${F(cx-18)} ${F(cy-46)} L${F(cx-26)} ${F(cy+42)} M${F(cx+18)} ${F(cy-46)} L${F(cx+26)} ${F(cy+42)}" ${ink(sw*1.6)}/>`;
     for(let i=0;i<RI(3,6);i++){const y=cy-36+i*R(16,22);
@@ -1301,20 +1301,20 @@ const VISTA={
      const cx=W*(i+.5)/arches, aw=W/arches*.34;
      g+=`<path d="M${F(cx-aw)} ${F(hz)} L${F(cx-aw)} ${F(dy-H*.01)} Q${F(cx)} ${F(dy-H*.1)} ${F(cx+aw)} ${F(dy-H*.01)} L${F(cx+aw)} ${F(hz)}" fill="${P(BG)}" ${ink(2)}/>`;}
    for(let i=0;i<=arches;i++){const x=W*i/arches;
-     g+=`<path d="M${F(x)} ${F(dy-H*.045)} L${F(x)} ${F(dy-H*.13)}" ${ink(2.2)} fill="none"/>`;}
+     g+=`<path d="M${F(x)} ${F(dy-H*.045)} L${F(x)} ${F(dy-H*.13)}" ${ink(2.2)}/>`;}
    return g;},
  wonder:(W,H,hz,ink,fill)=>{
    let g=`<rect x="0" y="${F(hz)}" width="${F(W)}" height="${F(H-hz)}" fill="${fill()}" ${ink(1.8)}/>`;
    const t=RI(0,2), cx=W*R(.4,.6);
    if(t===0){
      g+=`<path d="M${F(cx-W*.22)} ${F(hz)} L${F(cx)} ${F(hz-H*.34)} L${F(cx+W*.22)} ${F(hz)} Z" fill="${fill()}" ${ink(2.4)}/>`;
-     g+=`<path d="M${F(cx)} ${F(hz-H*.34)} L${F(cx)} ${F(hz)}" ${ink(1.6)} fill="none"/>`;
+     g+=`<path d="M${F(cx)} ${F(hz-H*.34)} L${F(cx)} ${F(hz)}" ${ink(1.6)}/>`;
    }else if(t===1){
      g+=`<path d="M${F(cx-W*.1)} ${F(hz)} L${F(cx-W*.035)} ${F(hz-H*.36)} L${F(cx+W*.035)} ${F(hz-H*.36)} L${F(cx+W*.1)} ${F(hz)} Z" fill="${fill()}" ${ink(2.4)}/>`;
-     for(let i=1;i<4;i++)g+=`<path d="M${F(cx-W*.1+W*.02*i)} ${F(hz-H*.09*i)} L${F(cx+W*.1-W*.02*i)} ${F(hz-H*.09*i)}" ${ink(1.6)} fill="none"/>`;
+     for(let i=1;i<4;i++)g+=`<path d="M${F(cx-W*.1+W*.02*i)} ${F(hz-H*.09*i)} L${F(cx+W*.1-W*.02*i)} ${F(hz-H*.09*i)}" ${ink(1.6)}/>`;
    }else{
-     g+=`<path d="M${F(cx-W*.16)} ${F(hz)} L${F(cx-W*.16)} ${F(hz-H*.16)} Q${F(cx)} ${F(hz-H*.4)} ${F(cx+W*.16)} ${F(hz-H*.16)} L${F(cx+W*.16)} ${F(hz)}" fill="none" ${ink(3)}/>`;
-     g+=`<path d="M${F(cx-W*.16)} ${F(hz)} L${F(cx-W*.09)} ${F(hz)} L${F(cx-W*.09)} ${F(hz-H*.14)} M${F(cx+W*.16)} ${F(hz)} L${F(cx+W*.09)} ${F(hz)} L${F(cx+W*.09)} ${F(hz-H*.14)}" fill="none" ${ink(2.2)}/>`;
+     g+=`<path d="M${F(cx-W*.16)} ${F(hz)} L${F(cx-W*.16)} ${F(hz-H*.16)} Q${F(cx)} ${F(hz-H*.4)} ${F(cx+W*.16)} ${F(hz-H*.16)} L${F(cx+W*.16)} ${F(hz)}" ${ink(3)}/>`;
+     g+=`<path d="M${F(cx-W*.16)} ${F(hz)} L${F(cx-W*.09)} ${F(hz)} L${F(cx-W*.09)} ${F(hz-H*.14)} M${F(cx+W*.16)} ${F(hz)} L${F(cx+W*.09)} ${F(hz)} L${F(cx+W*.09)} ${F(hz-H*.14)}" ${ink(2.2)}/>`;
    }
    return g;},
  market:(W,H,hz,ink,fill)=>{
@@ -1323,7 +1323,7 @@ const VISTA={
    for(let i=0;i<n;i++){
      const x=W*(i+.5)/n+R(-W*.04,W*.04), sw2=W/n*R(.3,.46), top=hz-H*R(.12,.2);
      g+=`<path d="M${F(x-sw2)} ${F(top)} L${F(x+sw2)} ${F(top)} L${F(x+sw2*.8)} ${F(top+H*.05)} L${F(x-sw2*.8)} ${F(top+H*.05)} Z" fill="${P(PAL)}" ${ink(2)}/>`;
-     g+=`<path d="M${F(x-sw2*.8)} ${F(top+H*.05)} L${F(x-sw2*.8)} ${F(hz)} M${F(x+sw2*.8)} ${F(top+H*.05)} L${F(x+sw2*.8)} ${F(hz)}" fill="none" ${ink(1.8)}/>`;
+     g+=`<path d="M${F(x-sw2*.8)} ${F(top+H*.05)} L${F(x-sw2*.8)} ${F(hz)} M${F(x+sw2*.8)} ${F(top+H*.05)} L${F(x+sw2*.8)} ${F(hz)}" ${ink(1.8)}/>`;
      for(let b=0;b<RI(1,3);b++)
        g+=`<circle cx="${F(x+R(-sw2*.5,sw2*.5))}" cy="${F(hz-H*R(.01,.04))}" r="${F(H*R(.012,.024))}" fill="${P(PAL)}" ${ink(1.2)}/>`;
    }
@@ -1346,7 +1346,7 @@ const VISTA={
    const n=RI(5,10);
    for(let i=0;i<n;i++){
      const x=W*(i+R(.1,.9))/n, th=H*R(.14,.3), tw=W*R(.03,.07);
-     g+=`<path d="M${F(x)} ${F(hz)} L${F(x)} ${F(hz-th*.34)}" ${ink(2.2)} fill="none"/>`;
+     g+=`<path d="M${F(x)} ${F(hz)} L${F(x)} ${F(hz-th*.34)}" ${ink(2.2)}/>`;
      const col=P(['#5E7A45','#6E8C52','#4F6B3B','#8FA36B']);
      for(let L=0;L<3;L++)
        g+=`<path d="M${F(x-tw*(1.4-L*.3))} ${F(hz-th*(.3+L*.22))} L${F(x)} ${F(hz-th*(.55+L*.24))} L${F(x+tw*(1.4-L*.3))} ${F(hz-th*(.3+L*.22))} Z" fill="${col}" ${ink(1.6)}/>`;
@@ -1368,7 +1368,7 @@ const VISTA={
    const nl=RI(2,4);
    for(let i=0;i<nl;i++){
      const t=(i+1)/(nl+1), x=W*(.14+t*.6), lh=H*R(.14,.24), yb=hz+H*.04*i;
-     g+=`<path d="M${F(x)} ${F(yb)} L${F(x)} ${F(yb-lh)}" ${ink(2.4)} fill="none"/>`;
+     g+=`<path d="M${F(x)} ${F(yb)} L${F(x)} ${F(yb-lh)}" ${ink(2.4)}/>`;
      g+=`<path d="M${F(x-W*.02)} ${F(yb-lh)} L${F(x+W*.02)} ${F(yb-lh)} L${F(x+W*.012)} ${F(yb-lh+H*.035)} L${F(x-W*.012)} ${F(yb-lh+H*.035)} Z" fill="#F2C511" ${ink(1.6)}/>`;
    }
    return g;}
@@ -1823,9 +1823,10 @@ function generate(){
   const dark=(FORCE&&FORCE.ground==='nocturne')?true:chance(.16);
   const gid='g'+Math.floor(RNG()*1e6);
   const names=[];
-  const COMPW=[['center',.098],['scatter',.079],['diptych',.072],['tiny',.063],
-               ['crowd',.079],['portrait',.107],['landscape',.163],['panels',.17],
-               ['illumination',.066],['pixel',.038],['aurora',.065]];
+  const COMPW=[['center',.0857],['scatter',.069],['diptych',.063],['tiny',.055],
+               ['crowd',.069],['portrait',.0936],['landscape',.1426],['panels',.1488],
+               ['illumination',.0578],['pixel',.0333],['aurora',.0569],
+               ['woodcut',.045],['cubist',.045],['optical',.035]];
   let mode=(()=>{let r=R(0,1);for(const[k,w]of COMPW){if((r-=w)<=0)return k;}return 'center';})();
   if(FORCE&&FORCE.composition)mode=FORCE.composition;
   if(BANNER&&!(FORCE&&FORCE.composition)){
@@ -1877,7 +1878,93 @@ function generate(){
   let picks=[];
   const AN=(FORCE&&FORCE.anchor)?FORCE.anchor:null;
   const fx=w/300, fy=h/300;
-  if(mode==='aurora'){
+  if(mode==='woodcut'){
+    /* Relief print. Everything is a flat plane or a carved line, and the
+       carving is what does the shading — no gradients anywhere. */
+    const paper=P(['#EDE6D6','#E8E2CE','#F0EADA','#E4DCC8']);
+    const ink=P(['#141010','#13161A','#181212']);
+    const lit=PAL.filter(c=>{const v=parseInt(c.slice(1,3),16)+parseInt(c.slice(3,5),16)+parseInt(c.slice(5,7),16);return v>210;});
+    const pool=lit.length?lit:PAL;
+    const flats=[P(pool),P(pool),paper];
+    s+=`<rect width="${w}" height="${h}" fill="${paper}"/>`;
+    for(let i=0;i<RI(5,9);i++){
+      const cx=R(0,w), cy=R(0,h), rad=Math.min(w,h)*R(.18,.42), k=RI(3,5);
+      let d='';
+      for(let j=0;j<k;j++){const a=j/k*6.283+R(-.5,.5), rr2=rad*R(.5,1);
+        d+=(j?'L':'M')+F(cx+Math.cos(a)*rr2)+' '+F(cy+Math.sin(a)*rr2);}
+      s+=`<path d="${d}Z" fill="${P(flats)}" opacity="${F(R(.55,.85))}"/>`;
+    }
+    /* the carving: fans of tapered parallel gouges */
+    for(let g=0;g<RI(6,12);g++){
+      const cx=R(0,w), cy=R(0,h), a=R(0,3.14), lines=RI(4,11);
+      const spread=Math.min(w,h)*R(.06,.2), len=Math.min(w,h)*R(.15,.42);
+      for(let i=0;i<lines;i++){
+        const t=(i/(lines-1)-.5)*spread;
+        const ox2=cx+Math.cos(a+1.57)*t, oy2=cy+Math.sin(a+1.57)*t;
+        const wgt=(1-Math.abs(i/(lines-1)-.5)*2)*R(1.5,4.5)+.6;
+        s+=`<path d="M${F(ox2-Math.cos(a)*len/2)} ${F(oy2-Math.sin(a)*len/2)} L${F(ox2+Math.cos(a)*len/2)} ${F(oy2+Math.sin(a)*len/2)}" stroke="${ink}" stroke-width="${F(wgt)}" stroke-linecap="round" fill="none"/>`;
+      }
+    }
+    TR.ground='relief';
+    picks=[[w*R(.42,.58), h*R(.5,.62), R(.85,1.15)*Math.min(fx,fy)]];
+  }else if(mode==='cubist'){
+    /* Still life, faceted. Vessels first, then straight cuts across the
+       whole plate that recolour whatever they pass over. */
+    s+=`<rect width="${w}" height="${h}" fill="${P(BG)}"/>`;
+    const base=h*R(.72,.84);
+    s+=`<rect x="0" y="${F(base)}" width="${F(w)}" height="${F(h-base)}" fill="${P(PAL)}"/>`;
+    const objs=RI(3,6);
+    for(let i=0;i<objs;i++){
+      const vx=w*(i+.5)/objs+R(-w*.06,w*.06);
+      const vh=h*R(.24,.48), vw=w*R(.07,.15), top=base-vh;
+      const col=P(PAL), kind=RI(0,2);
+      if(kind===0)
+        s+=`<path d="M${F(vx-vw*.3)} ${F(top)} L${F(vx+vw*.3)} ${F(top)} L${F(vx+vw*.3)} ${F(top+vh*.2)} L${F(vx+vw)} ${F(top+vh*.45)} L${F(vx+vw)} ${F(base)} L${F(vx-vw)} ${F(base)} L${F(vx-vw)} ${F(top+vh*.45)} L${F(vx-vw*.3)} ${F(top+vh*.2)} Z" fill="${col}" stroke="#14100E" stroke-width="${F(R(1.8,3.4))}" stroke-linejoin="round"/>`;
+      else if(kind===1)
+        s+=`<path d="M${F(vx-vw*.55)} ${F(top)} Q${F(vx-vw*1.15)} ${F(top+vh*.5)} ${F(vx-vw*.6)} ${F(base)} L${F(vx+vw*.6)} ${F(base)} Q${F(vx+vw*1.15)} ${F(top+vh*.5)} ${F(vx+vw*.55)} ${F(top)} Z" fill="${col}" stroke="#14100E" stroke-width="${F(R(1.8,3.4))}" stroke-linejoin="round"/>`;
+      else
+        s+=`<path d="M${F(vx-vw)} ${F(base-vh*.5)} Q${F(vx)} ${F(base+vh*.24)} ${F(vx+vw)} ${F(base-vh*.5)} Z" fill="${col}" stroke="#14100E" stroke-width="${F(R(1.8,3.4))}" stroke-linejoin="round"/>`;
+      if(chance(.6)){
+        const r2=Math.min(vw,vh)*R(.3,.5);
+        s+=`<circle cx="${F(vx)}" cy="${F(top+vh*R(.35,.6))}" r="${F(r2)}" fill="${P(PAL)}" stroke="#14100E" stroke-width="${F(R(1.6,2.8))}"/>`;
+      }
+    }
+    /* the facets */
+    for(let i=0;i<RI(4,8);i++){
+      const a=R(0,3.1416), c=R(0,1);
+      const px=w*c, py=h*c, L=Math.max(w,h)*1.6;
+      const dx=Math.cos(a)*L, dy=Math.sin(a)*L;
+      const nx2=-Math.sin(a)*L, ny2=Math.cos(a)*L;
+      s+=`<path d="M${F(px-dx)} ${F(py-dy)} L${F(px+dx)} ${F(py+dy)} L${F(px+dx+nx2)} ${F(py+dy+ny2)} L${F(px-dx+nx2)} ${F(py-dy+ny2)} Z" fill="${P(PAL)}" opacity="${F(R(.12,.24))}"/>`;
+      s+=`<path d="M${F(px-dx)} ${F(py-dy)} L${F(px+dx)} ${F(py+dy)}" stroke="#14100E" stroke-width="${F(R(.8,2.2))}" opacity="${F(R(.4,.8))}" fill="none"/>`;
+    }
+    TR.ground='faceted';
+    picks = chance(.4) ? [[w*R(.3,.7), base-h*R(.05,.2), R(.4,.62)*Math.min(fx,fy)]] : [];
+  }else if(mode==='optical'){
+    /* Tessellation. Two tones, one repeating cell, and just enough drift
+       that the eye keeps sliding off it. */
+    const a1=P(['#141014','#16161A','#101418']), a2=P(['#F2EFE6','#EDE8DC','#F6F2E8']);
+    const a3=P(PAL);
+    s+=`<rect width="${w}" height="${h}" fill="${a2}"/>`;
+    const cols=RI(6,13), cell=w/cols, rows=Math.ceil(h/(cell*.86))+1;
+    const motif=RI(0,2);
+    for(let r=0;r<rows;r++)for(let c=0;c<cols+1;c++){
+      const ox2=c*cell+(r%2?cell/2:0), oy2=r*cell*.86;
+      const tone=[a1,a2,a3][(r+c)%3];
+      if(motif===0){
+        const hx=cell*.5, hy=cell*.29;
+        s+=`<path d="M${F(ox2)} ${F(oy2)} L${F(ox2+hx)} ${F(oy2+hy)} L${F(ox2+hx)} ${F(oy2+hy*3)} L${F(ox2)} ${F(oy2+hy*2)} Z" fill="${a1}"/>`;
+        s+=`<path d="M${F(ox2)} ${F(oy2)} L${F(ox2-hx)} ${F(oy2+hy)} L${F(ox2-hx)} ${F(oy2+hy*3)} L${F(ox2)} ${F(oy2+hy*2)} Z" fill="${a2}"/>`;
+        s+=`<path d="M${F(ox2)} ${F(oy2)} L${F(ox2+hx)} ${F(oy2+hy)} L${F(ox2)} ${F(oy2+hy*2)} L${F(ox2-hx)} ${F(oy2+hy)} Z" fill="${tone}"/>`;
+      }else if(motif===1){
+        s+=`<path d="M${F(ox2-cell*.5)} ${F(oy2+cell*.5)} L${F(ox2)} ${F(oy2)} L${F(ox2+cell*.5)} ${F(oy2+cell*.5)} L${F(ox2)} ${F(oy2+cell*.24)} Z" fill="${tone}"/>`;
+      }else{
+        s+=`<path d="M${F(ox2-cell*.5)} ${F(oy2)} A${F(cell*.5)} ${F(cell*.5)} 0 0 1 ${F(ox2+cell*.5)} ${F(oy2)} Z" fill="${tone}" stroke="${a1}" stroke-width="${F(cell*.05)}"/>`;
+      }
+    }
+    TR.ground='tessellated';
+    picks = chance(.45) ? [[w*R(.32,.68), h*R(.42,.62), R(.5,.8)*Math.min(fx,fy)]] : [];
+  }else if(mode==='aurora'){
     /* Night, and something happening at the bottom of it. Glow is drawn
        as stacked shapes rather than a blur filter — filters are the least
        portable thing in SVG and this has to survive every browser. */
