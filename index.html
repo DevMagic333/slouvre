@@ -1750,6 +1750,24 @@ function buildFrame(w,h){
           gold:gold, deep:deep};
 }
 
+/* Grain. Fractal noise laid over the whole plate at low opacity, the way
+   a cheap print or a glitter card sits on top of its own image. Defined
+   once per work and referenced, so it costs almost nothing. */
+function grainDefs(id,kind){
+  /* The noise carries its own alpha — bright specks on nothing — so this
+     needs no blend mode. Blend modes on SVG elements are the least
+     reliably supported part of the spec and not worth depending on. */
+  if(kind==='glitter')
+    return `<filter id="${id}" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">`+
+      `<feTurbulence type="fractalNoise" baseFrequency="${F(R(.6,1.0))}" numOctaves="3" seed="${RI(1,9999)}" result="n"/>`+
+      `<feColorMatrix in="n" type="matrix" values="`+
+        `0 0 0 0 1   0 0 0 0 .90   0 0 0 0 .52   1.9 1.9 1.9 0 -2.35"/></filter>`;
+  return `<filter id="${id}" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">`+
+    `<feTurbulence type="fractalNoise" baseFrequency="${F(R(.8,1.2))}" numOctaves="2" seed="${RI(1,9999)}" result="n"/>`+
+    `<feColorMatrix in="n" type="matrix" values="`+
+      `0 0 0 0 .07   0 0 0 0 .06   0 0 0 0 .05   .55 .55 .55 0 -.42"/></filter>`;
+}
+
 function generate(){
   const w=CW,h=CH;let s='';
   TR={};
@@ -1882,6 +1900,16 @@ function generate(){
 
   const forced=FORCE&&FORCE.subject?SUBJECTS.find(e=>e[1]===FORCE.subject):null;
   picks.forEach((p,ix)=>{const e=(forced&&ix===0)?forced:pickSubject();names.push(e[1]);s+=e[0](p[0],p[1],p[2]);});
+
+  /* the surface the work is printed on */
+  const gr=(()=>{let r=R(0,1);
+    if(r<.60)return 'none'; if(r<.82)return 'grain'; return 'glitter';})();
+  TR.surface=gr;
+  if(gr!=='none'){
+    const gid='gr'+Math.floor(R(1000,99999));
+    s+=`<defs>${grainDefs(gid,gr)}</defs>`;
+    s+=`<rect width="${w}" height="${h}" filter="url(#${gid})" opacity="${F(gr==='glitter'?R(.55,.85):R(.35,.60))}" pointer-events="none"/>`;
+  }
   TR.subject=names.length?[...new Set(names)].sort().join(' + '):'scenery';
   TR.figures=String(picks.length);
   TR.species=SPECIES||'\u2014';
@@ -1946,6 +1974,7 @@ const ODDS={
   composition:{center:.15,scatter:.12,diptych:.11,tiny:.10,crowd:.12,portrait:.16,landscape:.24},
   ground:{gradient:.21,aureole:.21,'colour field':.21,flat:.21,nocturne:.16},
   condition:{pristine:.60,craquelure:.20,foxing:.12,overpainted:.06,'water damage':.02},
+  surface:{none:.60,grain:.22,glitter:.18},
   signature:{unsigned:.48,signed:.42,'signed and dated':.10},
   inscription:{none:.66},
   palette:{restrained:.29,mixed:.28,saturated:.43},
@@ -2019,7 +2048,7 @@ const D={
     camNote:'Read on your device and discarded. Nothing is uploaded or kept.',
     fromPhoto:'after a photograph submitted by a visitor',
     lab:{subject:'Subject',species:'Species',accessory:'Attire',figures:'Figures',hands:'Fingers',composition:'Composition',
-         ground:'Ground',palette:'Palette',inscription:'Inscription',signature:'Signature',condition:'Condition'},
+         ground:'Ground',palette:'Palette',surface:'Surface',inscription:'Inscription',signature:'Signature',condition:'Condition'},
     val:{},
     tA:['untitled','study for','after','notes toward','the','remains of'],
     tB:['descent','the body','a threshold','appetite','the mother','rupture','absence','hunger','the wound','exit','a small betrayal','the father','silence','collapse'],
@@ -2065,8 +2094,9 @@ const D={
     camNote:'Se lee en su dispositivo y se descarta. Nada se sube ni se guarda.',
     fromPhoto:'seg\u00fan una fotograf\u00eda de un visitante',
     lab:{subject:'Tema',species:'Especie',accessory:'Vestimenta',figures:'Figuras',hands:'Dedos',composition:'Composici\u00f3n',
-         ground:'Fondo',palette:'Paleta',inscription:'Inscripci\u00f3n',signature:'Firma',condition:'Conservaci\u00f3n'},
-    val:{brainlet:'cerebrito',object:'objeto',block:'bloque',animal:'animal',cactus:'cactus',
+         ground:'Fondo',palette:'Paleta',surface:'Superficie',inscription:'Inscripci\u00f3n',signature:'Firma',condition:'Conservaci\u00f3n'},
+    val:{none:'ninguna',grain:'grano',glitter:'purpurina',
+         brainlet:'cerebrito',object:'objeto',block:'bloque',animal:'animal',cactus:'cactus',
          hand:'mano',anime:'anime',center:'centro',scatter:'dispersi\u00f3n',diptych:'d\u00edptico',
          tiny:'miniatura',crowd:'multitud',gradient:'degradado',aureole:'aureola',
          'colour field':'campo de color',flat:'plano',nocturne:'nocturno',
