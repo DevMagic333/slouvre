@@ -423,6 +423,7 @@ footer{
       <button id="modeG"></button>
       <button id="modeB"></button>
       <button id="saveBtn"></button>
+      <button id="shareBtn"></button>
     </div>
     <p class="note" id="note"></p>
   </div>
@@ -1145,101 +1146,160 @@ function boxWob(x1,y1,x2,y2,j){
   for(let i=1;i<=3;i++)d+=`L${F(x1+R(-j,j))} ${F(m(y2,y1,i/3)+R(-j,j))}`;
   return d+'Z';
 }
+const SHAPES={
+ sky:(o)=>{let s='';for(let i=0;i<RI(1,3);i++){const ax=R(o.x1,o.x2),ay=R(o.y1,o.y1+o.bh*.6),aw=o.bw*R(.12,.3);
+   s+=`<path d="M${F(ax-aw)} ${F(ay)} q${F(aw*.5)} ${F(-aw*.45)} ${F(aw)} 0 q${F(aw*.5)} ${F(-aw*.3)} ${F(aw)} ${F(aw*.1)}" fill="none" ${o.st} opacity=".5"/>`;}return s;},
+
+ tower:(o)=>{let s=`<path d="${boxWob(o.x1,o.y1,o.x2,o.y2,o.j)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
+   const v=RI(0,2);
+   if(v===0){const rows=Math.max(1,Math.round(o.bh/(o.rr*2.2)));
+     for(let r=0;r<rows;r++)if(chance(.55)){const yy=o.y1+o.bh*(r+.5)/rows,ww=o.bw*R(.2,.42);
+       s+=`<rect x="${F(o.cx-ww/2)}" y="${F(yy-o.rr*.4)}" width="${F(ww)}" height="${F(o.rr*.8)}" fill="#EFE7D4" ${o.st} opacity=".8"/>`;}}
+   else if(v===1){const n=RI(2,4);for(let i=1;i<n;i++)
+     s+=`<path d="M${F(o.x1+o.bw*i/n)} ${F(o.y1+o.bh*.06)} L${F(o.x1+o.bw*i/n+R(-3,3))} ${F(o.y2-o.bh*.06)}" fill="none" ${o.st} opacity=".55"/>`;}
+   else{s+=`<path d="M${F(o.x1)} ${F(o.y1)} L${F(o.cx)} ${F(o.y1-o.bh*R(.08,.2))} L${F(o.x2)} ${F(o.y1)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;}
+   return s;},
+
+ slab:(o)=>{let s=`<path d="${boxWob(o.x1,o.y1,o.x2,o.y2,o.j)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
+   if(chance(.6))s+=`<path d="M${F(o.x1+o.bw*.1)} ${F(o.y1+o.bh*R(.3,.7))} L${F(o.x2-o.bw*.1)} ${F(o.y1+o.bh*R(.3,.7))}" fill="none" ${o.st} opacity=".5"/>`;
+   return s;},
+
+ stick:(o)=>{let s=`<path d="M${F(o.cx+R(-o.j,o.j))} ${F(o.y2)} Q${F(o.cx+R(-o.bw,o.bw))} ${F(o.cy)} ${F(o.cx+R(-o.j,o.j))} ${F(o.y1)}" fill="none" ${o.st} opacity="${o.op}"/>`;
+   if(chance(.5))s+=`<circle cx="${F(o.cx)}" cy="${F(o.y1)}" r="${F(Math.max(3,o.bw*.5))}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
+   return s;},
+
+ lump:(o)=>`<path d="M${F(o.x1)} ${F(o.y2)} Q${F(o.x1+o.bw*.1)} ${F(o.y1+o.bh*R(.05,.3))} ${F(o.cx)} ${F(o.y1)} Q${F(o.x2-o.bw*.1)} ${F(o.y1+o.bh*R(.05,.3))} ${F(o.x2)} ${F(o.y2)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`,
+
+ frond:(o)=>{let s='';const n=RI(4,7);
+   for(let i=0;i<n;i++){const a=-Math.PI/2+R(-1.1,1.1),L=Math.max(o.bw,o.bh)*R(.3,.62);
+     const ex=o.cx+Math.cos(a)*L,ey=o.cy+Math.sin(a)*L;
+     s+=`<path d="M${F(o.cx)} ${F(o.cy)} Q${F(o.cx+Math.cos(a)*L*.5+R(-10,10))} ${F(o.cy+Math.sin(a)*L*.5)} ${F(ex)} ${F(ey)}" fill="none" ${o.st} opacity="${o.op}"/>`;
+     s+=`<path d="${drawWob(ex,ey,L*.16,L*.11,7,.4)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;}
+   return s;},
+
+ arch:(o)=>{const sp=o.y1+o.bh*.45;
+   let s=`<path d="M${F(o.x1)} ${F(o.y2)} L${F(o.x1)} ${F(sp)} Q${F(o.cx)} ${F(o.y1-o.bh*.06)} ${F(o.x2)} ${F(sp)} L${F(o.x2)} ${F(o.y2)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
+   const ix=o.bw*R(.18,.28),iy=o.bh*R(.16,.26);
+   s+=`<path d="M${F(o.x1+ix)} ${F(o.y2)} L${F(o.x1+ix)} ${F(sp+iy*.5)} Q${F(o.cx)} ${F(o.y1+iy)} ${F(o.x2-ix)} ${F(sp+iy*.5)} L${F(o.x2-ix)} ${F(o.y2)}" fill="#EFE7D4" ${o.st} opacity="${F(R(.6,.9))}"/>`;
+   return s;},
+
+ stairs:(o)=>{const n=RI(3,6),dir=chance(.5)?1:-1;
+   let d=`M${F(dir>0?o.x1:o.x2)} ${F(o.y2)}`;
+   for(let i=0;i<n;i++){const sx=(dir>0?o.x1:o.x2)+dir*o.bw*(i+1)/n,sy=o.y2-o.bh*(i+1)/n;
+     d+=`L${F(sx-dir*o.bw/n)} ${F(sy)}L${F(sx)} ${F(sy)}`;}
+   return `<path d="${d}L${F(dir>0?o.x2:o.x1)} ${F(o.y2)}Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;},
+
+ door:(o)=>{let s=`<path d="${boxWob(o.x1,o.y1,o.x2,o.y2,o.j)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
+   const px=o.bw*R(.16,.24),py=o.bh*R(.1,.18);
+   s+=`<path d="${boxWob(o.x1+px,o.y1+py,o.x2-px,o.y2-py*R(1.4,2.6),o.j*.6)}" fill="none" ${o.st} opacity=".65"/>`;
+   s+=`<circle cx="${F(o.x2-px*R(.4,.7))}" cy="${F(o.cy+o.bh*R(0,.12))}" r="${F(Math.max(2.4,o.bw*.05))}" fill="#EFE7D4" ${o.st} opacity=".9"/>`;
+   return s;},
+
+ figure:(o)=>{const sc=Math.min(o.bw/78,o.bh/150)*R(.85,1.15);
+   return `<g transform="translate(${F(o.cx)},${F(o.y1+o.bh*.46)}) scale(${F(sc)})" opacity="${F(R(.85,1))}">${subjBrainlet(0,0,1)}</g>`;},
+
+ vehicle:(o)=>{const wr=Math.max(3,o.bh*R(.2,.3)),base=o.y2-wr*.9;
+   let s=`<path d="M${F(o.x1)} ${F(base)} L${F(o.x1+o.bw*.08)} ${F(o.y1+o.bh*R(.42,.6))} L${F(o.x1+o.bw*R(.26,.34))} ${F(o.y1+o.bh*R(.38,.55))} L${F(o.x1+o.bw*.36)} ${F(o.y1)} L${F(o.x2-o.bw*R(.24,.34))} ${F(o.y1)} L${F(o.x2-o.bw*.1)} ${F(o.y1+o.bh*R(.4,.56))} L${F(o.x2)} ${F(base)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
+   s+=`<circle cx="${F(o.x1+o.bw*R(.2,.28))}" cy="${F(base)}" r="${F(wr)}" fill="#26231C" ${o.st} opacity="${o.op}"/>`;
+   s+=`<circle cx="${F(o.x2-o.bw*R(.2,.28))}" cy="${F(base)}" r="${F(wr)}" fill="#26231C" ${o.st} opacity="${o.op}"/>`;
+   return s;},
+
+ lamp:(o)=>{const sh=o.bh*R(.22,.38);
+   let s=`<path d="M${F(o.cx-o.bw*R(.3,.45))} ${F(o.y1+sh)} L${F(o.cx-o.bw*R(.12,.2))} ${F(o.y1)} L${F(o.cx+o.bw*R(.12,.2))} ${F(o.y1)} L${F(o.cx+o.bw*R(.3,.45))} ${F(o.y1+sh)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
+   s+=`<path d="M${F(o.cx)} ${F(o.y1+sh)} L${F(o.cx+R(-4,4))} ${F(o.y2-o.bh*.04)}" fill="none" ${o.st} opacity="${o.op}"/>`;
+   s+=`<path d="M${F(o.cx-o.bw*.24)} ${F(o.y2)} L${F(o.cx+o.bw*.24)} ${F(o.y2)}" fill="none" ${o.st} opacity="${o.op}"/>`;
+   return s;},
+
+ pot:(o)=>{const py=o.y1+o.bh*R(.5,.66);
+   let s=`<path d="M${F(o.cx-o.bw*.32)} ${F(py)} L${F(o.cx+o.bw*.32)} ${F(py)} L${F(o.cx+o.bw*.22)} ${F(o.y2)} L${F(o.cx-o.bw*.22)} ${F(o.y2)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
+   const n=RI(3,6);
+   for(let i=0;i<n;i++){const a=-Math.PI/2+R(-1,1),L=(py-o.y1)*R(.6,1);
+     s+=`<path d="M${F(o.cx)} ${F(py)} Q${F(o.cx+Math.cos(a)*L*.6+R(-8,8))} ${F(py+Math.sin(a)*L*.6)} ${F(o.cx+Math.cos(a)*L)} ${F(py+Math.sin(a)*L)}" fill="none" ${o.st} opacity="${o.op}"/>`;
+     s+=`<path d="${drawWob(o.cx+Math.cos(a)*L,py+Math.sin(a)*L,L*.2,L*.12,7,.35)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;}
+   return s;},
+
+ bottle:(o)=>{const sh=o.y1+o.bh*R(.26,.42),nw=o.bw*R(.16,.28);
+   return `<path d="M${F(o.cx-nw)} ${F(o.y1)} L${F(o.cx+nw)} ${F(o.y1)} L${F(o.cx+nw)} ${F(sh)} L${F(o.x2)} ${F(sh+o.bh*.12)} L${F(o.x2)} ${F(o.y2)} L${F(o.x1)} ${F(o.y2)} L${F(o.x1)} ${F(sh+o.bh*.12)} L${F(o.cx-nw)} ${F(sh)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;},
+
+ table:(o)=>{const tt=o.y1+o.bh*R(.1,.26);
+   let s=`<path d="${boxWob(o.x1,tt,o.x2,tt+o.bh*R(.12,.2),o.j*.5)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
+   const legs=chance(.5)?2:4;
+   for(let i=0;i<legs;i++){const lx=o.x1+o.bw*(i+.5)/legs;
+     s+=`<path d="M${F(lx)} ${F(tt+o.bh*.18)} L${F(lx+R(-6,6))} ${F(o.y2)}" fill="none" ${o.st} opacity="${o.op}"/>`;}
+   return s;},
+
+ window:(o)=>{let s=`<path d="${boxWob(o.x1,o.y1,o.x2,o.y2,o.j)}" fill="#EAE4D6" ${o.st} opacity="${o.op}"/>`;
+   s+=`<path d="M${F(o.cx)} ${F(o.y1)} L${F(o.cx)} ${F(o.y2)} M${F(o.x1)} ${F(o.cy)} L${F(o.x2)} ${F(o.cy)}" fill="none" ${o.st} opacity=".7"/>`;
+   return s;},
+
+ rug:(o)=>{const sk=o.bw*R(.08,.2);
+   let s=`<path d="M${F(o.x1+sk)} ${F(o.y1)} L${F(o.x2)} ${F(o.y1)} L${F(o.x2-sk)} ${F(o.y2)} L${F(o.x1)} ${F(o.y2)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
+   for(let i=1;i<RI(2,5);i++){const t=i/4;
+     s+=`<path d="M${F(o.x1+sk*(1-t))} ${F(o.y1+o.bh*t)} L${F(o.x2-sk*t)} ${F(o.y1+o.bh*t)}" fill="none" stroke="#EFE7D4" stroke-width="${F(R(1.6,3))}" opacity=".8"/>`;}
+   return s;},
+
+ crate:(o)=>{let s=`<path d="${boxWob(o.x1,o.y1,o.x2,o.y2,o.j)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
+   s+=`<path d="M${F(o.x1)} ${F(o.y1)} L${F(o.x2)} ${F(o.y2)} M${F(o.x2)} ${F(o.y1)} L${F(o.x1)} ${F(o.y2)}" fill="none" ${o.st} opacity=".6"/>`;
+   return s;},
+
+ cage:(o)=>{let s=`<path d="${boxWob(o.x1,o.y1,o.x2,o.y2,o.j*.5)}" fill="#EFE7D4" ${o.st} opacity="${F(R(.25,.5))}"/>`;
+   const n=Math.max(3,Math.round(o.bw/(o.rr*.8)));
+   for(let i=1;i<n;i++)s+=`<path d="M${F(o.x1+o.bw*i/n)} ${F(o.y1)} L${F(o.x1+o.bw*i/n+R(-2,2))} ${F(o.y2)}" fill="none" stroke="#1A1712" stroke-width="${F(R(.8,1.6))}" opacity=".75"/>`;
+   const m=Math.max(2,Math.round(o.bh/(o.rr*1.4)));
+   for(let i=1;i<m;i++)s+=`<path d="M${F(o.x1)} ${F(o.y1+o.bh*i/m)} L${F(o.x2)} ${F(o.y1+o.bh*i/m+R(-2,2))}" fill="none" stroke="#1A1712" stroke-width="${F(R(.8,1.6))}" opacity=".75"/>`;
+   return s;},
+
+ bowl:(o)=>{let s=`<path d="M${F(o.x1)} ${F(o.cy)} Q${F(o.cx)} ${F(o.y2+o.bh*.25)} ${F(o.x2)} ${F(o.cy)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
+   s+=`<ellipse cx="${F(o.cx)}" cy="${F(o.cy)}" rx="${F(o.bw/2)}" ry="${F(o.bh*R(.1,.18))}" fill="#EFE7D4" ${o.st} opacity="${o.op}"/>`;
+   return s;},
+
+ shelf:(o)=>{let s=`<path d="M${F(o.x1)} ${F(o.cy)} L${F(o.x2)} ${F(o.cy+R(-3,3))}" fill="none" stroke="#1A1712" stroke-width="${F(R(2.4,4))}" stroke-linecap="round" opacity="${o.op}"/>`;
+   for(let i=0;i<RI(2,4);i++){const bx=R(o.x1+o.bw*.1,o.x2-o.bw*.2),bwid=o.bw*R(.08,.18),bht=o.bh*R(.3,.8);
+     s+=`<path d="${boxWob(bx,o.cy-bht,bx+bwid,o.cy,o.j*.4)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;}
+   return s;},
+
+ cup:(o)=>{let s=`<path d="M${F(o.x1+o.bw*.12)} ${F(o.y1)} L${F(o.x2-o.bw*.12)} ${F(o.y1)} L${F(o.x2-o.bw*.22)} ${F(o.y2)} L${F(o.x1+o.bw*.22)} ${F(o.y2)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
+   s+=`<path d="M${F(o.x2-o.bw*.14)} ${F(o.y1+o.bh*.22)} q${F(o.bw*.34)} ${F(o.bh*.18)} ${F(-o.bw*.06)} ${F(o.bh*.42)}" fill="none" ${o.st} opacity="${o.op}"/>`;
+   return s;},
+
+ ball:(o)=>{const r=Math.min(o.bw,o.bh)/2;
+   let s=`<path d="${drawWob(o.cx,o.cy,r,r,RI(9,13),.08)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
+   s+=`<path d="M${F(o.cx-r*.8)} ${F(o.cy)} q${F(r*.8)} ${F(-r*R(.5,.9))} ${F(r*1.6)} 0" fill="none" ${o.st} opacity=".6"/>`;
+   return s;},
+
+ cushion:(o)=>{let s=`<path d="M${F(o.x1)} ${F(o.cy)} Q${F(o.x1)} ${F(o.y1)} ${F(o.cx)} ${F(o.y1)} Q${F(o.x2)} ${F(o.y1)} ${F(o.x2)} ${F(o.cy)} Q${F(o.x2)} ${F(o.y2)} ${F(o.cx)} ${F(o.y2)} Q${F(o.x1)} ${F(o.y2)} ${F(o.x1)} ${F(o.cy)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
+   if(chance(.6))s+=`<circle cx="${F(o.cx)}" cy="${F(o.cy)}" r="${F(Math.min(o.bw,o.bh)*.06)}" fill="none" ${o.st} opacity=".7"/>`;
+   return s;},
+
+ sign:(o)=>{const bh2=o.bh*R(.3,.5);
+   let s=`<path d="${boxWob(o.x1,o.y1,o.x2,o.y1+bh2,o.j*.6)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
+   s+=`<path d="M${F(o.cx)} ${F(o.y1+bh2)} L${F(o.cx+R(-3,3))} ${F(o.y2)}" fill="none" ${o.st} opacity="${o.op}"/>`;
+   for(let i=0;i<RI(1,3);i++)s+=`<path d="M${F(o.x1+o.bw*.15)} ${F(o.y1+bh2*(i+1)/3)} L${F(o.x2-o.bw*R(.15,.4))} ${F(o.y1+bh2*(i+1)/3)}" fill="none" ${o.st} opacity=".55"/>`;
+   return s;},
+
+ sunburst:(o)=>{const r=Math.min(o.bw,o.bh)/2,n=RI(10,20);
+   let s='';
+   for(let i=0;i<n;i++){const a=i/n*Math.PI*2,a2=(i+.5)/n*Math.PI*2;
+     s+=`<path d="M${F(o.cx+Math.cos(a)*r*.35)} ${F(o.cy+Math.sin(a)*r*.35)} L${F(o.cx+Math.cos(a2)*r*R(.85,1.05))} ${F(o.cy+Math.sin(a2)*r*R(.85,1.05))} L${F(o.cx+Math.cos(a+Math.PI*2/n)*r*.35)} ${F(o.cy+Math.sin(a+Math.PI*2/n)*r*.35)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;}
+   s+=`<circle cx="${F(o.cx)}" cy="${F(o.cy)}" r="${F(r*.3)}" fill="#EFE7D4" ${o.st} opacity="${o.op}"/>`;
+   return s;},
+
+ blob:(o)=>{let s=`<path d="${drawWob(o.cx,o.cy,o.bw/2,o.bh/2,RI(7,11),.22)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
+   if(o.dark>.55&&chance(.5))s+=`<path d="M${F(o.cx-o.bw*.2)} ${F(o.cy)} q${F(o.bw*.2)} ${F(o.bh*.14)} ${F(o.bw*.4)} 0" fill="none" ${o.st} opacity=".6"/>`;
+   return s;}
+};
+
 function photoGround(w,h,grid){
   let s=`<rect width="${w}" height="${h}" fill="${grid.paper}"/>`;
   const rr=Math.min(w,h)/grid.n;
-
   grid.regions.forEach(g=>{
-    const x1=g.x1*w, y1=g.y1*h, x2=g.x2*w, y2=g.y2*h;
-    const cx=(x1+x2)/2, cy=(y1+y2)/2, bw=x2-x1, bh=y2-y1;
-    const j=Math.min(bw,bh)*.09+2;
-    const sw=F(R(2,3.6));
-    const st=`stroke="#1A1712" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round"`;
-    const op=F(R(.55,.85));
-
-    if(g.kind==='sky'){
-      for(let i=0;i<RI(1,3);i++){
-        const ax=R(x1,x2), ay=R(y1,y1+bh*.6), aw=bw*R(.12,.3);
-        s+=`<path d="M${F(ax-aw)} ${F(ay)} q${F(aw*.5)} ${F(-aw*.45)} ${F(aw)} 0 q${F(aw*.5)} ${F(-aw*.3)} ${F(aw)} ${F(aw*.1)}" fill="none" ${st} opacity=".5"/>`;
-      }
-      return;
-    }
-    if(g.kind==='slab'){
-      s+=`<path d="${boxWob(x1,y1,x2,y2,j)}" fill="${g.col}" ${st} opacity="${op}"/>`;
-      if(chance(.6))s+=`<path d="M${F(x1+bw*.1)} ${F(y1+bh*R(.3,.7))} L${F(x2-bw*.1)} ${F(y1+bh*R(.3,.7))}" fill="none" ${st} opacity=".5"/>`;
-      return;
-    }
-    if(g.kind==='tower'){
-      s+=`<path d="${boxWob(x1,y1,x2,y2,j)}" fill="${g.col}" ${st} opacity="${op}"/>`;
-      const rows=Math.max(1,Math.round(bh/(rr*2.2)));
-      for(let r=0;r<rows;r++)if(chance(.55)){
-        const yy=y1+bh*(r+.5)/rows, ww=bw*R(.2,.42);
-        s+=`<rect x="${F(cx-ww/2)}" y="${F(yy-rr*.4)}" width="${F(ww)}" height="${F(rr*.8)}" fill="#EFE7D4" ${st} opacity=".8"/>`;
-      }
-      return;
-    }
-    if(g.kind==='stick'){
-      s+=`<path d="M${F(cx+R(-j,j))} ${F(y2)} Q${F(cx+R(-bw,bw))} ${F(cy)} ${F(cx+R(-j,j))} ${F(y1)}" fill="none" ${st} opacity="${op}"/>`;
-      if(chance(.5))s+=`<circle cx="${F(cx)}" cy="${F(y1)}" r="${F(Math.max(3,bw*.5))}" fill="${g.col}" ${st} opacity="${op}"/>`;
-      return;
-    }
-    if(g.kind==='lump'){
-      s+=`<path d="M${F(x1)} ${F(y2)} Q${F(x1+bw*.1)} ${F(y1+bh*R(.05,.3))} ${F(cx)} ${F(y1)} Q${F(x2-bw*.1)} ${F(y1+bh*R(.05,.3))} ${F(x2)} ${F(y2)} Z" fill="${g.col}" ${st} opacity="${op}"/>`;
-      return;
-    }
-    if(g.kind==='frond'){
-      const n=RI(4,7);
-      for(let i=0;i<n;i++){
-        const a=-Math.PI/2+R(-1.1,1.1), L=Math.max(bw,bh)*R(.3,.62);
-        const ex=cx+Math.cos(a)*L, ey=cy+Math.sin(a)*L;
-        s+=`<path d="M${F(cx)} ${F(cy)} Q${F(cx+Math.cos(a)*L*.5+R(-10,10))} ${F(cy+Math.sin(a)*L*.5)} ${F(ex)} ${F(ey)}" fill="none" ${st} opacity="${op}"/>`;
-        s+=`<path d="${drawWob(ex,ey,L*.16,L*.11,7,.4)}" fill="${g.col}" ${st} opacity="${op}"/>`;
-      }
-      return;
-    }
-    if(g.kind==='arch'){
-      const spring=y1+bh*.45;
-      s+=`<path d="M${F(x1+R(-j,j))} ${F(y2)} L${F(x1+R(-j,j))} ${F(spring)} Q${F(cx+R(-j*2,j*2))} ${F(y1-bh*.06)} ${F(x2+R(-j,j))} ${F(spring)} L${F(x2+R(-j,j))} ${F(y2)} Z" fill="${g.col}" ${st} opacity="${op}"/>`;
-      const ix=bw*R(.18,.28), iy=bh*R(.16,.26);
-      s+=`<path d="M${F(x1+ix)} ${F(y2)} L${F(x1+ix)} ${F(spring+iy*.5)} Q${F(cx)} ${F(y1+iy)} ${F(x2-ix)} ${F(spring+iy*.5)} L${F(x2-ix)} ${F(y2)}" fill="#EFE7D4" ${st} opacity="${F(R(.6,.9))}"/>`;
-      return;
-    }
-    if(g.kind==='stairs'){
-      const n=RI(3,6), dir=chance(.5)?1:-1;
-      let d=`M${F(dir>0?x1:x2)} ${F(y2)}`;
-      for(let i=0;i<n;i++){
-        const sx=(dir>0?x1:x2)+dir*bw*(i+1)/n;
-        const sy=y2-bh*(i+1)/n;
-        d+=`L${F(sx-dir*bw/n+R(-j,j))} ${F(sy+R(-j,j))}L${F(sx+R(-j,j))} ${F(sy+R(-j,j))}`;
-      }
-      d+=`L${F(dir>0?x2:x1)} ${F(y2)}Z`;
-      s+=`<path d="${d}" fill="${g.col}" ${st} opacity="${op}"/>`;
-      return;
-    }
-    if(g.kind==='door'){
-      s+=`<path d="${boxWob(x1,y1,x2,y2,j)}" fill="${g.col}" ${st} opacity="${op}"/>`;
-      const px=bw*R(.16,.24), py=bh*R(.1,.18);
-      s+=`<path d="${boxWob(x1+px,y1+py,x2-px,y2-py*R(1.4,2.6),j*.6)}" fill="none" ${st} opacity=".65"/>`;
-      s+=`<circle cx="${F(x2-px*R(.4,.7))}" cy="${F(cy+bh*R(0,.12))}" r="${F(Math.max(2.4,bw*.05))}" fill="#EFE7D4" ${st} opacity=".9"/>`;
-      return;
-    }
-    if(g.kind==='figure'){
-      /* a person becomes one of ours. the museum has one population. */
-      const sc=Math.min(bw/78,bh/150)*R(.85,1.15);
-      s+=`<g transform="translate(${F(cx)},${F(y1+bh*.46)}) scale(${F(sc)})" opacity="${F(R(.85,1))}">${subjBrainlet(0,0,1)}</g>`;
-      return;
-    }
-    if(g.kind==='vehicle'){
-      const wr=Math.max(3,bh*R(.2,.3)), base=y2-wr*.9;
-      s+=`<path d="M${F(x1)} ${F(base)} L${F(x1+bw*.08)} ${F(y1+bh*R(.42,.6))} L${F(x1+bw*R(.26,.34))} ${F(y1+bh*R(.38,.55))} L${F(x1+bw*.36)} ${F(y1+R(-j,j))} L${F(x2-bw*R(.24,.34))} ${F(y1+R(-j,j))} L${F(x2-bw*.1)} ${F(y1+bh*R(.4,.56))} L${F(x2)} ${F(base)} Z" fill="${g.col}" ${st} opacity="${op}"/>`;
-      s+=`<circle cx="${F(x1+bw*R(.2,.28))}" cy="${F(base)}" r="${F(wr)}" fill="#26231C" ${st} opacity="${op}"/>`;
-      s+=`<circle cx="${F(x2-bw*R(.2,.28))}" cy="${F(base)}" r="${F(wr)}" fill="#26231C" ${st} opacity="${op}"/>`;
-      return;
-    }
-    /* blob — the default object */
-    s+=`<path d="${drawWob(cx,cy,bw/2,bh/2,RI(7,11),.22)}" fill="${g.col}" ${st} opacity="${op}"/>`;
-    if(g.dark>.55&&chance(.5))
-      s+=`<path d="M${F(cx-bw*.2)} ${F(cy)} q${F(bw*.2)} ${F(bh*.14)} ${F(bw*.4)} 0" fill="none" ${st} opacity=".6"/>`;
+    const x1=g.x1*w,y1=g.y1*h,x2=g.x2*w,y2=g.y2*h;
+    const o={x1:x1,y1:y1,x2:x2,y2:y2,cx:(x1+x2)/2,cy:(y1+y2)/2,bw:x2-x1,bh:y2-y1,
+             col:g.col,dark:g.dark,rr:rr,
+             j:Math.min(x2-x1,y2-y1)*.09+2,
+             op:F(R(.55,.85)),
+             st:`stroke="#1A1712" stroke-width="${F(R(2,3.6))}" stroke-linejoin="round" stroke-linecap="round"`};
+    s+=(SHAPES[g.kind]||SHAPES.blob)(o);
   });
   return s;
 }
@@ -1445,7 +1505,7 @@ const D={
     after:'after a description by a visitor',
     seeded:'Seed',
     camGo:'Photograph something',
-    modeG:'Gallery',modeB:'Banner',save:'Save image',
+    modeG:'Gallery',modeB:'Banner',save:'Save image',share:'Share',
     camNote:'Read on your device and discarded. Nothing is uploaded or kept.',
     fromPhoto:'after a photograph submitted by a visitor',
     lab:{subject:'Subject',species:'Species',accessory:'Attire',figures:'Figures',hands:'Fingers',composition:'Composition',
@@ -1491,7 +1551,7 @@ const D={
     after:'seg\u00fan la descripci\u00f3n de un visitante',
     seeded:'Semilla',
     camGo:'Fotografiar algo',
-    modeG:'Galer\u00eda',modeB:'Estandarte',save:'Guardar imagen',
+    modeG:'Galer\u00eda',modeB:'Estandarte',save:'Guardar imagen',share:'Compartir',
     camNote:'Se lee en su dispositivo y se descarta. Nada se sube ni se guarda.',
     fromPhoto:'seg\u00fan una fotograf\u00eda de un visitante',
     lab:{subject:'Tema',species:'Especie',accessory:'Vestimenta',figures:'Figuras',hands:'Dedos',composition:'Composici\u00f3n',
@@ -1612,6 +1672,7 @@ function render(){
   document.getElementById('modeG').textContent=d.modeG;
   document.getElementById('modeB').textContent=d.modeB;
   document.getElementById('saveBtn').textContent=d.save;
+  document.getElementById('shareBtn').textContent=d.share;
   document.getElementById('modeG').style.opacity=BANNER?'.45':'1';
   document.getElementById('modeB').style.opacity=BANNER?'1':'.45';
   document.getElementById('tagline').textContent=d.camNote+'   #Slouvred';
@@ -1646,7 +1707,7 @@ function rerender(){
 }
 document.getElementById('modeG').onclick=()=>setMode(false);
 document.getElementById('modeB').onclick=()=>setMode(true);
-document.getElementById('saveBtn').onclick=()=>{
+function exportPNG(cb){
   const svg=document.getElementById('art').cloneNode(true);
   svg.setAttribute('xmlns','http://www.w3.org/2000/svg');
   svg.setAttribute('width',CW);svg.setAttribute('height',CH);
@@ -1681,16 +1742,50 @@ document.getElementById('saveBtn').onclick=()=>{
     const x=c.getContext('2d');
     x.fillStyle='#ffffff';x.fillRect(0,0,c.width,c.height);
     x.drawImage(im,0,0,c.width,c.height);
-    c.toBlob(bl=>{
-      const a=document.createElement('a');
-      a.href=URL.createObjectURL(bl);
-      a.download='slouvre-'+(cur.seed||Date.now())+(BANNER?'-banner':'')+'.png';
-      document.body.appendChild(a);a.click();a.remove();
-    });
-    URL.revokeObjectURL(url);
+    c.toBlob(bl=>{ URL.revokeObjectURL(url);
+      cb(bl,'slouvre-'+(cur.seed||Date.now())+(BANNER?'-banner':'')+'.png'); });
   };
+  im.onerror=()=>{URL.revokeObjectURL(url);cb(null,null);};
   im.src=url;
+}
+
+document.getElementById('saveBtn').onclick=()=>{
+  exportPNG((bl,name)=>{
+    if(!bl)return;
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(bl);a.download=name;
+    document.body.appendChild(a);a.click();a.remove();
+  });
 };
+
+/* The share sheet is the only way an image actually reaches a post —
+   no site can attach a file to a tweet on the user's behalf. Where the
+   sheet isn't available we hand over the file and open the composer. */
+document.getElementById('shareBtn').onclick=()=>{
+  const btn=document.getElementById('shareBtn'), was=btn.textContent;
+  btn.disabled=true;
+  exportPNG(async (bl,name)=>{
+    btn.disabled=false;
+    if(!bl)return;
+    const line=(lang==='es')
+      ? 'Mi pieza de El Slouvre. theslouvre.com'
+      : 'My piece from The Slouvre. theslouvre.com';
+    try{
+      const file=new File([bl],name,{type:'image/png'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        await navigator.share({files:[file],text:line});
+        return;
+      }
+    }catch(e){ if(e&&e.name==='AbortError')return; }
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(bl);a.download=name;
+    document.body.appendChild(a);a.click();a.remove();
+    window.open('https://x.com/intent/post?text='+encodeURIComponent(line),'_blank','noopener');
+    btn.textContent=(lang==='es')?'Imagen guardada \u2014 ad\u00fantala':'Image saved \u2014 attach it';
+    setTimeout(()=>{btn.textContent=was;},4200);
+  });
+};
+
 document.getElementById('camGo').onclick=()=>document.getElementById('camIn').click();
 document.getElementById('camIn').addEventListener('change',e=>{
   const f=e.target.files&&e.target.files[0]; if(!f)return;
@@ -1815,22 +1910,46 @@ function fromPhoto(img){
 
   /* keep the ones big enough to be worth drawing, and decide what each
      one becomes from its proportions and where it sits */
-  const keep=regions.filter(g=>g.area>.012).sort((a,b)=>b.area-a.area).slice(0,14);
+  const keep=regions.filter(g=>g.area>.009).sort((a,b)=>b.area-a.area).slice(0,18);
+  /* every object that could plausibly fill a region of this shape gets
+     a vote. picking among them is what stops the same five shapes from
+     appearing in every picture. */
+  const CAT=[
+    {k:'sky',     asp:[.3,3],   cy:[0,.45], dark:[0,.36], area:[.10,1]},
+    {k:'stick',   asp:[3,99],   w:[0,.12]},
+    {k:'lamp',    asp:[1.6,6],  w:[0,.3]},
+    {k:'figure',  asp:[1.7,3.6],w:[0,.24], dark:[.34,1]},
+    {k:'bottle',  asp:[1.6,4],  w:[0,.2]},
+    {k:'sign',    asp:[1.3,3.4],w:[0,.3]},
+    {k:'door',    asp:[1.4,2.8],fill:[.68,1], cy:[.3,1]},
+    {k:'tower',   asp:[1.5,5]},
+    {k:'crate',   asp:[.7,1.6], fill:[.66,1]},
+    {k:'window',  asp:[.6,1.8], cy:[0,.62], fill:[.6,1]},
+    {k:'arch',    asp:[.7,1.8], cy:[0,.7],  fill:[.6,1]},
+    {k:'cage',    asp:[.5,1.6], fill:[.5,1]},
+    {k:'sunburst',asp:[.7,1.45],fill:[.45,.9]},
+    {k:'ball',    asp:[.75,1.35],fill:[.62,1]},
+    {k:'cushion', asp:[.6,1.5], cy:[.25,1]},
+    {k:'pot',     asp:[.7,2.2], fill:[.3,.8]},
+    {k:'frond',   asp:[.4,2.4], fill:[0,.56]},
+    {k:'cup',     asp:[.8,1.8], w:[0,.18]},
+    {k:'bowl',    asp:[.3,.9],  cy:[.2,1]},
+    {k:'table',   asp:[.3,1],   cy:[.25,1]},
+    {k:'shelf',   asp:[.15,.6]},
+    {k:'vehicle', asp:[.28,.7], cy:[.5,1],  dark:[.36,1]},
+    {k:'rug',     asp:[.2,.7],  cy:[.55,1]},
+    {k:'stairs',  asp:[.25,.75],cy:[.45,1]},
+    {k:'slab',    asp:[0,.5],   cy:[.4,1]},
+    {k:'lump',    asp:[.5,1.1], cy:[.5,1]},
+    {k:'blob',    asp:[.35,2.6]}
+  ];
+  const inR=(v,r)=>!r||(v>=r[0]&&v<=r[1]);
   keep.forEach(g=>{
     const bw=g.x2-g.x1, bh=g.y2-g.y1, asp=bh/bw, cy=(g.y1+g.y2)/2;
     const fill=g.area/(bw*bh);
-    if(g.dark<.35&&cy<.45&&g.area>.10)          g.kind='sky';
-    else if(asp>3.4&&bw<.11)                    g.kind='stick';
-    else if(asp>1.9&&asp<3.4&&bw<.2&&g.dark>.38)g.kind='figure';
-    else if(asp>1.45&&asp<2.7&&fill>.72&&g.y2>.72) g.kind='door';
-    else if(asp>1.7)                            g.kind='tower';
-    else if(asp<.62&&cy>.6&&g.dark>.42&&bw>.17) g.kind='vehicle';
-    else if(asp<.58&&cy>.58&&fill<.78)          g.kind='stairs';
-    else if(asp<.42&&cy>.55)                    g.kind='slab';
-    else if(asp>.75&&asp<1.7&&cy<.62&&fill>.62) g.kind='arch';
-    else if(fill<.52)                           g.kind='frond';
-    else if(cy>.6&&asp<.9)                      g.kind='lump';
-    else                                        g.kind='blob';
+    const cands=CAT.filter(c=>inR(asp,c.asp)&&inR(cy,c.cy)&&inR(fill,c.fill)
+                              &&inR(g.dark,c.dark)&&inR(bw,c.w)&&inR(g.area,c.area));
+    g.kind=cands.length?P(cands).k:'blob';
   });
   const wash=[];
   edgeCount=keep.length;
