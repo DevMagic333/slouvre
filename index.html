@@ -997,7 +997,8 @@ function subjAnimal(cx,cy,s){
   const col=P(['#E2C08A','#9A9A9A','#D9743A','#EDEDED','#5B4636','#F2C511','#C9A227','#8B5E3C']);
   const kind=(()=>{const r=R(0,1);
     if(r<.035)return 'bull'; if(r<.065)return 'goat';
-    return P(['generic','chicken','bird','long','horned','bunny','mouse','tiger','monkey','worm']);})();
+    return P(['generic','chicken','bird','long','horned','bunny','mouse','tiger','monkey','worm',
+              'coyote','owl','frog','croc']);})();
   SPECIES=SPECIES||kind;
   const bw=(kind==='long'?R(62,84):R(44,58))*s;
   g+=`<path d="${blob(cx,cy+26*s,bw,8,5*s)}" fill="${col}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
@@ -1008,7 +1009,33 @@ function subjAnimal(cx,cy,s){
   const hx=cx+R(-24,24)*s,hy=cy-R(24,44)*s,hr=(kind==='bird'?22:27)*s;
   g+=`<path d="${blob(hx,hy,hr,7,4*s)}" fill="${col}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
 
-  if(kind==='chicken'){
+  if(kind==='coyote'){
+    /* placed anywhere, which is the joke — a coyote at the lake */
+    for(const d of [-1,1])
+      g+=`<path d="M${F(hx+d*hr*.5)} ${F(hy-hr*.5)} L${F(hx+d*hr*.72)} ${F(hy-hr*1.5)} L${F(hx+d*hr*.14)} ${F(hy-hr*.78)} Z" fill="${col}" stroke="#111" stroke-width="${F(sw*.8)}" stroke-linejoin="round"/>`;
+    g+=`<path d="M${F(hx+hr*.55)} ${F(hy+hr*.12)} q${F(24*s)} ${F(3*s)} ${F(30*s)} ${F(12*s)} q${F(-14*s)} ${F(7*s)} ${F(-30*s)} ${F(4*s)} Z" fill="${col}" stroke="#111" stroke-width="${F(sw*.8)}" stroke-linejoin="round"/>`;
+    g+=`<circle cx="${F(hx+hr*1.32)}" cy="${F(hy+hr*.5)}" r="${F(3.4*s)}" fill="#111"/>`;
+    g+=`<path d="M${F(cx-bw*.85)} ${F(cy+22*s)} q${F(-30*s)} ${F(-6*s)} ${F(-34*s)} ${F(-34*s)}" fill="none" stroke="${col}" stroke-width="${F(13*s)}" stroke-linecap="round"/>`;
+    g+=`<path d="M${F(cx-bw*.85)} ${F(cy+22*s)} q${F(-30*s)} ${F(-6*s)} ${F(-34*s)} ${F(-34*s)}" fill="none" stroke="#111" stroke-width="${F(sw*.7)}" stroke-linecap="round" opacity=".55"/>`;
+  }else if(kind==='owl'){
+    for(const d of [-1,1]){
+      g+=`<circle cx="${F(hx+d*hr*.4)}" cy="${F(hy-hr*.05)}" r="${F(hr*.36)}" fill="#F4F1E8" stroke="#111" stroke-width="${F(sw*.7)}"/>`;
+      g+=`<circle cx="${F(hx+d*hr*.4)}" cy="${F(hy-hr*.05)}" r="${F(hr*.15)}" fill="#111"/>`;
+      g+=`<path d="M${F(hx+d*hr*.6)} ${F(hy-hr*.7)} l${F(d*hr*.18)} ${F(-hr*.4)} l${F(-d*hr*.36)} ${F(hr*.22)} Z" fill="${col}" stroke="#111" stroke-width="${F(sw*.7)}" stroke-linejoin="round"/>`;
+    }
+    g+=`<path d="M${F(hx)} ${F(hy+hr*.12)} l${F(5*s)} ${F(11*s)} l${F(-10*s)} 0 Z" fill="#F2C511" stroke="#111" stroke-width="${F(sw*.6)}" stroke-linejoin="round"/>`;
+  }else if(kind==='frog'){
+    for(const d of [-1,1]){
+      g+=`<circle cx="${F(hx+d*hr*.45)}" cy="${F(hy-hr*.72)}" r="${F(hr*.3)}" fill="${col}" stroke="#111" stroke-width="${F(sw*.7)}"/>`;
+      g+=`<circle cx="${F(hx+d*hr*.45)}" cy="${F(hy-hr*.72)}" r="${F(hr*.12)}" fill="#111"/>`;
+    }
+    g+=`<path d="M${F(hx-hr*.8)} ${F(hy+hr*.2)} q${F(hr*.8)} ${F(hr*.5)} ${F(hr*1.6)} 0" fill="none" stroke="#111" stroke-width="${F(sw)}" stroke-linecap="round"/>`;
+  }else if(kind==='croc'){
+    g+=`<path d="M${F(hx+hr*.4)} ${F(hy)} l${F(40*s)} ${F(-6*s)} l0 ${F(18*s)} l${F(-40*s)} ${F(6*s)} Z" fill="${col}" stroke="#111" stroke-width="${F(sw*.8)}" stroke-linejoin="round"/>`;
+    for(let i=0;i<4;i++)
+      g+=`<path d="M${F(hx+hr*.55+i*10*s)} ${F(hy-2*s)} l${F(4*s)} ${F(-7*s)} l${F(4*s)} ${F(7*s)} Z" fill="#F4F1E8" stroke="#111" stroke-width="${F(sw*.4)}"/>`;
+    g+=`<path d="M${F(cx-bw*.8)} ${F(cy+24*s)} l${F(-34*s)} ${F(-4*s)} l${F(10*s)} ${F(14*s)} Z" fill="${col}" stroke="#111" stroke-width="${F(sw*.8)}" stroke-linejoin="round"/>`;
+  }else if(kind==='chicken'){
     for(let i=0;i<3;i++)
       g+=`<path d="${blob(hx-hr*.3+i*hr*.34,hy-hr*.95,hr*.24,6,2)}" fill="#C43A3A" stroke="#111" stroke-width="${F(sw*.6)}"/>`;
     g+=`<path d="M${F(hx+hr*.7)} ${F(hy+hr*.1)} l${F(16*s)} ${F(5*s)} l${F(-15*s)} ${F(7*s)} Z" fill="#F2C511" stroke="#111" stroke-width="${F(sw*.7)}" stroke-linejoin="round"/>`;
@@ -1234,9 +1261,137 @@ function condition(w,h){
 
 /* the world behind them. this is the part people will actually
    want to look at, so it is drawn straight. */
+/* Landscape painting, as the museum understands it. Each scene decides how
+   many figures belong in it — a market is crowded, a dead town holds one. */
+let SCENE=null, SCENEPOP=0;
+const VISTA={
+ mountains:(W,H,hz,ink,fill)=>{
+   let g='',back='';const peaks=RI(3,6);
+   for(let L=0;L<2;L++){
+     const base=hz+L*H*.06;
+     let d=`M0 ${F(base)}`;
+     for(let i=0;i<peaks;i++){
+       const x1=W*(i+.5)/peaks, top=base-H*R(.16,.34)*(L?.7:1);
+       d+=`L${F(x1-W/peaks*.5)} ${F(base)}L${F(x1)} ${F(top)}`;
+       if(chance(.5))g+=`<path d="M${F(x1-W*.03)} ${F(top+H*.05)} L${F(x1)} ${F(top)} L${F(x1+W*.03)} ${F(top+H*.05)} Z" fill="#F4F1E8" ${ink(1.4)}/>`;
+     }
+     back+=`<path d="${d}L${F(W)} ${F(base)}L${F(W)} ${F(H)}L0 ${F(H)}Z" fill="${fill()}" ${ink(2.2)}/>`;
+   }
+   return back+g;},
+ lake:(W,H,hz,ink,fill)=>{
+   let g=`<path d="M0 ${F(hz)}L${F(W*.3)} ${F(hz-H*.16)}L${F(W*.55)} ${F(hz)}Z" fill="${fill()}" ${ink(2)}/>`;
+   g+=`<path d="M${F(W*.45)} ${F(hz)}L${F(W*.72)} ${F(hz-H*.2)}L${F(W)} ${F(hz)}Z" fill="${fill()}" ${ink(2)}/>`;
+   g+=`<rect x="0" y="${F(hz)}" width="${F(W)}" height="${F(H-hz)}" fill="${P(['#8FB6C7','#A9C4CF','#7FA8B8'])}" ${ink(2)}/>`;
+   for(let i=0;i<RI(3,7);i++){const y=hz+(H-hz)*R(.1,.9);
+     g+=`<path d="M${F(R(0,W*.7))} ${F(y)} q${F(W*.06)} -3 ${F(W*.14)} 0" fill="none" stroke="#F4F1E8" stroke-width="${F(R(1.4,2.6))}" stroke-linecap="round" opacity=".8"/>`;}
+   return g;},
+ waterfall:(W,H,hz,ink,fill)=>{
+   let g=`<path d="M0 ${F(hz)}L${F(W*.34)} ${F(hz-H*.3)}L${F(W*.42)} ${F(H)}L0 ${F(H)}Z" fill="${fill()}" ${ink(2.2)}/>`;
+   g+=`<path d="M${F(W)} ${F(hz)}L${F(W*.66)} ${F(hz-H*.28)}L${F(W*.58)} ${F(H)}L${F(W)} ${F(H)}Z" fill="${fill()}" ${ink(2.2)}/>`;
+   g+=`<rect x="${F(W*.42)}" y="${F(hz-H*.22)}" width="${F(W*.16)}" height="${F(H-hz+H*.22)}" fill="#DCEBF2" ${ink(1.8)}/>`;
+   for(let i=0;i<RI(4,8);i++){const x=W*.44+R(0,W*.12);
+     g+=`<path d="M${F(x)} ${F(hz-H*.2)} q${F(R(-5,5))} ${F(H*.2)} ${F(R(-4,4))} ${F(H*.4)}" fill="none" stroke="#fff" stroke-width="${F(R(1.2,2.4))}" stroke-linecap="round" opacity=".75"/>`;}
+   g+=`<ellipse cx="${F(W*.5)}" cy="${F(H*.93)}" rx="${F(W*.22)}" ry="${F(H*.05)}" fill="#DCEBF2" ${ink(1.6)}/>`;
+   return g;},
+ bridge:(W,H,hz,ink,fill)=>{
+   let g=`<rect x="0" y="${F(hz)}" width="${F(W)}" height="${F(H-hz)}" fill="${P(['#8FB6C7','#9BB0A8'])}" ${ink(1.8)}/>`;
+   const dy=hz-H*R(.04,.1), arches=RI(2,4);
+   g+=`<rect x="0" y="${F(dy-H*.045)}" width="${F(W)}" height="${F(H*.045)}" fill="${fill()}" ${ink(2.4)}/>`;
+   for(let i=0;i<arches;i++){
+     const cx=W*(i+.5)/arches, aw=W/arches*.34;
+     g+=`<path d="M${F(cx-aw)} ${F(hz)} L${F(cx-aw)} ${F(dy-H*.01)} Q${F(cx)} ${F(dy-H*.1)} ${F(cx+aw)} ${F(dy-H*.01)} L${F(cx+aw)} ${F(hz)}" fill="${P(BG)}" ${ink(2)}/>`;}
+   for(let i=0;i<=arches;i++){const x=W*i/arches;
+     g+=`<path d="M${F(x)} ${F(dy-H*.045)} L${F(x)} ${F(dy-H*.13)}" ${ink(2.2)} fill="none"/>`;}
+   return g;},
+ wonder:(W,H,hz,ink,fill)=>{
+   let g=`<rect x="0" y="${F(hz)}" width="${F(W)}" height="${F(H-hz)}" fill="${fill()}" ${ink(1.8)}/>`;
+   const t=RI(0,2), cx=W*R(.4,.6);
+   if(t===0){
+     g+=`<path d="M${F(cx-W*.22)} ${F(hz)} L${F(cx)} ${F(hz-H*.34)} L${F(cx+W*.22)} ${F(hz)} Z" fill="${fill()}" ${ink(2.4)}/>`;
+     g+=`<path d="M${F(cx)} ${F(hz-H*.34)} L${F(cx)} ${F(hz)}" ${ink(1.6)} fill="none"/>`;
+   }else if(t===1){
+     g+=`<path d="M${F(cx-W*.1)} ${F(hz)} L${F(cx-W*.035)} ${F(hz-H*.36)} L${F(cx+W*.035)} ${F(hz-H*.36)} L${F(cx+W*.1)} ${F(hz)} Z" fill="${fill()}" ${ink(2.4)}/>`;
+     for(let i=1;i<4;i++)g+=`<path d="M${F(cx-W*.1+W*.02*i)} ${F(hz-H*.09*i)} L${F(cx+W*.1-W*.02*i)} ${F(hz-H*.09*i)}" ${ink(1.6)} fill="none"/>`;
+   }else{
+     g+=`<path d="M${F(cx-W*.16)} ${F(hz)} L${F(cx-W*.16)} ${F(hz-H*.16)} Q${F(cx)} ${F(hz-H*.4)} ${F(cx+W*.16)} ${F(hz-H*.16)} L${F(cx+W*.16)} ${F(hz)}" fill="none" ${ink(3)}/>`;
+     g+=`<path d="M${F(cx-W*.16)} ${F(hz)} L${F(cx-W*.09)} ${F(hz)} L${F(cx-W*.09)} ${F(hz-H*.14)} M${F(cx+W*.16)} ${F(hz)} L${F(cx+W*.09)} ${F(hz)} L${F(cx+W*.09)} ${F(hz-H*.14)}" fill="none" ${ink(2.2)}/>`;
+   }
+   return g;},
+ market:(W,H,hz,ink,fill)=>{
+   let g=`<rect x="0" y="${F(hz)}" width="${F(W)}" height="${F(H-hz)}" fill="${fill()}" ${ink(1.6)}/>`;
+   const n=RI(3,6);
+   for(let i=0;i<n;i++){
+     const x=W*(i+.5)/n+R(-W*.04,W*.04), sw2=W/n*R(.3,.46), top=hz-H*R(.12,.2);
+     g+=`<path d="M${F(x-sw2)} ${F(top)} L${F(x+sw2)} ${F(top)} L${F(x+sw2*.8)} ${F(top+H*.05)} L${F(x-sw2*.8)} ${F(top+H*.05)} Z" fill="${P(PAL)}" ${ink(2)}/>`;
+     g+=`<path d="M${F(x-sw2*.8)} ${F(top+H*.05)} L${F(x-sw2*.8)} ${F(hz)} M${F(x+sw2*.8)} ${F(top+H*.05)} L${F(x+sw2*.8)} ${F(hz)}" fill="none" ${ink(1.8)}/>`;
+     for(let b=0;b<RI(1,3);b++)
+       g+=`<circle cx="${F(x+R(-sw2*.5,sw2*.5))}" cy="${F(hz-H*R(.01,.04))}" r="${F(H*R(.012,.024))}" fill="${P(PAL)}" ${ink(1.2)}/>`;
+   }
+   return g;},
+ ghosttown:(W,H,hz,ink,fill)=>{
+   let g=`<rect x="0" y="${F(hz)}" width="${F(W)}" height="${F(H-hz)}" fill="${P(['#D8C9A8','#CFC0A0','#E0D2B4'])}" ${ink(1.4)}/>`;
+   for(let i=0;i<RI(2,4);i++){
+     const x=W*R(.05,.75), bw=W*R(.13,.22), bh=H*R(.12,.22);
+     g+=`<path d="M${F(x)} ${F(hz)} L${F(x)} ${F(hz-bh)} L${F(x+bw*.5)} ${F(hz-bh-H*.04)} L${F(x+bw)} ${F(hz-bh)} L${F(x+bw)} ${F(hz)} Z" fill="${fill()}" ${ink(2.2)}/>`;
+     g+=`<rect x="${F(x+bw*.36)}" y="${F(hz-bh*.55)}" width="${F(bw*.28)}" height="${F(bh*.55)}" fill="#3A332A" ${ink(1.4)}/>`;
+   }
+   for(let i=0;i<RI(1,3);i++){
+     const tx=R(W*.1,W*.9), ty=hz+(H-hz)*R(.2,.8), tr=H*R(.025,.05);
+     let d='';for(let k=0;k<7;k++){const a=k*.9;d+=`M${F(tx)} ${F(ty)} l${F(Math.cos(a)*tr)} ${F(Math.sin(a)*tr)} `;}
+     g+=`<path d="${d}" fill="none" stroke="#8A7A5C" stroke-width="${F(R(1.2,2.2))}" stroke-linecap="round"/>`;
+   }
+   return g;},
+ forest:(W,H,hz,ink,fill)=>{
+   let g=`<rect x="0" y="${F(hz)}" width="${F(W)}" height="${F(H-hz)}" fill="${P(['#8FA36B','#9BAF77','#7E9160'])}" ${ink(1.4)}/>`;
+   const n=RI(5,10);
+   for(let i=0;i<n;i++){
+     const x=W*(i+R(.1,.9))/n, th=H*R(.14,.3), tw=W*R(.03,.07);
+     g+=`<path d="M${F(x)} ${F(hz)} L${F(x)} ${F(hz-th*.34)}" ${ink(2.2)} fill="none"/>`;
+     const col=P(['#5E7A45','#6E8C52','#4F6B3B','#8FA36B']);
+     for(let L=0;L<3;L++)
+       g+=`<path d="M${F(x-tw*(1.4-L*.3))} ${F(hz-th*(.3+L*.22))} L${F(x)} ${F(hz-th*(.55+L*.24))} L${F(x+tw*(1.4-L*.3))} ${F(hz-th*(.3+L*.22))} Z" fill="${col}" ${ink(1.6)}/>`;
+   }
+   return g;},
+ canyon:(W,H,hz,ink,fill)=>{
+   let g=`<rect x="0" y="${F(hz)}" width="${F(W)}" height="${F(H-hz)}" fill="${P(['#C9784A','#B8693F','#D48B5A'])}" ${ink(1.6)}/>`;
+   for(const side of [0,1]){
+     const x0=side?W:0, dir=side?-1:1;
+     let d=`M${F(x0)} ${F(H)}L${F(x0)} ${F(hz-H*R(.2,.36))}`;
+     for(let i=0;i<4;i++)d+=`L${F(x0+dir*W*R(.08,.3))} ${F(hz-H*R(.02,.24))}`;
+     d+=`L${F(x0+dir*W*.05)} ${F(H)}Z`;
+     g+=`<path d="${d}" fill="${P(['#A85C36','#93502F','#C06A3E'])}" ${ink(2.2)}/>`;
+   }
+   return g;},
+ lamps:(W,H,hz,ink,fill)=>{
+   let g=`<rect x="0" y="${F(hz)}" width="${F(W)}" height="${F(H-hz)}" fill="${fill()}" ${ink(1.4)}/>`;
+   g+=`<path d="M${F(W*.1)} ${F(H)} L${F(W*.42)} ${F(hz)} L${F(W*.58)} ${F(hz)} L${F(W*.9)} ${F(H)} Z" fill="${P(['#B8AE9A','#C4BAA4'])}" ${ink(1.8)}/>`;
+   const nl=RI(2,4);
+   for(let i=0;i<nl;i++){
+     const t=(i+1)/(nl+1), x=W*(.14+t*.6), lh=H*R(.14,.24), yb=hz+H*.04*i;
+     g+=`<path d="M${F(x)} ${F(yb)} L${F(x)} ${F(yb-lh)}" ${ink(2.4)} fill="none"/>`;
+     g+=`<path d="M${F(x-W*.02)} ${F(yb-lh)} L${F(x+W*.02)} ${F(yb-lh)} L${F(x+W*.012)} ${F(yb-lh+H*.035)} L${F(x-W*.012)} ${F(yb-lh+H*.035)} Z" fill="#F2C511" ${ink(1.6)}/>`;
+   }
+   return g;}
+};
+const SCENEPOPS={market:[5,11],ghosttown:[1,1],lamps:[1,3],bridge:[0,2],wonder:[1,3],
+  mountains:[0,1],lake:[0,2],waterfall:[0,1],forest:[0,2],canyon:[0,1],
+  city:[0,3],hills:[0,2],desert:[0,1],sea:[0,1]};
+
 function scenery(W,H,small){
   let g='';const hz=H*R(.56,.74);
-  const kind=P(['city','hills','desert','sea']);
+  const kind=P(['city','hills','desert','sea','mountains','lake','waterfall',
+                'bridge','wonder','market','ghosttown','forest','canyon','lamps']);
+  SCENE=kind;
+  const pr=SCENEPOPS[kind]||[0,2];
+  SCENEPOP=RI(pr[0],pr[1]);
+  const _ink=t=>`stroke="#111" stroke-width="${F(t)}" stroke-linejoin="round" stroke-linecap="round"`;
+  const _fill=()=>P(PAL);
+  if(VISTA[kind]){
+    let sky='';
+    if(chance(.75)){const r=R(14,30);
+      sky+=`<circle cx="${F(R(W*.15,W*.85))}" cy="${F(hz-R(40,120))}" r="${F(r)}" fill="${P(['#F2C511','#F5F0E4','#E2711D','#FF5EA8'])}" opacity="${F(R(.6,.95))}"/>`;}
+    return sky+VISTA[kind](W,H,hz,_ink,_fill);
+  }
   const far=P(PAL), near=P(PAL);
   if(chance(.7)){
     const r=R(14,30);
@@ -1498,8 +1653,8 @@ function generate(){
   const dark=(FORCE&&FORCE.ground==='nocturne')?true:chance(.16);
   const gid='g'+Math.floor(RNG()*1e6);
   const names=[];
-  const COMPW=[['center',.14],['scatter',.11],['diptych',.10],['tiny',.09],
-               ['crowd',.11],['portrait',.15],['landscape',.22],['panels',.08]];
+  const COMPW=[['center',.12],['scatter',.096],['diptych',.087],['tiny',.078],
+               ['crowd',.096],['portrait',.13],['landscape',.193],['panels',.20]];
   let mode=(()=>{let r=R(0,1);for(const[k,w]of COMPW){if((r-=w)<=0)return k;}return 'center';})();
   if(FORCE&&FORCE.composition)mode=FORCE.composition;
   if(BANNER&&!(FORCE&&FORCE.composition))mode=chance(.75)?'landscape':mode;
@@ -1581,6 +1736,14 @@ function generate(){
   }else if(mode==='landscape'){
     if(!PH)s+=scenery(w,h,true);
     picks=[];
+    /* a market is full of people. a dead town has one. */
+    if(!PH&&SCENEPOP>0){
+      const base=h*R(.72,.86);
+      for(let i=0;i<SCENEPOP;i++){
+        const sc=(SCENEPOP>4?R(.24,.42):R(.3,.6))*Math.min(fx,fy);
+        picks.push([w*(i+.5)/SCENEPOP+R(-w*.06,w*.06), base-R(0,h*.05), sc]);
+      }
+    }
   }else if(mode==='portrait'){
     /* the sitter, three-quarter, with a view behind them */
     if(!PH)s+=`<g opacity=".85">${scenery(w,h,false)}</g>`;
@@ -1666,8 +1829,9 @@ const ODDS={
   palette:{restrained:.29,mixed:.28,saturated:.43},
   figures:{'0':.24,'1':.31,'2':.18,'3':.18,'4':.045,'5':.045},
   hands:{'—':.80},
-  species:{'—':.40,human:.16,generic:.035,chicken:.035,bird:.035,long:.035,horned:.035,
-           bunny:.035,mouse:.035,tiger:.035,monkey:.035,worm:.035,
+  species:{'—':.40,human:.16,generic:.025,chicken:.025,bird:.025,long:.025,horned:.025,
+           bunny:.025,mouse:.025,tiger:.025,monkey:.025,worm:.025,
+           coyote:.025,owl:.025,frog:.025,croc:.025,
            goat:.012,bull:.014,zombie:.011,alien:.012},
   accessory:{none:.40,glasses:.12,sunglasses:.09,cap:.09,trench:.06,beanie:.05,jersey:.05,
              beret:.04,rocker:.04,monocle:.02,cigarette:.025,cigar:.015,crown:.01}
