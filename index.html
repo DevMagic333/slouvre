@@ -1379,8 +1379,14 @@ const SCENEPOPS={market:[5,11],ghosttown:[1,1],lamps:[1,3],bridge:[0,2],wonder:[
 
 function scenery(W,H,small){
   let g='';const hz=H*R(.56,.74);
-  const kind=P(['city','hills','desert','sea','mountains','lake','waterfall',
-                'bridge','wonder','market','ghosttown','forest','canyon','lamps']);
+  /* weighted, not uniform — adding ten scenes had quietly cut the skyline
+     from one roll in four to one in fourteen. It is the one people put
+     across the top of a profile, so it leads. */
+  const SCENEW=[['city',.18],['mountains',.10],['lamps',.08],['market',.08],
+    ['hills',.07],['lake',.07],['bridge',.07],['forest',.06],['sea',.06],
+    ['ghosttown',.06],['desert',.05],['canyon',.05],['waterfall',.04],['wonder',.03]];
+  let kind=(()=>{let r=R(0,1);for(const[k,w]of SCENEW){if((r-=w)<=0)return k;}return 'city';})();
+  if(BANNER&&chance(.28))kind='city';
   SCENE=kind;
   const pr=SCENEPOPS[kind]||[0,2];
   SCENEPOP=RI(pr[0],pr[1]);
@@ -1657,7 +1663,11 @@ function generate(){
                ['crowd',.096],['portrait',.13],['landscape',.193],['panels',.20]];
   let mode=(()=>{let r=R(0,1);for(const[k,w]of COMPW){if((r-=w)<=0)return k;}return 'center';})();
   if(FORCE&&FORCE.composition)mode=FORCE.composition;
-  if(BANNER&&!(FORCE&&FORCE.composition))mode=chance(.75)?'landscape':mode;
+  if(BANNER&&!(FORCE&&FORCE.composition)){
+    /* wide formats want a horizon or a grid — both read across 1500x500 */
+    const b=R(0,1);
+    mode = b<.62 ? 'landscape' : (b<.84 ? 'panels' : mode);
+  }
   TR.composition=mode;
   SPECIES=null;
   ACC=pickAcc();
