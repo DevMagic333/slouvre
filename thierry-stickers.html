@@ -1,0 +1,75 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Thierry — sticker export</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:28px 18px 60px;background:#EDE9E1;color:#1a1a1a;
+ font:15px/1.55 "EB Garamond",Georgia,serif}
+h1{font:400 30px/1.1 "Bodoni Moda",Didot,Georgia,serif;margin:0 0 4px;letter-spacing:.01em}
+.sub{opacity:.6;margin:0 0 26px;font-size:14px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:26px}
+button{font:14px/1 "EB Garamond",Georgia,serif;padding:11px 18px;border:1px solid #6E1A1A;
+ background:#6E1A1A;color:#F6F2EA;border-radius:2px;cursor:pointer;letter-spacing:.04em}
+button.ghost{background:transparent;color:#6E1A1A}
+button:active{transform:translateY(1px)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px}
+.card{background:#fff;border:1px solid #d6cfc2;padding:14px;border-radius:2px}
+.pv{background-image:linear-gradient(45deg,#eee 25%,transparent 25%),
+ linear-gradient(-45deg,#eee 25%,transparent 25%),
+ linear-gradient(45deg,transparent 75%,#eee 75%),
+ linear-gradient(-45deg,transparent 75%,#eee 75%);
+ background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0;margin-bottom:10px}
+.pv svg{display:block;width:100%;height:auto}
+.lab{font:600 13px/1 ui-monospace,monospace;letter-spacing:.02em;margin-bottom:3px}
+.note{font-size:13px;opacity:.62;margin-bottom:11px;min-height:34px}
+.row{display:flex;gap:7px}
+.row button{flex:1;padding:8px 0;font-size:13px}
+.tip{margin-top:34px;padding:16px 18px;border-left:2px solid #6E1A1A;background:#fff;
+ max-width:620px;font-size:14px}
+.tip b{font-weight:600}
+</style></head><body>
+<h1>Thierry</h1>
+<p class="sub">Six poses &middot; 512&times;512 &middot; transparent &middot; identical scale across the set</p>
+<div class="bar">
+ <button onclick="all('webp')">Download all &mdash; WebP</button>
+ <button class="ghost" onclick="all('png')">Download all &mdash; PNG</button>
+ <button class="ghost" onclick="all('svg')">Download all &mdash; SVG</button>
+</div>
+<div class="grid" id="g"></div>
+<div class="tip">
+<b>For Telegram:</b> message <b>@Stickers</b>, send <b>/newpack</b>, name the pack, then send the six
+files <b>as files</b> &mdash; not as photos. Sending them as photos strips the transparency and
+flattens them onto white. Give each one its label as the emoji-free keyword when prompted.
+<br><br>
+<b>WebP</b> is what Telegram uses internally and runs far smaller than PNG. <b>SVG</b> is the master
+&mdash; it stays sharp at any size, so keep those for print, the site, or anything larger later.
+</div>
+<script>
+const D=[{"id": "1-judgment", "svg": "<svg viewBox=\"0 0 184 184\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(22.4,-4) scale(1.2)\" fill=\"none\" stroke=\"#000\" stroke-width=\"2.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M40 86c-13 5-20 16-22 30-1 9-1 22 0 34\"/><path d=\"M74 86c14 5 22 16 24 31 1 9 1 21 0 33\"/><path d=\"M42 79c6 5 22 6 30 0\"/><path d=\"M40 86c8 6 26 7 34 0\"/><path d=\"M34 44c-4-16 6-30 24-31 19-1 30 10 30 24 0 8-3 12-2 18 1 5-4 9-11 10-3 6-13 8-22 6-9-2-15-8-16-15-1-6-2-8-3-12z\"/><path d=\"M36 27c8-6 22-9 34-5 5 2 8 5 9 8\"/><path d=\"M55 15c-6 6-14 9-19 11\"/><circle cx=\"49\" cy=\"47\" r=\"7.5\"/><circle cx=\"72\" cy=\"46\" r=\"6\"/><path d=\"M56.5 47h9\"/><path d=\"M41.5 45l-6-3\"/><path d=\"M44.5 45c2.5-2 6-2 8.5 0\"/><path d=\"M68.5 44c2-1.6 4.5-1.6 6.5 0\"/><path d=\"M46.5 48.5h5\" stroke-width=\"3.6\"/><path d=\"M69.5 47.5h4\" stroke-width=\"3.6\"/><path d=\"M52 66c5 4 13 4 17 0\"/><path d=\"M55 96c-4 16-7 34-8 56\" /><path d=\"M70 97c0 14 0 34 1 55\" /><path d=\"M54 79c-1-3 1-5 5-6 6-2 12-1 14 3 1 3 1 8 0 12-1 5-4 8-9 8-5 0-9-3-10-8-1-3 0-6 0-9z\" fill=\"#fff\"/><path d=\"M57 79c4-2 10-2 13 1\"/><path d=\"M56 85c4-2 11-2 14 0\"/><path d=\"M57 91c4-1 9-1 12 0\"/><path d=\"M54 82c-3 1-5 4-4 7\"/></g></svg>", "label": "hm", "note": "The default. Judgment, and total calm."}, {"id": "2-dismissal", "svg": "<svg viewBox=\"0 0 184 184\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(22.4,-4) scale(1.2)\" fill=\"none\" stroke=\"#000\" stroke-width=\"2.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M52 88c-9 6-13 17-14 30-1 9-1 22 0 34\"/><path d=\"M78 90c9 6 13 16 14 30 1 9 1 21 0 33\"/><path d=\"M54 90c8 5 18 5 25 0\"/><g transform=\"rotate(-15 66 62) translate(4,0)\"><path d=\"M34 44c-4-16 6-30 24-31 19-1 30 10 30 24 0 8-3 12-2 18 1 5-4 9-11 10-3 6-13 8-22 6-9-2-15-8-16-15-1-6-2-8-3-12z\"/><path d=\"M36 27c8-6 22-9 34-5 5 2 8 5 9 8\"/><path d=\"M55 15c-6 6-14 9-19 11\"/><circle cx=\"49\" cy=\"47\" r=\"7.5\"/><circle cx=\"72\" cy=\"46\" r=\"6\"/><path d=\"M56.5 47h9\"/><path d=\"M41.5 45l-6-3\"/><path d=\"M45 47h7\" stroke-width=\"4\"/><path d=\"M68.5 46h5\" stroke-width=\"4\"/><path d=\"M53 66h15\"/><path d=\"M44 79c6 5 22 6 30 0\"/><path d=\"M42 86c8 6 26 7 34 0\"/></g></g></svg>", "label": "we're done here", "note": "He has already stopped listening."}, {"id": "3-presenting", "svg": "<svg viewBox=\"0 0 184 184\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(-13,-4) scale(1.2)\" fill=\"none\" stroke=\"#000\" stroke-width=\"2.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M40 86c-13 5-20 16-22 30-1 9-1 22 0 34\"/><path d=\"M74 86c14 5 22 16 24 31 1 9 1 21 0 33\"/><path d=\"M42 79c6 5 22 6 30 0\"/><path d=\"M40 86c8 6 26 7 34 0\"/><path d=\"M34 44c-4-16 6-30 24-31 19-1 30 10 30 24 0 8-3 12-2 18 1 5-4 9-11 10-3 6-13 8-22 6-9-2-15-8-16-15-1-6-2-8-3-12z\"/><path d=\"M36 27c8-6 22-9 34-5 5 2 8 5 9 8\"/><path d=\"M55 15c-6 6-14 9-19 11\"/><circle cx=\"49\" cy=\"47\" r=\"7.5\"/><circle cx=\"72\" cy=\"46\" r=\"6\"/><path d=\"M56.5 47h9\"/><path d=\"M41.5 45l-6-3\"/><path d=\"M47 47.5h4\" stroke-width=\"3.4\"/><path d=\"M70 46.5h3.4\" stroke-width=\"3.4\"/><path d=\"M56 63c3.5-2.5 9-2.5 11 1.5-2.5 3.5-9 3.5-11-1.5z\"/><path d=\"M78 94c13 3 24 7 31 10\"/><path d=\"M76 102c12 3 22 6 29 8\"/><path d=\"M109 104c5-1 9 0 11 2\"/><path d=\"M106 110c4 0 8 0 11-1\"/><g transform=\"translate(122,42)\"><path d=\"M0 0h40v64H0z\"/><path d=\"M6 6h28v52H6z\"/></g></g></svg>", "label": "observe", "note": "An empty frame. He is not looking at it."}, {"id": "4-appraising", "svg": "<svg viewBox=\"0 0 184 184\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(22.4,-4) scale(1.2)\" fill=\"none\" stroke=\"#000\" stroke-width=\"2.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M40 86c-13 5-20 16-22 30-1 9-1 22 0 34\"/><path d=\"M74 86c14 5 22 16 24 31 1 9 1 21 0 33\"/><g transform=\"rotate(13 60 76)\"><path d=\"M42 79c6 5 22 6 30 0\"/><path d=\"M40 86c8 6 26 7 34 0\"/><path d=\"M34 44c-4-16 6-30 24-31 19-1 30 10 30 24 0 8-3 12-2 18 1 5-4 9-11 10-3 6-13 8-22 6-9-2-15-8-16-15-1-6-2-8-3-12z\"/><path d=\"M36 27c8-6 22-9 34-5 5 2 8 5 9 8\"/><path d=\"M55 15c-6 6-14 9-19 11\"/><circle cx=\"49\" cy=\"47\" r=\"7.5\" fill=\"#fff\"/><circle cx=\"72\" cy=\"46\" r=\"6\" fill=\"#fff\"/><circle cx=\"49\" cy=\"47\" r=\"7.5\"/><circle cx=\"72\" cy=\"46\" r=\"6\"/><path d=\"M43.5 51.5l10-9\"/><path d=\"M67.5 49.5l8-7\"/><path d=\"M56.5 47h9\"/><path d=\"M41.5 45l-6-3\"/><path d=\"M53 66h15\"/></g><path d=\"M55 96c-4 16-7 34-8 56\" /><path d=\"M70 97c0 14 0 34 1 55\" /><path d=\"M54 79c-1-3 1-5 5-6 6-2 12-1 14 3 1 3 1 8 0 12-1 5-4 8-9 8-5 0-9-3-10-8-1-3 0-6 0-9z\" fill=\"#fff\"/><path d=\"M57 79c4-2 10-2 13 1\"/><path d=\"M56 85c4-2 11-2 14 0\"/><path d=\"M57 91c4-1 9-1 12 0\"/><path d=\"M54 82c-3 1-5 4-4 7\"/></g></svg>", "label": "interesting", "note": "The lenses go opaque. He is examining you."}, {"id": "5-declined", "svg": "<svg viewBox=\"0 0 184 184\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(22.4,-4) scale(1.2)\" fill=\"none\" stroke=\"#000\" stroke-width=\"2.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><g transform=\"translate(0,-3)\"><path d=\"M42 86c-8 6-11 18-12 31-1 9-1 21 0 33\"/><path d=\"M72 86c9 5 12 17 13 31 1 9 1 21 0 33\"/><path d=\"M42 79c6 5 22 6 30 0\"/><path d=\"M40 86c8 6 26 7 34 0\"/><path d=\"M34 44c-4-16 6-30 24-31 19-1 30 10 30 24 0 8-3 12-2 18 1 5-4 9-11 10-3 6-13 8-22 6-9-2-15-8-16-15-1-6-2-8-3-12z\"/><path d=\"M36 27c8-6 22-9 34-5 5 2 8 5 9 8\"/><path d=\"M55 15c-6 6-14 9-19 11\"/><circle cx=\"49\" cy=\"47\" r=\"7.5\"/><circle cx=\"72\" cy=\"46\" r=\"6\"/><path d=\"M56.5 47h9\"/><path d=\"M41.5 45l-6-3\"/><path d=\"M44.5 46c2.5 3 6 3 8.5 0\"/><path d=\"M68.5 45c2 2.6 4.5 2.6 6.5 0\"/><path d=\"M53 66h15\"/></g></g></svg>", "label": "declined", "note": "The committee has decided."}, {"id": "6-happiness", "svg": "<svg viewBox=\"0 0 184 184\" xmlns=\"http://www.w3.org/2000/svg\"><g transform=\"translate(22.4,-4) scale(1.2)\" fill=\"none\" stroke=\"#000\" stroke-width=\"2.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M36 92c-14 6-21 16-23 28-1 9-1 21 0 31\"/><path d=\"M78 92c15 5 23 15 25 28 1 9 1 21 0 31\"/><g transform=\"rotate(-8 60 74) translate(0,-4)\"><path d=\"M42 79c6 5 22 6 30 0\"/><path d=\"M40 86c8 6 26 7 34 0\"/><path d=\"M34 44c-4-16 6-30 24-31 19-1 30 10 30 24 0 8-3 12-2 18 1 5-4 9-11 10-3 6-13 8-22 6-9-2-15-8-16-15-1-6-2-8-3-12z\"/><path d=\"M36 27c8-6 22-9 34-5 5 2 8 5 9 8\"/><path d=\"M55 15c-6 6-14 9-19 11\"/><circle cx=\"49\" cy=\"47\" r=\"7.5\"/><circle cx=\"72\" cy=\"46\" r=\"6\"/><path d=\"M56.5 47h9\"/><path d=\"M41.5 45l-6-3\"/><path d=\"M44.5 46c2.5 3 6 3 8.5 0\"/><path d=\"M68.5 45c2 2.6 4.5 2.6 6.5 0\"/><path d=\"M52 64c5 4 13 4 17 0\"/></g></g></svg>", "label": ":)", "note": "Nothing explains why."}];
+const g=document.getElementById('g');
+D.forEach(d=>{
+  const c=document.createElement('div');c.className='card';
+  c.innerHTML='<div class="pv">'+d.svg+'</div><div class="lab">'+d.label+'</div>'+
+    '<div class="note">'+d.note+'</div><div class="row">'+
+    '<button data-f="webp">WebP</button>'+
+    '<button class="ghost" data-f="png">PNG</button>'+
+    '<button class="ghost" data-f="svg">SVG</button></div>';
+  c.querySelectorAll('button').forEach(b=>b.onclick=()=>save(d,b.dataset.f));
+  g.appendChild(c);
+});
+function dl(blob,name){
+  const u=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1500);
+}
+function save(d,fmt){
+  if(fmt==='svg') return dl(new Blob([d.svg],{type:'image/svg+xml'}),'thierry-'+d.id+'.svg');
+  const img=new Image();
+  img.onload=()=>{
+    const c=document.createElement('canvas');c.width=c.height=512;
+    c.getContext('2d').drawImage(img,0,0,512,512);
+    c.toBlob(b=>dl(b,'thierry-'+d.id+'.'+fmt),'image/'+fmt,1);
+  };
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(d.svg);
+}
+function all(fmt){D.forEach((d,i)=>setTimeout(()=>save(d,fmt),i*450));}
+</script></body></html>
