@@ -1653,6 +1653,103 @@ function photoGround(w,h,grid){
   return s;
 }
 
+/* Style builders. Each fills a rectangle, so any of them can stand alone
+   as a whole work or sit inside the frame of another. That crossing is
+   where the collection stops looking like one machine. */
+function buildPixel(ox,oy,w,h,names){
+  let s='';
+  const G2=RI(14,26), cw2=w/G2, ch2=h/G2;
+  const pal=[P(PAL),P(PAL),P(PAL),P(BG),P(BG)];
+  s+=`<rect x="${F(ox)}" y="${F(oy)}" width="${F(w)}" height="${F(h)}" fill="${P(BG)}"/>`;
+  const fw=RI(6,10), fh=RI(8,13);
+  const gx0=Math.floor((G2-fw)/2), gy0=Math.floor((G2-fh)/2)+RI(-1,2);
+  const body=P(PAL), dark='#1A1A22';
+  const X=(i)=>ox+i*cw2, Y=(j)=>oy+j*ch2;
+  for(let y=0;y<fh;y++)for(let x=0;x<fw;x++){
+    const edge=(x===0||y===0||x===fw-1||y===fh-1);
+    if(edge&&chance(.45))continue;
+    const isHead=y<Math.floor(fh*.45);
+    s+=`<rect x="${F(X(gx0+x))}" y="${F(Y(gy0+y))}" width="${F(cw2+.5)}" height="${F(ch2+.5)}" fill="${isHead?body:(chance(.22)?P(pal):dark)}"/>`;
+  }
+  const ey=gy0+Math.floor(fh*.2);
+  [gx0+Math.floor(fw*.25), gx0+Math.floor(fw*.68)].forEach(ex=>{
+    s+=`<rect x="${F(X(ex))}" y="${F(Y(ey))}" width="${F(cw2+.5)}" height="${F(ch2*RI(1,2)+.5)}" fill="#111"/>`;});
+  const my=gy0+Math.floor(fh*.34);
+  for(let x=0;x<RI(2,4);x++)
+    s+=`<rect x="${F(X(gx0+Math.floor(fw*.3)+x))}" y="${F(Y(my))}" width="${F(cw2+.5)}" height="${F(ch2+.5)}" fill="#111"/>`;
+  for(let i=0;i<RI(14,50);i++)
+    s+=`<rect x="${F(X(RI(0,G2-1)))}" y="${F(Y(RI(0,G2-1)))}" width="${F(cw2+.5)}" height="${F(ch2+.5)}" fill="${P(pal)}" opacity="${F(R(.4,1))}"/>`;
+  return s;
+}
+
+function buildPanels(ox,oy,w,h,names){
+  let s='';
+  const cols=RI(2,3), rows=RI(2,3);
+  const gap=Math.min(w,h)*R(.004,.016);
+  const cw=(w-gap*(cols+1))/cols, ch=(h-gap*(rows+1))/rows;
+  const uid=Math.floor(R(1000,99999));
+  let n=0;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    const px=ox+gap+c*(cw+gap), py=oy+gap+r*(ch+gap);
+    s+=`<rect x="${F(px)}" y="${F(py)}" width="${F(cw)}" height="${F(ch)}" fill="${chance(.5)?P(PAL):P(BG)}" stroke="#111" stroke-width="${F(R(1.6,3))}"/>`;
+    if(chance(.55)){
+      const id='pz'+uid+'-'+(n++);
+      const z=R(2.2,4.4)*Math.min(cw,ch)/110;
+      const e=pickSubject(); if(names)names.push(e[1]);
+      s+=`<clipPath id="${id}"><rect x="${F(px)}" y="${F(py)}" width="${F(cw)}" height="${F(ch)}"/></clipPath>`;
+      s+=`<g clip-path="url(#${id})">${e[0](px+cw*R(.2,.8), py+ch*R(.25,.85), z)}</g>`;
+    }else if(chance(.5)){
+      const gx=px+cw/2, gy=py+ch/2, gr=Math.min(cw,ch)*R(.18,.36);
+      const gst=`fill="${P(PAL)}" fill-opacity="${F(R(.5,.9))}" stroke="#111" stroke-width="${F(R(1.4,2.6))}" stroke-linejoin="round"`;
+      const sh=RI(0,2);
+      if(sh===0)s+=`<circle cx="${F(gx)}" cy="${F(gy)}" r="${F(gr)}" ${gst}/>`;
+      else if(sh===1)s+=`<rect x="${F(gx-gr)}" y="${F(gy-gr)}" width="${F(gr*2)}" height="${F(gr*2)}" transform="rotate(${F(R(-20,20))} ${F(gx)} ${F(gy)})" ${gst}/>`;
+      else s+=`<path d="M${F(gx)} ${F(gy-gr)} L${F(gx+gr)} ${F(gy+gr)} L${F(gx-gr)} ${F(gy+gr)} Z" ${gst}/>`;
+    }
+  }
+  return s;
+}
+
+/* returns {svg, inner:[x,y,w,h], gold, deep} so callers can fill the middle */
+function buildFrame(w,h){
+  const deep=P(['#3A2018','#2A1C2E','#1E2A22','#32231A','#241E2E']);
+  const gold=P(['#C9A227','#B8923A','#D4B24C']);
+  const cream=P(['#EDE3C8','#E8DCC0','#F0E8D2']);
+  const accent=P(['#8E2B2B','#6E1A1A','#2E4A6E','#4A6E3A']);
+  let s=`<rect width="${w}" height="${h}" fill="${deep}"/>`;
+  const bands=RI(3,5);
+  let inset=0;
+  for(let b=0;b<bands;b++){
+    const t=b/bands; inset=Math.min(w,h)*(.03+t*.145);
+    const bw2=Math.min(w,h)*.026;
+    const col=[gold,accent,cream][b%3];
+    s+=`<rect x="${F(inset)}" y="${F(inset)}" width="${F(w-inset*2)}" height="${F(h-inset*2)}" fill="none" stroke="${col}" stroke-width="${F(bw2)}"/>`;
+    const n=RI(6,12), mr=bw2*R(.3,.46);
+    for(let i=0;i<n;i++){
+      const f=(i+.5)/n;
+      [[inset+(w-inset*2)*f,inset],[inset+(w-inset*2)*f,h-inset],
+       [inset,inset+(h-inset*2)*f],[w-inset,inset+(h-inset*2)*f]].forEach(pt=>{
+        if(!chance(.82))return;
+        const m=RI(0,2);
+        if(m===0)s+=`<ellipse cx="${F(pt[0])}" cy="${F(pt[1])}" rx="${F(mr*1.6)}" ry="${F(mr*.6)}" fill="${cream}"/>`;
+        else if(m===1)s+=`<rect x="${F(pt[0]-mr*.4)}" y="${F(pt[1]-mr)}" width="${F(mr*.8)}" height="${F(mr*2)}" fill="${accent}"/>`;
+        else s+=`<circle cx="${F(pt[0])}" cy="${F(pt[1])}" r="${F(mr*.7)}" fill="${gold}"/>`;
+      });
+    }
+  }
+  const ins=Math.min(w,h)*.085, mrad=Math.min(w,h)*R(.055,.078);
+  [[ins,ins],[w-ins,ins],[ins,h-ins],[w-ins,h-ins]].forEach(c=>{
+    s+=`<rect x="${F(c[0]-mrad)}" y="${F(c[1]-mrad)}" width="${F(mrad*2)}" height="${F(mrad*2)}" fill="${deep}" stroke="${cream}" stroke-width="${F(mrad*.16)}"/>`;
+    for(let k=0;k<4;k++){const a=k*Math.PI/2+Math.PI/4;
+      const px=c[0]+Math.cos(a)*mrad*.5, py=c[1]+Math.sin(a)*mrad*.5;
+      s+=`<ellipse cx="${F(px)}" cy="${F(py)}" rx="${F(mrad*.3)}" ry="${F(mrad*.13)}" transform="rotate(${F(a*180/Math.PI)} ${F(px)} ${F(py)})" fill="${gold}"/>`;}
+    s+=`<circle cx="${F(c[0])}" cy="${F(c[1])}" r="${F(mrad*.2)}" fill="${cream}"/>`;
+  });
+  const pad=Math.min(w,h)*.035;
+  return {svg:s, inner:[inset+pad, inset+pad, w-(inset+pad)*2, h-(inset+pad)*2],
+          gold:gold, deep:deep};
+}
+
 function generate(){
   const w=CW,h=CH;let s='';
   TR={};
@@ -1714,111 +1811,50 @@ function generate(){
   const AN=(FORCE&&FORCE.anchor)?FORCE.anchor:null;
   const fx=w/300, fy=h/300;
   if(mode==='illumination'){
-    /* The manuscript page. Concentric borders, a repeating motif on each
-       band, medallions in the corners, and one figure enthroned in the
-       middle taking itself extremely seriously. */
-    const deep=P(['#3A2018','#2A1C2E','#1E2A22','#32231A','#241E2E']);
-    const gold=P(['#C9A227','#B8923A','#D4B24C']);
-    const cream=P(['#EDE3C8','#E8DCC0','#F0E8D2']);
-    const accent=P(['#8E2B2B','#6E1A1A','#2E4A6E','#4A6E3A']);
-    s+=`<rect width="${w}" height="${h}" fill="${deep}"/>`;
-    const bands=RI(3,5);
-    for(let b=0;b<bands;b++){
-      const t=b/bands, inset=Math.min(w,h)*(.03+t*.145);
-      const bw2=Math.min(w,h)*.026;
-      const col=[gold,accent,cream][b%3];
-      s+=`<rect x="${F(inset)}" y="${F(inset)}" width="${F(w-inset*2)}" height="${F(h-inset*2)}"
-           fill="none" stroke="${col}" stroke-width="${F(bw2)}"/>`;
-      /* the repeating motif along each band */
-      const n=RI(6,12), mr=bw2*R(.3,.46);
-      for(let i=0;i<n;i++){
-        const f=(i+.5)/n;
-        const pts=[[inset+(w-inset*2)*f,inset],[inset+(w-inset*2)*f,h-inset],
-                   [inset,inset+(h-inset*2)*f],[w-inset,inset+(h-inset*2)*f]];
-        pts.forEach(pt=>{
-          if(chance(.82)){
-            const m=RI(0,2);
-            if(m===0)s+=`<ellipse cx="${F(pt[0])}" cy="${F(pt[1])}" rx="${F(mr*1.6)}" ry="${F(mr*.6)}" fill="${cream}"/>`;
-            else if(m===1)s+=`<rect x="${F(pt[0]-mr*.4)}" y="${F(pt[1]-mr)}" width="${F(mr*.8)}" height="${F(mr*2)}" fill="${accent}"/>`;
-            else s+=`<circle cx="${F(pt[0])}" cy="${F(pt[1])}" r="${F(mr*.7)}" fill="${gold}"/>`;
-          }
-        });
-      }
-    }
-    /* corner medallions */
-    const ins=Math.min(w,h)*.085, mrad=Math.min(w,h)*R(.055,.078);
-    [[ins,ins],[w-ins,ins],[ins,h-ins],[w-ins,h-ins]].forEach(c=>{
-      s+=`<rect x="${F(c[0]-mrad)}" y="${F(c[1]-mrad)}" width="${F(mrad*2)}" height="${F(mrad*2)}" fill="${deep}" stroke="${cream}" stroke-width="${F(mrad*.16)}"/>`;
-      for(let k=0;k<4;k++){const a=k*Math.PI/2+Math.PI/4;
-        s+=`<ellipse cx="${F(c[0]+Math.cos(a)*mrad*.5)}" cy="${F(c[1]+Math.sin(a)*mrad*.5)}" rx="${F(mrad*.3)}" ry="${F(mrad*.13)}" transform="rotate(${F(a*180/Math.PI)} ${F(c[0]+Math.cos(a)*mrad*.5)} ${F(c[1]+Math.sin(a)*mrad*.5)})" fill="${gold}"/>`;}
-      s+=`<circle cx="${F(c[0])}" cy="${F(c[1])}" r="${F(mrad*.2)}" fill="${cream}"/>`;
-    });
-    /* the niche, and whoever is sitting in it */
-    const nw=w*.34, nh=h*.42, nx=w/2-nw/2, ny=h/2-nh/2-h*.02;
-    s+=`<path d="M${F(nx)} ${F(ny+nh)} L${F(nx)} ${F(ny+nh*.34)} Q${F(w/2)} ${F(ny-nh*.16)} ${F(nx+nw)} ${F(ny+nh*.34)} L${F(nx+nw)} ${F(ny+nh)} Z"
-         fill="${P(['#2A1C2E','#1E1A16','#2E2418'])}" stroke="${gold}" stroke-width="${F(Math.min(w,h)*.012)}"/>`;
+    /* The manuscript page. The frame is always the frame; what it holds
+       is whichever style the roll lands on. */
+    const fr=buildFrame(w,h); s+=fr.svg;
+    const [ix,iy,iw,ih]=fr.inner;
+    const uid='il'+Math.floor(R(1000,99999));
+    const inner=(()=>{let r=R(0,1);
+      if(r<.40)return 'niche'; if(r<.60)return 'pixel';
+      if(r<.80)return 'panels'; return 'vista';})();
     TR.ground='illuminated';
-    picks=[[w/2, ny+nh*.72, R(.62,.88)*Math.min(fx,fy)]];
+    if(inner==='pixel'){
+      s+=`<clipPath id="${uid}"><rect x="${F(ix)}" y="${F(iy)}" width="${F(iw)}" height="${F(ih)}"/></clipPath>`;
+      s+=`<g clip-path="url(#${uid})">${buildPixel(ix,iy,iw,ih,names)}</g>`;
+      picks=[];
+    }else if(inner==='panels'){
+      s+=`<clipPath id="${uid}"><rect x="${F(ix)}" y="${F(iy)}" width="${F(iw)}" height="${F(ih)}"/></clipPath>`;
+      s+=`<g clip-path="url(#${uid})">${buildPanels(ix,iy,iw,ih,names)}</g>`;
+      picks=[];
+    }else if(inner==='vista'){
+      s+=`<clipPath id="${uid}"><rect x="${F(ix)}" y="${F(iy)}" width="${F(iw)}" height="${F(ih)}"/></clipPath>`;
+      s+=`<g clip-path="url(#${uid})" transform="translate(${F(ix)},${F(iy)})">${scenery(iw,ih,true)}</g>`;
+      picks=SCENEPOP>0?[[ix+iw*.5, iy+ih*.72, R(.3,.5)*Math.min(fx,fy)]]:[];
+    }else{
+      const nw=iw*.56, nh=ih*.72, nx=ix+iw/2-nw/2, ny=iy+ih/2-nh/2;
+      s+=`<path d="M${F(nx)} ${F(ny+nh)} L${F(nx)} ${F(ny+nh*.34)} Q${F(nx+nw/2)} ${F(ny-nh*.16)} ${F(nx+nw)} ${F(ny+nh*.34)} L${F(nx+nw)} ${F(ny+nh)} Z" fill="${P(['#2A1C2E','#1E1A16','#2E2418'])}" stroke="${fr.gold}" stroke-width="${F(Math.min(w,h)*.012)}"/>`;
+      picks=[[nx+nw/2, ny+nh*.74, R(.5,.7)*Math.min(fx,fy)]];
+    }
   }else if(mode==='pixel'){
-    /* everything on a coarse grid. the oldest digital art style there is. */
-    const G2=RI(14,26), cw2=w/G2, ch2=h/G2;
-    const pal=[P(PAL),P(PAL),P(PAL),P(BG),P(BG)];
-    const bg=P(BG);
-    s+=`<rect width="${w}" height="${h}" fill="${bg}"/>`;
-    /* a blocky figure built out of cells */
-    const fw=RI(6,10), fh=RI(8,13);
-    const ox=Math.floor((G2-fw)/2), oy=Math.floor((G2-fh)/2)+RI(-1,2);
-    const body=P(PAL), dark='#1A1A22';
-    for(let y=0;y<fh;y++)for(let x=0;x<fw;x++){
-      const edge=(x===0||y===0||x===fw-1||y===fh-1);
-      if(edge&&chance(.45))continue;
-      const isHead=y<Math.floor(fh*.45);
-      const col=isHead?body:(chance(.22)?P(pal):dark);
-      s+=`<rect x="${F((ox+x)*cw2)}" y="${F((oy+y)*ch2)}" width="${F(cw2+.5)}" height="${F(ch2+.5)}" fill="${col}"/>`;
-    }
-    /* eyes, mouth — the only things that make it a face */
-    const ey=oy+Math.floor(fh*.2);
-    [ox+Math.floor(fw*.25), ox+Math.floor(fw*.68)].forEach(ex=>{
-      s+=`<rect x="${F(ex*cw2)}" y="${F(ey*ch2)}" width="${F(cw2+.5)}" height="${F(ch2*RI(1,2)+.5)}" fill="#111"/>`;});
-    const my=oy+Math.floor(fh*.34);
-    for(let x=0;x<RI(2,4);x++)
-      s+=`<rect x="${F((ox+Math.floor(fw*.3)+x)*cw2)}" y="${F(my*ch2)}" width="${F(cw2+.5)}" height="${F(ch2+.5)}" fill="#111"/>`;
-    /* scattered noise cells so it reads as a corrupted sprite */
-    for(let i=0;i<RI(14,50);i++)
-      s+=`<rect x="${F(RI(0,G2-1)*cw2)}" y="${F(RI(0,G2-1)*ch2)}" width="${F(cw2+.5)}" height="${F(ch2+.5)}" fill="${P(pal)}" opacity="${F(R(.4,1))}"/>`;
-    TR.ground='pixelated';
-    picks=[];
+    s+=buildPixel(0,0,w,h,names);
+    TR.ground='pixelated'; picks=[];
   }else if(mode==='panels'){
-    /* the work cut into panels. some hold a flat shape, some hold a
-       fragment of a figure blown up past the edge of its box — an eye,
-       a mouth, the corner of a pair of glasses. */
-    const cols=RI(2,3), rows=RI(2,3);
-    const gap=Math.min(w,h)*R(.004,.016);
-    const cw=(w-gap*(cols+1))/cols, ch=(h-gap*(rows+1))/rows;
-    const uid=Math.floor(R(1000,9999));
-    let n=0;
-    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-      const px=gap+c*(cw+gap), py=gap+r*(ch+gap);
-      const fill=chance(.5)?P(PAL):P(BG);
-      s+=`<rect x="${F(px)}" y="${F(py)}" width="${F(cw)}" height="${F(ch)}" fill="${fill}" stroke="#111" stroke-width="${F(R(1.6,3))}"/>`;
-      if(chance(.55)){
-        const id='pz'+uid+'-'+(n++);
-        const z=R(2.2,4.4)*Math.min(cw,ch)/110;
-        const ox=px+cw*R(.2,.8), oy=py+ch*R(.25,.85);
-        const e=pickSubject(); names.push(e[1]);
-        s+=`<clipPath id="${id}"><rect x="${F(px)}" y="${F(py)}" width="${F(cw)}" height="${F(ch)}"/></clipPath>`;
-        s+=`<g clip-path="url(#${id})">${e[0](ox,oy,z)}</g>`;
-      }else if(chance(.5)){
-        const gx=px+cw/2, gy=py+ch/2, gr=Math.min(cw,ch)*R(.18,.36);
-        const sh=RI(0,2);
-        const gst=`fill="${P(PAL)}" fill-opacity="${F(R(.5,.9))}" stroke="#111" stroke-width="${F(R(1.4,2.6))}" stroke-linejoin="round"`;
-        if(sh===0)s+=`<circle cx="${F(gx)}" cy="${F(gy)}" r="${F(gr)}" ${gst}/>`;
-        else if(sh===1)s+=`<rect x="${F(gx-gr)}" y="${F(gy-gr)}" width="${F(gr*2)}" height="${F(gr*2)}" transform="rotate(${F(R(-20,20))} ${F(gx)} ${F(gy)})" ${gst}/>`;
-        else s+=`<path d="M${F(gx)} ${F(gy-gr)} L${F(gx+gr)} ${F(gy+gr)} L${F(gx-gr)} ${F(gy+gr)} Z" ${gst}/>`;
-      }
+    /* one panel grid in eight gets the gilt treatment around it */
+    if(chance(.12)){
+      const fr=buildFrame(w,h); s+=fr.svg;
+      const [ix,iy,iw,ih]=fr.inner;
+      const uid='pf'+Math.floor(R(1000,99999));
+      s+=`<clipPath id="${uid}"><rect x="${F(ix)}" y="${F(iy)}" width="${F(iw)}" height="${F(ih)}"/></clipPath>`;
+      s+=`<g clip-path="url(#${uid})">${buildPanels(ix,iy,iw,ih,names)}</g>`;
+      TR.ground='illuminated';
+    }else{
+      s+=buildPanels(0,0,w,h,names);
+      TR.ground='panelled';
     }
-    TR.ground='panelled';
     picks=[];
+
   }else if(mode==='landscape'){
     if(!PH)s+=scenery(w,h,true);
     picks=[];
