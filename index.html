@@ -1122,44 +1122,124 @@ function scenery(W,H,small){
 
 /* the photograph, redrawn badly: one wobbly blob per cell of a
    coarse grid, then the strong edges scribbled over the top. */
-/* the photograph, redrawn as a pencil sketch: tone becomes hatching,
-   edges become contour lines. no colour fills — structure survives
-   line work far better than it survives paint. */
-function photoGround(w,h,grid,edges){
-  let s=`<rect width="${w}" height="${h}" fill="${grid.paper}"/>`;
-  const n=grid.n, cw=w/n, ch=h/n, rr=Math.max(cw,ch);
-
-  /* a few loose washes so it isn't bone dry */
-  if(grid.wash)grid.wash.forEach(q=>{
-    s+=`<path d="${blob(q[0]*w,q[1]*h,rr*R(1.6,3.2),RI(6,9),rr*.9)}" fill="${q[2]}" opacity="${F(R(.07,.15))}"/>`;
-  });
-
-  /* hatching. the darker the patch, the more strokes land on it. */
-  const ang=R(.55,.85), ca=Math.cos(ang), sa=Math.sin(ang);
-  for(let i=0;i<grid.tone.length;i++){
-    const t=grid.tone[i]; if(t<.34)continue;
-    const gx=i%n, gy=Math.floor(i/n);
-    const cx=(gx+.5)*cw, cy=(gy+.5)*ch;
-    const lines=Math.min(3,Math.round(t*3.4));
-    for(let k=0;k<lines;k++){
-      const off=(k-(lines-1)/2)*rr*.42+R(-1.2,1.2);
-      const len=rr*R(.7,1.9);
-      const x1=cx-ca*len/2-sa*off, y1=cy-sa*len/2+ca*off;
-      const x2=cx+ca*len/2-sa*off, y2=cy+sa*len/2+ca*off;
-      s+=`<path d="M${F(x1)} ${F(y1)} Q${F((x1+x2)/2+R(-1.6,1.6))} ${F((y1+y2)/2+R(-1.6,1.6))} ${F(x2)} ${F(y2)}" fill="none" stroke="#23201C" stroke-width="${F(R(.7,1.5))}" stroke-linecap="round" opacity="${F(.22+t*R(.35,.55))}"/>`;
-    }
-    /* the deepest shadows get a second pass across the first */
-    if(t>.72&&chance(.8)){
-      const len=rr*R(.9,1.5);
-      s+=`<path d="M${F(cx-sa*len/2)} ${F(cy+ca*len/2)} L${F(cx+sa*len/2)} ${F(cy-ca*len/2)}" fill="none" stroke="#1A1815" stroke-width="${F(R(.7,1.4))}" stroke-linecap="round" opacity="${F(R(.3,.6))}"/>`;
-    }
+/* The photograph is not filtered — it is re-staged. We find the large
+   shapes, measure where they sit and how they lean, then draw our own
+   crude object in each place. The room keeps its layout. Nothing in it
+   keeps its identity. */
+function drawWob(x,y,w2,h2,pts,jit){
+  let d='';
+  for(let i=0;i<pts;i++){
+    const t=i/pts*Math.PI*2;
+    const px=x+Math.cos(t)*w2*(1+R(-jit,jit));
+    const py=y+Math.sin(t)*h2*(1+R(-jit,jit));
+    d+=(i?'L':'M')+F(px)+' '+F(py);
   }
+  return d+'Z';
+}
+function boxWob(x1,y1,x2,y2,j){
+  const m=(a,b,t)=>a+(b-a)*t;
+  let d=`M${F(x1+R(-j,j))} ${F(y1+R(-j,j))}`;
+  for(let i=1;i<=3;i++)d+=`L${F(m(x1,x2,i/3)+R(-j,j))} ${F(y1+R(-j,j))}`;
+  for(let i=1;i<=3;i++)d+=`L${F(x2+R(-j,j))} ${F(m(y1,y2,i/3)+R(-j,j))}`;
+  for(let i=1;i<=3;i++)d+=`L${F(m(x2,x1,i/3)+R(-j,j))} ${F(y2+R(-j,j))}`;
+  for(let i=1;i<=3;i++)d+=`L${F(x1+R(-j,j))} ${F(m(y2,y1,i/3)+R(-j,j))}`;
+  return d+'Z';
+}
+function photoGround(w,h,grid){
+  let s=`<rect width="${w}" height="${h}" fill="${grid.paper}"/>`;
+  const rr=Math.min(w,h)/grid.n;
 
-  /* contours last, so the outline sits on top of the shading */
-  if(grid.detail)grid.detail.forEach(e=>{
-    if(!chance(.88))return;
-    const x=e[0]*w,y=e[1]*h,a=e[2],st=e[3],len=rr*(st?R(1.1,2.1):R(.6,1.3));
-    s+=`<path d="M${F(x-Math.cos(a)*len/2)} ${F(y-Math.sin(a)*len/2)} Q${F(x+R(-2.5,2.5))} ${F(y+R(-2.5,2.5))} ${F(x+Math.cos(a)*len/2)} ${F(y+Math.sin(a)*len/2)}" fill="none" stroke="#16140F" stroke-width="${F(st?R(1.5,2.8):R(.8,1.6))}" stroke-linecap="round" opacity="${F(st?R(.7,.95):R(.35,.65))}"/>`;
+  grid.regions.forEach(g=>{
+    const x1=g.x1*w, y1=g.y1*h, x2=g.x2*w, y2=g.y2*h;
+    const cx=(x1+x2)/2, cy=(y1+y2)/2, bw=x2-x1, bh=y2-y1;
+    const j=Math.min(bw,bh)*.09+2;
+    const sw=F(R(2,3.6));
+    const st=`stroke="#1A1712" stroke-width="${sw}" stroke-linejoin="round" stroke-linecap="round"`;
+    const op=F(R(.55,.85));
+
+    if(g.kind==='sky'){
+      for(let i=0;i<RI(1,3);i++){
+        const ax=R(x1,x2), ay=R(y1,y1+bh*.6), aw=bw*R(.12,.3);
+        s+=`<path d="M${F(ax-aw)} ${F(ay)} q${F(aw*.5)} ${F(-aw*.45)} ${F(aw)} 0 q${F(aw*.5)} ${F(-aw*.3)} ${F(aw)} ${F(aw*.1)}" fill="none" ${st} opacity=".5"/>`;
+      }
+      return;
+    }
+    if(g.kind==='slab'){
+      s+=`<path d="${boxWob(x1,y1,x2,y2,j)}" fill="${g.col}" ${st} opacity="${op}"/>`;
+      if(chance(.6))s+=`<path d="M${F(x1+bw*.1)} ${F(y1+bh*R(.3,.7))} L${F(x2-bw*.1)} ${F(y1+bh*R(.3,.7))}" fill="none" ${st} opacity=".5"/>`;
+      return;
+    }
+    if(g.kind==='tower'){
+      s+=`<path d="${boxWob(x1,y1,x2,y2,j)}" fill="${g.col}" ${st} opacity="${op}"/>`;
+      const rows=Math.max(1,Math.round(bh/(rr*2.2)));
+      for(let r=0;r<rows;r++)if(chance(.55)){
+        const yy=y1+bh*(r+.5)/rows, ww=bw*R(.2,.42);
+        s+=`<rect x="${F(cx-ww/2)}" y="${F(yy-rr*.4)}" width="${F(ww)}" height="${F(rr*.8)}" fill="#EFE7D4" ${st} opacity=".8"/>`;
+      }
+      return;
+    }
+    if(g.kind==='stick'){
+      s+=`<path d="M${F(cx+R(-j,j))} ${F(y2)} Q${F(cx+R(-bw,bw))} ${F(cy)} ${F(cx+R(-j,j))} ${F(y1)}" fill="none" ${st} opacity="${op}"/>`;
+      if(chance(.5))s+=`<circle cx="${F(cx)}" cy="${F(y1)}" r="${F(Math.max(3,bw*.5))}" fill="${g.col}" ${st} opacity="${op}"/>`;
+      return;
+    }
+    if(g.kind==='lump'){
+      s+=`<path d="M${F(x1)} ${F(y2)} Q${F(x1+bw*.1)} ${F(y1+bh*R(.05,.3))} ${F(cx)} ${F(y1)} Q${F(x2-bw*.1)} ${F(y1+bh*R(.05,.3))} ${F(x2)} ${F(y2)} Z" fill="${g.col}" ${st} opacity="${op}"/>`;
+      return;
+    }
+    if(g.kind==='frond'){
+      const n=RI(4,7);
+      for(let i=0;i<n;i++){
+        const a=-Math.PI/2+R(-1.1,1.1), L=Math.max(bw,bh)*R(.3,.62);
+        const ex=cx+Math.cos(a)*L, ey=cy+Math.sin(a)*L;
+        s+=`<path d="M${F(cx)} ${F(cy)} Q${F(cx+Math.cos(a)*L*.5+R(-10,10))} ${F(cy+Math.sin(a)*L*.5)} ${F(ex)} ${F(ey)}" fill="none" ${st} opacity="${op}"/>`;
+        s+=`<path d="${drawWob(ex,ey,L*.16,L*.11,7,.4)}" fill="${g.col}" ${st} opacity="${op}"/>`;
+      }
+      return;
+    }
+    if(g.kind==='arch'){
+      const spring=y1+bh*.45;
+      s+=`<path d="M${F(x1+R(-j,j))} ${F(y2)} L${F(x1+R(-j,j))} ${F(spring)} Q${F(cx+R(-j*2,j*2))} ${F(y1-bh*.06)} ${F(x2+R(-j,j))} ${F(spring)} L${F(x2+R(-j,j))} ${F(y2)} Z" fill="${g.col}" ${st} opacity="${op}"/>`;
+      const ix=bw*R(.18,.28), iy=bh*R(.16,.26);
+      s+=`<path d="M${F(x1+ix)} ${F(y2)} L${F(x1+ix)} ${F(spring+iy*.5)} Q${F(cx)} ${F(y1+iy)} ${F(x2-ix)} ${F(spring+iy*.5)} L${F(x2-ix)} ${F(y2)}" fill="#EFE7D4" ${st} opacity="${F(R(.6,.9))}"/>`;
+      return;
+    }
+    if(g.kind==='stairs'){
+      const n=RI(3,6), dir=chance(.5)?1:-1;
+      let d=`M${F(dir>0?x1:x2)} ${F(y2)}`;
+      for(let i=0;i<n;i++){
+        const sx=(dir>0?x1:x2)+dir*bw*(i+1)/n;
+        const sy=y2-bh*(i+1)/n;
+        d+=`L${F(sx-dir*bw/n+R(-j,j))} ${F(sy+R(-j,j))}L${F(sx+R(-j,j))} ${F(sy+R(-j,j))}`;
+      }
+      d+=`L${F(dir>0?x2:x1)} ${F(y2)}Z`;
+      s+=`<path d="${d}" fill="${g.col}" ${st} opacity="${op}"/>`;
+      return;
+    }
+    if(g.kind==='door'){
+      s+=`<path d="${boxWob(x1,y1,x2,y2,j)}" fill="${g.col}" ${st} opacity="${op}"/>`;
+      const px=bw*R(.16,.24), py=bh*R(.1,.18);
+      s+=`<path d="${boxWob(x1+px,y1+py,x2-px,y2-py*R(1.4,2.6),j*.6)}" fill="none" ${st} opacity=".65"/>`;
+      s+=`<circle cx="${F(x2-px*R(.4,.7))}" cy="${F(cy+bh*R(0,.12))}" r="${F(Math.max(2.4,bw*.05))}" fill="#EFE7D4" ${st} opacity=".9"/>`;
+      return;
+    }
+    if(g.kind==='figure'){
+      /* a person becomes one of ours. the museum has one population. */
+      const sc=Math.min(bw/78,bh/150)*R(.85,1.15);
+      s+=`<g transform="translate(${F(cx)},${F(y1+bh*.46)}) scale(${F(sc)})" opacity="${F(R(.85,1))}">${subjBrainlet(0,0,1)}</g>`;
+      return;
+    }
+    if(g.kind==='vehicle'){
+      const wr=Math.max(3,bh*R(.2,.3)), base=y2-wr*.9;
+      s+=`<path d="M${F(x1)} ${F(base)} L${F(x1+bw*.08)} ${F(y1+bh*R(.42,.6))} L${F(x1+bw*R(.26,.34))} ${F(y1+bh*R(.38,.55))} L${F(x1+bw*.36)} ${F(y1+R(-j,j))} L${F(x2-bw*R(.24,.34))} ${F(y1+R(-j,j))} L${F(x2-bw*.1)} ${F(y1+bh*R(.4,.56))} L${F(x2)} ${F(base)} Z" fill="${g.col}" ${st} opacity="${op}"/>`;
+      s+=`<circle cx="${F(x1+bw*R(.2,.28))}" cy="${F(base)}" r="${F(wr)}" fill="#26231C" ${st} opacity="${op}"/>`;
+      s+=`<circle cx="${F(x2-bw*R(.2,.28))}" cy="${F(base)}" r="${F(wr)}" fill="#26231C" ${st} opacity="${op}"/>`;
+      return;
+    }
+    /* blob — the default object */
+    s+=`<path d="${drawWob(cx,cy,bw/2,bh/2,RI(7,11),.22)}" fill="${g.col}" ${st} opacity="${op}"/>`;
+    if(g.dark>.55&&chance(.5))
+      s+=`<path d="M${F(cx-bw*.2)} ${F(cy)} q${F(bw*.2)} ${F(bh*.14)} ${F(bw*.4)} 0" fill="none" ${st} opacity=".6"/>`;
   });
   return s;
 }
@@ -1183,7 +1263,7 @@ function generate(){
   const style=RI(0,3);
   if(PH){
     TR.ground='photographic';
-    s+=photoGround(w,h,PH,FORCE.edges);
+    s+=photoGround(w,h,PH);
   }else{
   TR.ground=dark?'nocturne':['gradient','aureole','colour field','flat'][style];
   if(style===0){
@@ -1662,7 +1742,7 @@ function fromPhoto(img){
   const avg=total/(N*N);
 
   /* the grid the picture gets redrawn on */
-  const G=40, raw=[], step=N/G;
+  const G=34, raw=[], step=N/G;
   let edgeCount=0;
   for(let gy=0;gy<G;gy++)for(let gx=0;gx<G;gx++){
     let r=0,g=0,b=0,cnt=0;
@@ -1673,40 +1753,89 @@ function fromPhoto(img){
     raw.push([r/cnt,g/cnt,b/cnt]);
   }
 
-  /* stretch the range — phone photos indoors are all one dim value */
   const lums=raw.map(c=>c[0]*.299+c[1]*.587+c[2]*.114).sort((a,b)=>a-b);
   const lo=lums[Math.floor(lums.length*.03)], hi=lums[Math.floor(lums.length*.97)];
-  const k=(hi-lo>6)?255/(hi-lo):1;
+  const kk=(hi-lo>6)?255/(hi-lo):1;
+  for(let i=0;i<raw.length;i++)for(let ch=0;ch<3;ch++)
+    raw[i][ch]=Math.max(0,Math.min(255,(raw[i][ch]-lo)*kk));
 
-  /* tone map: how dark each patch is, 0 to 1 */
-  const tone=new Float32Array(raw.length);
-  for(let i=0;i<raw.length;i++){
-    let L=(raw[i][0]*.299+raw[i][1]*.587+raw[i][2]*.114);
-    L=Math.max(0,Math.min(255,(L-lo)*k));
-    tone[i]=Math.pow(1-L/255,1.45);
-  }
-
-  /* a handful of washes sampled from the darkest patches, for colour */
-  const wash=[];
-  for(let i=0;i<raw.length;i+=7){
-    if(tone[i]>.55&&wash.length<5){
-      const gx=i%G, gy=Math.floor(i/G);
-      wash.push([(gx+.5)/G,(gy+.5)/G,sat(raw[i][0],raw[i][1],raw[i][2],1.15)]);
+  /* quantise, then vote away the speckle so regions come out solid */
+  const K=5;
+  const byL=raw.map((c,i)=>[c[0]*.299+c[1]*.587+c[2]*.114,i]).sort((a,b)=>a[0]-b[0]);
+  let cent=[];
+  for(let k=0;k<K;k++)cent.push(raw[byL[Math.floor(k*(raw.length-1)/(K-1))][1]].slice());
+  const idx=new Uint8Array(raw.length);
+  for(let it=0;it<8;it++){
+    for(let i=0;i<raw.length;i++){
+      let best=0,bd=Infinity;
+      for(let k=0;k<K;k++){
+        const dr=raw[i][0]-cent[k][0],dg=raw[i][1]-cent[k][1],db=raw[i][2]-cent[k][2];
+        const q=dr*dr+dg*dg+db*db; if(q<bd){bd=q;best=k;}
+      }
+      idx[i]=best;
     }
+    const sum=cent.map(()=>[0,0,0,0]);
+    for(let i=0;i<raw.length;i++){const k=idx[i];sum[k][0]+=raw[i][0];sum[k][1]+=raw[i][1];sum[k][2]+=raw[i][2];sum[k][3]++;}
+    for(let k=0;k<K;k++)if(sum[k][3])cent[k]=[sum[k][0]/sum[k][3],sum[k][1]/sum[k][3],sum[k][2]/sum[k][3]];
+  }
+  for(let pass=0;pass<2;pass++){
+    const nx=new Uint8Array(idx);
+    for(let gy=0;gy<G;gy++)for(let gx=0;gx<G;gx++){
+      const tal=new Array(K).fill(0);
+      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+        const yy=gy+dy,xx=gx+dx; if(yy<0||yy>=G||xx<0||xx>=G)continue;
+        tal[idx[yy*G+xx]]++;
+      }
+      let bi=idx[gy*G+gx],bc=tal[bi];
+      for(let k=0;k<K;k++)if(tal[k]>bc){bc=tal[k];bi=k;}
+      nx[gy*G+gx]=bi;
+    }
+    idx.set(nx);
   }
 
-  /* contours from the full-resolution luminance */
-  const cand=[];
-  for(let y=1;y<N-1;y++)for(let xx=1;xx<N-1;xx++){
-    const i=y*N+xx;
-    const gxv=lum[i+1]-lum[i-1], gyv=lum[i+N]-lum[i-N];
-    const m=Math.hypot(gxv,gyv);
-    if(m>16){cand.push([xx/N,y/N,Math.atan2(gxv,-gyv),m]);edgeCount++;}
+  /* connected blobs of one colour — these are the "things" */
+  const lab=new Int16Array(raw.length).fill(-1);
+  const regions=[];
+  for(let start=0;start<raw.length;start++){
+    if(lab[start]>=0)continue;
+    const tag=idx[start], q=[start]; lab[start]=regions.length;
+    let mnx=G,mxx=0,mny=G,mxy=0,area=0;
+    while(q.length){
+      const p=q.pop(), px=p%G, py=Math.floor(p/G);
+      area++;
+      if(px<mnx)mnx=px; if(px>mxx)mxx=px;
+      if(py<mny)mny=py; if(py>mxy)mxy=py;
+      const nb=[px>0?p-1:-1, px<G-1?p+1:-1, py>0?p-G:-1, py<G-1?p+G:-1];
+      nb.forEach(o=>{ if(o>=0&&lab[o]<0&&idx[o]===tag){lab[o]=regions.length;q.push(o);} });
+    }
+    const c=cent[tag], L=(c[0]*.299+c[1]*.587+c[2]*.114)/255;
+    regions.push({x1:mnx/G,y1:mny/G,x2:(mxx+1)/G,y2:(mxy+1)/G,
+                  area:area/(G*G), dark:1-L, col:sat(c[0],c[1],c[2],1.25)});
   }
-  cand.sort((a,b)=>b[3]-a[3]);
-  const detail=cand.slice(0,780).map((e,i)=>[e[0],e[1],e[2],i<300?1:0]);
 
-  const busy=edgeCount/(N*N);
+  /* keep the ones big enough to be worth drawing, and decide what each
+     one becomes from its proportions and where it sits */
+  const keep=regions.filter(g=>g.area>.012).sort((a,b)=>b.area-a.area).slice(0,14);
+  keep.forEach(g=>{
+    const bw=g.x2-g.x1, bh=g.y2-g.y1, asp=bh/bw, cy=(g.y1+g.y2)/2;
+    const fill=g.area/(bw*bh);
+    if(g.dark<.35&&cy<.45&&g.area>.10)          g.kind='sky';
+    else if(asp>3.4&&bw<.11)                    g.kind='stick';
+    else if(asp>1.9&&asp<3.4&&bw<.2&&g.dark>.38)g.kind='figure';
+    else if(asp>1.45&&asp<2.7&&fill>.72&&g.y2>.72) g.kind='door';
+    else if(asp>1.7)                            g.kind='tower';
+    else if(asp<.62&&cy>.6&&g.dark>.42&&bw>.17) g.kind='vehicle';
+    else if(asp<.58&&cy>.58&&fill<.78)          g.kind='stairs';
+    else if(asp<.42&&cy>.55)                    g.kind='slab';
+    else if(asp>.75&&asp<1.7&&cy<.62&&fill>.62) g.kind='arch';
+    else if(fill<.52)                           g.kind='frond';
+    else if(cy>.6&&asp<.9)                      g.kind='lump';
+    else                                        g.kind='blob';
+  });
+  const wash=[];
+  edgeCount=keep.length;
+
+  const busy=keep.length/16;
   const bw=skMaxX-skMinX+1, bh=skMaxY-skMinY+1;
   const skAsp=bw/bh, skArea=(bw*bh)/(N*N), skFill=skinN/(bw*bh);
   const frac=skinN/(N*N);
@@ -1715,9 +1844,9 @@ function fromPhoto(img){
   const isFace = frac>.045 && frac<.42 && skAsp>.45 && skAsp<2.2
                  && skArea<.60 && skFill>.34;
   const force={
-    grid:{n:G,tone:tone,paper:'#EFEAE0',wash:wash,detail:detail},
+    grid:{n:G,paper:'#EFEAE0',regions:keep},
     edges:null,
-    pal:wash.map(q=>q[2]).slice(0,5),
+    pal:keep.map(g=>g.col).slice(0,5),
     wob:.8+busy*2.6,
     dens:.8
   };
