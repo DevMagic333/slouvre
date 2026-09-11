@@ -1122,27 +1122,44 @@ function scenery(W,H,small){
 
 /* the photograph, redrawn badly: one wobbly blob per cell of a
    coarse grid, then the strong edges scribbled over the top. */
+/* the photograph, redrawn as a pencil sketch: tone becomes hatching,
+   edges become contour lines. no colour fills — structure survives
+   line work far better than it survives paint. */
 function photoGround(w,h,grid,edges){
-  let s=`<rect width="${w}" height="${h}" fill="${grid.base}"/>`;
+  let s=`<rect width="${w}" height="${h}" fill="${grid.paper}"/>`;
   const n=grid.n, cw=w/n, ch=h/n, rr=Math.max(cw,ch);
-  /* every cell is painted in one of a handful of colours, so neighbours
-     sharing a colour fuse into a flat region instead of confetti. */
-  for(let i=0;i<grid.idx.length;i++){
-    const c=grid.pal[grid.idx[i]]; if(!c)continue;
-    const gx=i%n, gy=Math.floor(i/n);
-    s+=`<path d="${blob((gx+.5)*cw,(gy+.5)*ch,rr*R(.88,1.02),RI(6,8),rr*.13)}" fill="${c}"/>`;
-  }
-  /* then ink the borders between regions — the outline of the actual
-     shape, not a scribble where the brightness happened to change. */
-  if(edges)edges.forEach(e=>{
-    if(!chance(.9))return;
-    const x1=e[0]*w,y1=e[1]*h,x2=e[2]*w,y2=e[3]*h;
-    s+=`<path d="M${F(x1+R(-1.5,1.5))} ${F(y1+R(-1.5,1.5))} Q${F((x1+x2)/2+R(-2.5,2.5))} ${F((y1+y2)/2+R(-2.5,2.5))} ${F(x2+R(-1.5,1.5))} ${F(y2+R(-1.5,1.5))}" fill="none" stroke="#141414" stroke-width="${F(R(1.7,3))}" stroke-linecap="round" opacity="${F(R(.65,.92))}"/>`;
+
+  /* a few loose washes so it isn't bone dry */
+  if(grid.wash)grid.wash.forEach(q=>{
+    s+=`<path d="${blob(q[0]*w,q[1]*h,rr*R(1.6,3.2),RI(6,9),rr*.9)}" fill="${q[2]}" opacity="${F(R(.07,.15))}"/>`;
   });
+
+  /* hatching. the darker the patch, the more strokes land on it. */
+  const ang=R(.55,.85), ca=Math.cos(ang), sa=Math.sin(ang);
+  for(let i=0;i<grid.tone.length;i++){
+    const t=grid.tone[i]; if(t<.34)continue;
+    const gx=i%n, gy=Math.floor(i/n);
+    const cx=(gx+.5)*cw, cy=(gy+.5)*ch;
+    const lines=Math.min(3,Math.round(t*3.4));
+    for(let k=0;k<lines;k++){
+      const off=(k-(lines-1)/2)*rr*.42+R(-1.2,1.2);
+      const len=rr*R(.7,1.9);
+      const x1=cx-ca*len/2-sa*off, y1=cy-sa*len/2+ca*off;
+      const x2=cx+ca*len/2-sa*off, y2=cy+sa*len/2+ca*off;
+      s+=`<path d="M${F(x1)} ${F(y1)} Q${F((x1+x2)/2+R(-1.6,1.6))} ${F((y1+y2)/2+R(-1.6,1.6))} ${F(x2)} ${F(y2)}" fill="none" stroke="#23201C" stroke-width="${F(R(.7,1.5))}" stroke-linecap="round" opacity="${F(.22+t*R(.35,.55))}"/>`;
+    }
+    /* the deepest shadows get a second pass across the first */
+    if(t>.72&&chance(.8)){
+      const len=rr*R(.9,1.5);
+      s+=`<path d="M${F(cx-sa*len/2)} ${F(cy+ca*len/2)} L${F(cx+sa*len/2)} ${F(cy-ca*len/2)}" fill="none" stroke="#1A1815" stroke-width="${F(R(.7,1.4))}" stroke-linecap="round" opacity="${F(R(.3,.6))}"/>`;
+    }
+  }
+
+  /* contours last, so the outline sits on top of the shading */
   if(grid.detail)grid.detail.forEach(e=>{
-    if(!chance(.8))return;
-    const x=e[0]*w,y=e[1]*h,a=e[2],len=rr*R(.7,1.6);
-    s+=`<path d="M${F(x-Math.cos(a)*len/2)} ${F(y-Math.sin(a)*len/2)} Q${F(x+R(-3,3))} ${F(y+R(-3,3))} ${F(x+Math.cos(a)*len/2)} ${F(y+Math.sin(a)*len/2)}" fill="none" stroke="#1A1A1A" stroke-width="${F(R(.9,1.8))}" stroke-linecap="round" opacity="${F(R(.45,.75))}"/>`;
+    if(!chance(.88))return;
+    const x=e[0]*w,y=e[1]*h,a=e[2],st=e[3],len=rr*(st?R(1.1,2.1):R(.6,1.3));
+    s+=`<path d="M${F(x-Math.cos(a)*len/2)} ${F(y-Math.sin(a)*len/2)} Q${F(x+R(-2.5,2.5))} ${F(y+R(-2.5,2.5))} ${F(x+Math.cos(a)*len/2)} ${F(y+Math.sin(a)*len/2)}" fill="none" stroke="#16140F" stroke-width="${F(st?R(1.5,2.8):R(.8,1.6))}" stroke-linecap="round" opacity="${F(st?R(.7,.95):R(.35,.65))}"/>`;
   });
   return s;
 }
@@ -1645,7 +1662,7 @@ function fromPhoto(img){
   const avg=total/(N*N);
 
   /* the grid the picture gets redrawn on */
-  const G=42, raw=[], step=N/G;
+  const G=40, raw=[], step=N/G;
   let edgeCount=0;
   for(let gy=0;gy<G;gy++)for(let gx=0;gx<G;gx++){
     let r=0,g=0,b=0,cnt=0;
@@ -1656,84 +1673,40 @@ function fromPhoto(img){
     raw.push([r/cnt,g/cnt,b/cnt]);
   }
 
-  /* indoor photos are mostly one dim brown. stretch the range first or
-     every region lands on the same colour and nothing separates. */
+  /* stretch the range — phone photos indoors are all one dim value */
   const lums=raw.map(c=>c[0]*.299+c[1]*.587+c[2]*.114).sort((a,b)=>a-b);
-  const lo=lums[Math.floor(lums.length*.04)], hi=lums[Math.floor(lums.length*.96)];
-  if(hi-lo>6){
-    const k=255/(hi-lo);
-    for(let i=0;i<raw.length;i++)
-      for(let ch=0;ch<3;ch++)
-        raw[i][ch]=Math.max(0,Math.min(255,(raw[i][ch]-lo)*k));
+  const lo=lums[Math.floor(lums.length*.03)], hi=lums[Math.floor(lums.length*.97)];
+  const k=(hi-lo>6)?255/(hi-lo):1;
+
+  /* tone map: how dark each patch is, 0 to 1 */
+  const tone=new Float32Array(raw.length);
+  for(let i=0;i<raw.length;i++){
+    let L=(raw[i][0]*.299+raw[i][1]*.587+raw[i][2]*.114);
+    L=Math.max(0,Math.min(255,(L-lo)*k));
+    tone[i]=Math.pow(1-L/255,1.45);
   }
 
-  /* reduce to a handful of colours. this is what turns a photograph into
-     a cartoon: flat areas of one colour with a hard border between them. */
-  const K=6;
-  const byLum=raw.map((c,i)=>[c[0]*.299+c[1]*.587+c[2]*.114,i]).sort((a,b)=>a[0]-b[0]);
-  let cent=[];
-  for(let k=0;k<K;k++)cent.push(raw[byLum[Math.floor(k*(raw.length-1)/(K-1))][1]].slice());
-  const idx=new Uint8Array(raw.length);
-  for(let it=0;it<9;it++){
-    for(let i=0;i<raw.length;i++){
-      let best=0,bd=Infinity;
-      for(let k=0;k<K;k++){
-        const dr=raw[i][0]-cent[k][0],dg=raw[i][1]-cent[k][1],db=raw[i][2]-cent[k][2];
-        const dist=dr*dr+dg*dg+db*db;
-        if(dist<bd){bd=dist;best=k;}
-      }
-      idx[i]=best;
+  /* a handful of washes sampled from the darkest patches, for colour */
+  const wash=[];
+  for(let i=0;i<raw.length;i+=7){
+    if(tone[i]>.55&&wash.length<5){
+      const gx=i%G, gy=Math.floor(i/G);
+      wash.push([(gx+.5)/G,(gy+.5)/G,sat(raw[i][0],raw[i][1],raw[i][2],1.15)]);
     }
-    const sum=cent.map(()=>[0,0,0,0]);
-    for(let i=0;i<raw.length;i++){
-      const k=idx[i];sum[k][0]+=raw[i][0];sum[k][1]+=raw[i][1];sum[k][2]+=raw[i][2];sum[k][3]++;
-    }
-    for(let k=0;k<K;k++)if(sum[k][3])cent[k]=[sum[k][0]/sum[k][3],sum[k][1]/sum[k][3],sum[k][2]/sum[k][3]];
-  }
-  const pal=cent.map(c=>sat(c[0],c[1],c[2],1.3));
-
-  /* texture makes neighbouring cells flip between colours, which would
-     turn every cell border into an outline. vote each cell to match its
-     neighbours first, so regions grow solid and borders stay meaningful. */
-  for(let pass=0;pass<1;pass++){
-    const nx=new Uint8Array(idx);
-    for(let gy=0;gy<G;gy++)for(let gx=0;gx<G;gx++){
-      const tally=new Array(K).fill(0);
-      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
-        const yy=gy+dy,xx=gx+dx;
-        if(yy<0||yy>=G||xx<0||xx>=G)continue;
-        tally[idx[yy*G+xx]]++;
-      }
-      let best=idx[gy*G+gx],bc=tally[best];
-      for(let k=0;k<K;k++)if(tally[k]>bc){bc=tally[k];best=k;}
-      nx[gy*G+gx]=best;
-    }
-    idx.set(nx);
   }
 
-  /* the border between two regions is the outline of a thing */
-  const seg=[];
-  for(let gy=0;gy<G;gy++)for(let gx=0;gx<G;gx++){
-    const i=gy*G+gx;
-    if(gx<G-1&&idx[i]!==idx[i+1]){seg.push([(gx+1)/G,gy/G,(gx+1)/G,(gy+1)/G]);edgeCount++;}
-    if(gy<G-1&&idx[i]!==idx[i+G]){seg.push([gx/G,(gy+1)/G,(gx+1)/G,(gy+1)/G]);edgeCount++;}
-  }
-
-  /* strong edges, kept with the direction they run in */
-  /* quantising throws away thin things — chair legs, a guitar neck, the
-     line of a jaw. put them back as a light pencil pass over the flats. */
+  /* contours from the full-resolution luminance */
   const cand=[];
   for(let y=1;y<N-1;y++)for(let xx=1;xx<N-1;xx++){
     const i=y*N+xx;
     const gxv=lum[i+1]-lum[i-1], gyv=lum[i+N]-lum[i-N];
     const m=Math.hypot(gxv,gyv);
-    if(m>26)cand.push([xx/N,y/N,Math.atan2(gxv,-gyv),m]);
+    if(m>16){cand.push([xx/N,y/N,Math.atan2(gxv,-gyv),m]);edgeCount++;}
   }
   cand.sort((a,b)=>b[3]-a[3]);
-  const detail=cand.slice(0,240).map(e=>[e[0],e[1],e[2]]);
-  const edges=seg;
+  const detail=cand.slice(0,780).map((e,i)=>[e[0],e[1],e[2],i<300?1:0]);
 
-  const busy=edgeCount/(G*G);
+  const busy=edgeCount/(N*N);
   const bw=skMaxX-skMinX+1, bh=skMaxY-skMinY+1;
   const skAsp=bw/bh, skArea=(bw*bh)/(N*N), skFill=skinN/(bw*bh);
   const frac=skinN/(N*N);
@@ -1742,9 +1715,9 @@ function fromPhoto(img){
   const isFace = frac>.045 && frac<.42 && skAsp>.45 && skAsp<2.2
                  && skArea<.60 && skFill>.34;
   const force={
-    grid:{n:G,idx:idx,pal:pal,base:pal[K-1],detail:detail},
-    edges:edges,
-    pal:pal.slice(),
+    grid:{n:G,tone:tone,paper:'#EFEAE0',wash:wash,detail:detail},
+    edges:null,
+    pal:wash.map(q=>q[2]).slice(0,5),
     wob:.8+busy*2.6,
     dens:.8
   };
