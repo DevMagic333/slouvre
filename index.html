@@ -1294,6 +1294,13 @@ const SHAPES={
    s+=`<circle cx="${F(o.cx)}" cy="${F(o.cy)}" r="${F(r*.3)}" fill="#EFE7D4" ${o.st} opacity="${o.op}"/>`;
    return s;},
 
+ plane:(o)=>{
+   const x1=o.x1-o.bw*.04,y1=o.y1-o.bh*.04,x2=o.x2+o.bw*.04,y2=o.y2+o.bh*.04;
+   let s=`<path d="${boxWob(x1,y1,x2,y2,Math.min(o.bw,o.bh)*.05+3)}" fill="${o.col}" fill-opacity="${F(R(.5,.75))}" stroke="#1A1712" stroke-width="${F(R(1,2))}" stroke-linejoin="round" opacity="${F(R(.5,.8))}"/>`;
+   if(chance(.45)){const yy=R(y1+o.bh*.2,y2-o.bh*.1);
+     s+=`<path d="M${F(x1)} ${F(yy)} L${F(x2)} ${F(yy+R(-6,6))}" fill="none" stroke="#1A1712" stroke-width="${F(R(1,2.2))}" stroke-linecap="round" opacity=".4"/>`;}
+   return s;},
+
  blob:(o)=>{let s=`<path d="${drawWob(o.cx,o.cy,o.bw/2,o.bh/2,RI(7,11),.22)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
    if(o.dark>.55&&chance(.5))s+=`<path d="M${F(o.cx-o.bw*.2)} ${F(o.cy)} q${F(o.bw*.2)} ${F(o.bh*.14)} ${F(o.bw*.4)} 0" fill="none" ${o.st} opacity=".6"/>`;
    return s;}
@@ -1930,7 +1937,20 @@ function fromPhoto(img){
 
   /* keep the ones big enough to be worth drawing, and decide what each
      one becomes from its proportions and where it sits */
-  const keep=regions.filter(g=>g.area>.009).sort((a,b)=>b.area-a.area).slice(0,18);
+  /* A wall is not an object. Regions that sprawl across the frame or
+     lean on two or more edges are the room itself — they stay flat, and
+     the objects get placed on top of them. */
+  regions.forEach(g=>{
+    let ed=0;
+    if(g.x1<=.02)ed++; if(g.y1<=.02)ed++; if(g.x2>=.98)ed++; if(g.y2>=.98)ed++;
+    g.ground=(g.area>.11)||(ed>=2&&g.area>.045);
+  });
+  const planes=regions.filter(g=>g.ground&&g.area>.03)
+                      .sort((a,b)=>b.area-a.area).slice(0,5);
+  planes.forEach(g=>g.kind='plane');
+  const objs=regions.filter(g=>!g.ground&&g.area>.008&&g.area<.10)
+                    .sort((a,b)=>b.area-a.area).slice(0,11);
+  const keep=planes.concat(objs);
   /* every object that could plausibly fill a region of this shape gets
      a vote. picking among them is what stops the same five shapes from
      appearing in every picture. */
@@ -1969,7 +1989,7 @@ function fromPhoto(img){
     {k:'blob',    asp:[.35,2.6]}
   ];
   const inR=(v,r)=>!r||(v>=r[0]&&v<=r[1]);
-  keep.forEach(g=>{
+  objs.forEach(g=>{
     const bw=g.x2-g.x1, bh=g.y2-g.y1, asp=bh/bw, cy=(g.y1+g.y2)/2;
     const fill=g.area/(bw*bh);
     const cands=CAT.filter(c=>inR(asp,c.asp)&&inR(cy,c.cy)&&inR(fill,c.fill)
@@ -1977,7 +1997,7 @@ function fromPhoto(img){
     g.kind=cands.length?P(cands).k:'blob';
   });
   const wash=[];
-  edgeCount=keep.length;
+  edgeCount=objs.length;
 
   const busy=keep.length/16;
   const bw=skMaxX-skMinX+1, bh=skMaxY-skMinY+1;
@@ -1990,7 +2010,7 @@ function fromPhoto(img){
   const force={
     grid:{n:G,paper:'#EFEAE0',regions:keep},
     edges:null,
-    pal:keep.map(g=>g.col).slice(0,5),
+    pal:objs.map(g=>g.col).slice(0,5),
     wob:.8+busy*2.6,
     dens:.8
   };
