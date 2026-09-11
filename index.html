@@ -1146,6 +1146,12 @@ function boxWob(x1,y1,x2,y2,j){
   for(let i=1;i<=3;i++)d+=`L${F(x1+R(-j,j))} ${F(m(y2,y1,i/3)+R(-j,j))}`;
   return d+'Z';
 }
+/* our own creatures, scaled into whatever slot the photograph left */
+function placeSubj(fn,o,w0,h0,yf){
+  const sc=Math.min(o.bw/w0,o.bh/h0)*R(.82,1.12);
+  return `<g transform="translate(${F(o.cx)},${F(o.y1+o.bh*yf)}) scale(${F(sc)})" opacity="${F(R(.85,1))}">${fn(0,0,1)}</g>`;
+}
+const SUBJKIND={figure:1,animal:1,plant:1,thing:1,cube:1,paw:1};
 const SHAPES={
  sky:(o)=>{let s='';for(let i=0;i<RI(1,3);i++){const ax=R(o.x1,o.x2),ay=R(o.y1,o.y1+o.bh*.6),aw=o.bw*R(.12,.3);
    s+=`<path d="M${F(ax-aw)} ${F(ay)} q${F(aw*.5)} ${F(-aw*.45)} ${F(aw)} 0 q${F(aw*.5)} ${F(-aw*.3)} ${F(aw)} ${F(aw*.1)}" fill="none" ${o.st} opacity=".5"/>`;}return s;},
@@ -1195,8 +1201,12 @@ const SHAPES={
    s+=`<circle cx="${F(o.x2-px*R(.4,.7))}" cy="${F(o.cy+o.bh*R(0,.12))}" r="${F(Math.max(2.4,o.bw*.05))}" fill="#EFE7D4" ${o.st} opacity=".9"/>`;
    return s;},
 
- figure:(o)=>{const sc=Math.min(o.bw/78,o.bh/150)*R(.85,1.15);
-   return `<g transform="translate(${F(o.cx)},${F(o.y1+o.bh*.46)}) scale(${F(sc)})" opacity="${F(R(.85,1))}">${subjBrainlet(0,0,1)}</g>`;},
+ figure:(o)=>placeSubj(subjBrainlet,o,78,150,.46),
+ animal: (o)=>placeSubj(subjAnimal, o,120,100,.5),
+ plant:  (o)=>placeSubj(subjCactus, o,100,130,.5),
+ thing:  (o)=>placeSubj(subjObject, o,105,105,.5),
+ cube:   (o)=>placeSubj(subjCube,   o,110,110,.5),
+ paw:    (o)=>placeSubj(subjHand,   o,105,105,.5),
 
  vehicle:(o)=>{const wr=Math.max(3,o.bh*R(.2,.3)),base=o.y2-wr*.9;
    let s=`<path d="M${F(o.x1)} ${F(base)} L${F(o.x1+o.bw*.08)} ${F(o.y1+o.bh*R(.42,.6))} L${F(o.x1+o.bw*R(.26,.34))} ${F(o.y1+o.bh*R(.38,.55))} L${F(o.x1+o.bw*.36)} ${F(o.y1)} L${F(o.x2-o.bw*R(.24,.34))} ${F(o.y1)} L${F(o.x2-o.bw*.1)} ${F(o.y1+o.bh*R(.4,.56))} L${F(o.x2)} ${F(base)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
@@ -1299,7 +1309,17 @@ function photoGround(w,h,grid){
              j:Math.min(x2-x1,y2-y1)*.09+2,
              op:F(R(.55,.85)),
              st:`stroke="#1A1712" stroke-width="${F(R(2,3.6))}" stroke-linejoin="round" stroke-linecap="round"`};
-    s+=(SHAPES[g.kind]||SHAPES.blob)(o);
+    let piece=(SHAPES[g.kind]||SHAPES.blob)(o);
+    /* no two objects come out of the same mould — everything gets its
+       own lean, its own stretch, and sometimes a stray mark. */
+    const soft=SUBJKIND[g.kind];
+    const rot=soft?R(-4,4):R(-9,9);
+    const sx=soft?R(.97,1.03):R(.9,1.1), sy=soft?R(.97,1.03):R(.9,1.1);
+    s+=`<g transform="rotate(${F(rot)} ${F(o.cx)} ${F(o.cy)}) translate(${F(o.cx)} ${F(o.cy)}) scale(${F(sx)} ${F(sy)}) translate(${F(-o.cx)} ${F(-o.cy)})">${piece}</g>`;
+    if(!soft&&chance(.3)){
+      const mx=R(o.x1,o.x2), my=R(o.y1,o.y2), ml=Math.min(o.bw,o.bh)*R(.1,.3);
+      s+=`<path d="M${F(mx)} ${F(my)} q${F(ml*R(-.6,.6))} ${F(ml*R(-.7,.7))} ${F(ml*R(-1,1))} ${F(ml*R(-1,1))}" fill="none" stroke="#1A1712" stroke-width="${F(R(1,2.2))}" stroke-linecap="round" opacity="${F(R(.3,.6))}"/>`;
+    }
   });
   return s;
 }
@@ -1941,6 +1961,11 @@ function fromPhoto(img){
     {k:'stairs',  asp:[.25,.75],cy:[.45,1]},
     {k:'slab',    asp:[0,.5],   cy:[.4,1]},
     {k:'lump',    asp:[.5,1.1], cy:[.5,1]},
+    {k:'animal',  asp:[.45,1.5], cy:[.25,1]},
+    {k:'plant',   asp:[.9,2.8],  fill:[.28,.9]},
+    {k:'thing',   asp:[.5,2],    area:[0,.16]},
+    {k:'cube',    asp:[.7,1.5],  fill:[.62,1]},
+    {k:'paw',     asp:[.6,1.7],  area:[0,.12]},
     {k:'blob',    asp:[.35,2.6]}
   ];
   const inR=(v,r)=>!r||(v>=r[0]&&v<=r[1]);
