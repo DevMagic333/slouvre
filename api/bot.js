@@ -3,6 +3,10 @@
  *
  * Env vars:  TELEGRAM_BOT_TOKEN   (from BotFather)
  *            TELEGRAM_SECRET      (anything you invent)
+ *            THIERRY_TOPIC        (topic id — 41 for The Slouvre in La Bolsa)
+ *
+ * Telegram has no per-topic membership: a bot joins the whole group or
+ * not at all. The topic lock below is what keeps him in his own room.
  *
  * He is sincere. He does not know he is funny. Every line in here obeys
  * the bible: no emoji, no exclamation marks, never more than three
@@ -12,6 +16,7 @@
 const TOKEN  = process.env.TELEGRAM_BOT_TOKEN;
 const SECRET = process.env.TELEGRAM_SECRET;
 const API    = `https://api.telegram.org/bot${TOKEN}`;
+const TOPIC  = process.env.THIERRY_TOPIC ? Number(process.env.THIERRY_TOPIC) : null;
 
 /* ---------- his voice ---------- */
 
@@ -178,6 +183,11 @@ export default async function handler(req, res) {
     const from   = msg.from || {};
     const es     = String(from.language_code || '').toLowerCase().startsWith('es');
     const d      = es ? L.es : L.en;
+    /* He does not wander. Outside his own topic he is not present —
+       otherwise two bots answer the same message in the same room. */
+    if (TOPIC && thread !== TOPIC && msg.chat.type !== 'private')
+      return res.status(200).json({ ok: true });
+
     const text   = (msg.text || msg.caption || '').trim();
     const low    = text.toLowerCase();
 
