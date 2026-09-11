@@ -2133,8 +2133,11 @@ function exportPNG(cb){
      hard at the corners, so a corner mark is a mark you lose. */
   const ns='http://www.w3.org/2000/svg';
   const fsz=BANNER?CH*.062:10.5;
-  const padX=BANNER?CW*.05:11, padY=BANNER?CH*.13:13;
-  const tw=MARK.length*fsz*.55+fsz*1.5;
+  const padX=BANNER?CW*.05:14, padY=BANNER?CH*.13:14;
+  /* Georgia runs about .62em per character at this size. The old .55
+     estimate made the plate narrower than its own text, so the last
+     letter fell off the edge on every export. */
+  const tw=MARK.length*fsz*.62+fsz*1.9;
   const px=CW-tw-padX, py=CH-padY-fsz*1.45;
   const plate=document.createElementNS(ns,'rect');
   plate.setAttribute('x',px);plate.setAttribute('y',py);
