@@ -582,7 +582,7 @@ function scrawl(x,y,len,segs){
   }
   return d;
 }
-function ink(s){return `fill="none" stroke="#111" stroke-width="${F(s)}" stroke-linecap="round" stroke-linejoin="round"`;}
+function ink(s,c){return `fill="none" stroke="${c||'#111'}" stroke-width="${F(s)}" stroke-linecap="round" stroke-linejoin="round"`;}
 
 /* ---------- what they are wearing ---------- */
 const ACCS=[['none',.40],['glasses',.12],['sunglasses',.09],['cap',.09],['beanie',.05],
@@ -718,11 +718,11 @@ function subjBrainlet(cx,cy,s){
   if(sp==='zombie'){
     g+=`<path d="M${F(cx-hr*.5)} ${F(cy-hr*.55)} l${F(hr*.3)} ${F(hr*.12)}" ${ink(sw*.8)}/>`;
     for(let i=0;i<3;i++)g+=`<path d="M${F(cx-hr*.46+i*hr*.12)} ${F(cy-hr*.62)} l0 ${F(hr*.2)}" ${ink(sw*.6)}/>`;
-    g+=`<path d="M${F(cx+hr*.3)} ${F(cy+hr*.18)} q${F(4*s)} ${F(18*s)} ${F(-2*s)} ${F(26*s)}" ${ink(sw*.7)} stroke="#5C7A3E"/>`;
+    g+=`<path d="M${F(cx+hr*.3)} ${F(cy+hr*.18)} q${F(4*s)} ${F(18*s)} ${F(-2*s)} ${F(26*s)}" ${ink(sw*.7,'#5C7A3E')}/>`;
   }
   g+=mouth(cx,cy+hr*R(.36,.62),hr,sw);
   if(sp!=='alien'&&chance(.4))
-    g+=`<path d="M${F(cx-hr*.5)} ${F(cy+hr*.35)} q${F(R(-6,6))} ${F(hr*.5)} ${F(R(-5,5))} ${F(hr*R(.7,1.3))}" ${ink(sw)} stroke="#4FA3D8"/>`;
+    g+=`<path d="M${F(cx-hr*.5)} ${F(cy+hr*.35)} q${F(R(-6,6))} ${F(hr*.5)} ${F(R(-5,5))} ${F(hr*R(.7,1.3))}" ${ink(sw,'#4FA3D8')}/>`;
   const by=cy+hr*R(1.0,1.3);
   g+=`<path d="M${F(cx+R(-8,8)*s)} ${F(cy+hr*.9)} L${F(cx+R(-14,14)*s)} ${F(by+70*s)}" ${ink(sw)}/>`;
   const acc=ACC;
@@ -888,7 +888,7 @@ function subjAnimal(cx,cy,s){
         :`M${F(hx+dir*hr*.45)} ${F(hy-hr*.75)} q${F(dir*14*s)} ${F(-26*s)} ${F(dir*4*s)} ${F(-40*s)}`;
       g+=`<path d="${d}" fill="none" stroke="${hc}" stroke-width="${F(9*s)}" stroke-linecap="round"/>`;
       g+=`<path d="${d}" fill="none" stroke="#111" stroke-width="${F(sw*.7)}" stroke-linecap="round" opacity=".65"/>`;}
-    if(kind==='goat')g+=`<path d="M${F(hx)} ${F(hy+hr*.8)} q${F(-4*s)} ${F(20*s)} ${F(2*s)} ${F(30*s)}" ${ink(sw*1.2)} stroke="${col}"/>`;
+    if(kind==='goat')g+=`<path d="M${F(hx)} ${F(hy+hr*.8)} q${F(-4*s)} ${F(20*s)} ${F(2*s)} ${F(30*s)}" ${ink(sw*1.2,col)}/>`;
     if(kind==='bull')g+=`<circle cx="${F(hx+hr*.1)}" cy="${F(hy+hr*.42)}" r="${F(hr*.13)}" fill="#C9A227" stroke="#111" stroke-width="${F(sw*.6)}"/>`;
   }else{
     for(let e=0;e<2;e++){const dir=e?1:-1;
@@ -1125,18 +1125,24 @@ function scenery(W,H,small){
 function photoGround(w,h,grid,edges){
   let s=`<rect width="${w}" height="${h}" fill="${grid.base}"/>`;
   const n=grid.n, cw=w/n, ch=h/n, rr=Math.max(cw,ch);
-  for(let i=0;i<grid.cells.length;i++){
-    const c=grid.cells[i]; if(!c)continue;
+  /* every cell is painted in one of a handful of colours, so neighbours
+     sharing a colour fuse into a flat region instead of confetti. */
+  for(let i=0;i<grid.idx.length;i++){
+    const c=grid.pal[grid.idx[i]]; if(!c)continue;
     const gx=i%n, gy=Math.floor(i/n);
-    s+=`<path d="${blob((gx+.5)*cw,(gy+.5)*ch,rr*R(.66,.86),RI(5,7),rr*.2)}" fill="${c}" opacity="${F(R(.9,1))}"/>`;
+    s+=`<path d="${blob((gx+.5)*cw,(gy+.5)*ch,rr*R(.88,1.02),RI(6,8),rr*.13)}" fill="${c}"/>`;
   }
-  /* the ink pass. strong edges get a heavy line, so the thing you
-     photographed keeps its outline even after everything else melts. */
+  /* then ink the borders between regions — the outline of the actual
+     shape, not a scribble where the brightness happened to change. */
   if(edges)edges.forEach(e=>{
-    const strong=e[3]===1;
-    if(!chance(strong?.95:.6))return;
-    const x=e[0]*w,y=e[1]*h,a=e[2],len=rr*(strong?R(.9,1.9):R(.5,1.1));
-    s+=`<path d="M${F(x-Math.cos(a)*len/2)} ${F(y-Math.sin(a)*len/2)} Q${F(x+R(-4,4))} ${F(y+R(-4,4))} ${F(x+Math.cos(a)*len/2)} ${F(y+Math.sin(a)*len/2)}" fill="none" stroke="#111" stroke-width="${F(strong?R(2,4):R(.9,1.9))}" stroke-linecap="round" opacity="${F(strong?R(.7,.95):R(.3,.6))}"/>`;
+    if(!chance(.9))return;
+    const x1=e[0]*w,y1=e[1]*h,x2=e[2]*w,y2=e[3]*h;
+    s+=`<path d="M${F(x1+R(-1.5,1.5))} ${F(y1+R(-1.5,1.5))} Q${F((x1+x2)/2+R(-2.5,2.5))} ${F((y1+y2)/2+R(-2.5,2.5))} ${F(x2+R(-1.5,1.5))} ${F(y2+R(-1.5,1.5))}" fill="none" stroke="#141414" stroke-width="${F(R(1.7,3))}" stroke-linecap="round" opacity="${F(R(.65,.92))}"/>`;
+  });
+  if(grid.detail)grid.detail.forEach(e=>{
+    if(!chance(.8))return;
+    const x=e[0]*w,y=e[1]*h,a=e[2],len=rr*R(.7,1.6);
+    s+=`<path d="M${F(x-Math.cos(a)*len/2)} ${F(y-Math.sin(a)*len/2)} Q${F(x+R(-3,3))} ${F(y+R(-3,3))} ${F(x+Math.cos(a)*len/2)} ${F(y+Math.sin(a)*len/2)}" fill="none" stroke="#1A1A1A" stroke-width="${F(R(.9,1.8))}" stroke-linecap="round" opacity="${F(R(.45,.75))}"/>`;
   });
   return s;
 }
@@ -1222,7 +1228,7 @@ function generate(){
 
   /* doodles in the margins, because someone always draws on it */
   const DOOD=['star','spiral','heart','arrow','smiley','x','cloud'];
-  for(let i=0;i<RI(0,Math.round(3*DENS));i++){
+  for(let i=0;i<(PH?RI(0,1):RI(0,Math.round(3*DENS)));i++){
     const k=P(DOOD),x=R(14,w-14),y=R(14,h-14),z=R(.55,1.5),c=chance(.55)?'#111':P(PAL);
     const st=`fill="none" stroke="${c}" stroke-width="${F(R(1.4,3.2))}" stroke-linecap="round" stroke-linejoin="round" opacity="${F(R(.6,1))}"`;
     if(k==='star'){let d='';for(let p=0;p<5;p++){const a=-Math.PI/2+p*4*Math.PI/5;d+=(p?'L':'M')+F(x+Math.cos(a)*13*z)+' '+F(y+Math.sin(a)*13*z);}s+=`<path d="${d}Z" ${st}/>`;}
@@ -1235,7 +1241,7 @@ function generate(){
   }
 
   /* the tells */
-  if(chance(.34)){
+  if(chance(PH?.10:.34)){
     const t=P(GIBBER);TR.inscription=t;
     s+=`<text x="${F(R(20,w-110))}" y="${F(R(40,h-20))}" font-family="Georgia,serif" font-size="${F(R(15,38))}" fill="${chance(.5)?'#111':P(PAL)}" opacity="${F(R(.5,.95))}" transform="rotate(${F(R(-14,14))} ${F(w/2)} ${F(h/2)})" letter-spacing="${F(R(-1,4))}">${t}</text>`;
   }else TR.inscription='none';
@@ -1639,7 +1645,7 @@ function fromPhoto(img){
   const avg=total/(N*N);
 
   /* the grid the picture gets redrawn on */
-  const G=30, cells=[], step=N/G;
+  const G=42, raw=[], step=N/G;
   let edgeCount=0;
   for(let gy=0;gy<G;gy++)for(let gx=0;gx<G;gx++){
     let r=0,g=0,b=0,cnt=0;
@@ -1647,22 +1653,87 @@ function fromPhoto(img){
       for(let xx=Math.floor(gx*step);xx<Math.floor((gx+1)*step);xx++){
         const i=yy*N+xx;r+=d[i*4];g+=d[i*4+1];b+=d[i*4+2];cnt++;
       }
-    cells.push(sat(r/cnt,g/cnt,b/cnt,1.35));
+    raw.push([r/cnt,g/cnt,b/cnt]);
+  }
+
+  /* indoor photos are mostly one dim brown. stretch the range first or
+     every region lands on the same colour and nothing separates. */
+  const lums=raw.map(c=>c[0]*.299+c[1]*.587+c[2]*.114).sort((a,b)=>a-b);
+  const lo=lums[Math.floor(lums.length*.04)], hi=lums[Math.floor(lums.length*.96)];
+  if(hi-lo>6){
+    const k=255/(hi-lo);
+    for(let i=0;i<raw.length;i++)
+      for(let ch=0;ch<3;ch++)
+        raw[i][ch]=Math.max(0,Math.min(255,(raw[i][ch]-lo)*k));
+  }
+
+  /* reduce to a handful of colours. this is what turns a photograph into
+     a cartoon: flat areas of one colour with a hard border between them. */
+  const K=6;
+  const byLum=raw.map((c,i)=>[c[0]*.299+c[1]*.587+c[2]*.114,i]).sort((a,b)=>a[0]-b[0]);
+  let cent=[];
+  for(let k=0;k<K;k++)cent.push(raw[byLum[Math.floor(k*(raw.length-1)/(K-1))][1]].slice());
+  const idx=new Uint8Array(raw.length);
+  for(let it=0;it<9;it++){
+    for(let i=0;i<raw.length;i++){
+      let best=0,bd=Infinity;
+      for(let k=0;k<K;k++){
+        const dr=raw[i][0]-cent[k][0],dg=raw[i][1]-cent[k][1],db=raw[i][2]-cent[k][2];
+        const dist=dr*dr+dg*dg+db*db;
+        if(dist<bd){bd=dist;best=k;}
+      }
+      idx[i]=best;
+    }
+    const sum=cent.map(()=>[0,0,0,0]);
+    for(let i=0;i<raw.length;i++){
+      const k=idx[i];sum[k][0]+=raw[i][0];sum[k][1]+=raw[i][1];sum[k][2]+=raw[i][2];sum[k][3]++;
+    }
+    for(let k=0;k<K;k++)if(sum[k][3])cent[k]=[sum[k][0]/sum[k][3],sum[k][1]/sum[k][3],sum[k][2]/sum[k][3]];
+  }
+  const pal=cent.map(c=>sat(c[0],c[1],c[2],1.3));
+
+  /* texture makes neighbouring cells flip between colours, which would
+     turn every cell border into an outline. vote each cell to match its
+     neighbours first, so regions grow solid and borders stay meaningful. */
+  for(let pass=0;pass<1;pass++){
+    const nx=new Uint8Array(idx);
+    for(let gy=0;gy<G;gy++)for(let gx=0;gx<G;gx++){
+      const tally=new Array(K).fill(0);
+      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
+        const yy=gy+dy,xx=gx+dx;
+        if(yy<0||yy>=G||xx<0||xx>=G)continue;
+        tally[idx[yy*G+xx]]++;
+      }
+      let best=idx[gy*G+gx],bc=tally[best];
+      for(let k=0;k<K;k++)if(tally[k]>bc){bc=tally[k];best=k;}
+      nx[gy*G+gx]=best;
+    }
+    idx.set(nx);
+  }
+
+  /* the border between two regions is the outline of a thing */
+  const seg=[];
+  for(let gy=0;gy<G;gy++)for(let gx=0;gx<G;gx++){
+    const i=gy*G+gx;
+    if(gx<G-1&&idx[i]!==idx[i+1]){seg.push([(gx+1)/G,gy/G,(gx+1)/G,(gy+1)/G]);edgeCount++;}
+    if(gy<G-1&&idx[i]!==idx[i+G]){seg.push([gx/G,(gy+1)/G,(gx+1)/G,(gy+1)/G]);edgeCount++;}
   }
 
   /* strong edges, kept with the direction they run in */
+  /* quantising throws away thin things — chair legs, a guitar neck, the
+     line of a jaw. put them back as a light pencil pass over the flats. */
   const cand=[];
   for(let y=1;y<N-1;y++)for(let xx=1;xx<N-1;xx++){
     const i=y*N+xx;
     const gxv=lum[i+1]-lum[i-1], gyv=lum[i+N]-lum[i-N];
     const m=Math.hypot(gxv,gyv);
-    if(m>22){cand.push([xx/N,y/N,Math.atan2(gxv,-gyv),m]);edgeCount++;}
+    if(m>26)cand.push([xx/N,y/N,Math.atan2(gxv,-gyv),m]);
   }
   cand.sort((a,b)=>b[3]-a[3]);
-  const keep=cand.slice(0,560);
-  const edges=keep.map((e,i)=>[e[0],e[1],e[2],i<180?1:0]);
+  const detail=cand.slice(0,240).map(e=>[e[0],e[1],e[2]]);
+  const edges=seg;
 
-  const busy=edgeCount/(N*N);
+  const busy=edgeCount/(G*G);
   const bw=skMaxX-skMinX+1, bh=skMaxY-skMinY+1;
   const skAsp=bw/bh, skArea=(bw*bh)/(N*N), skFill=skinN/(bw*bh);
   const frac=skinN/(N*N);
@@ -1671,9 +1742,9 @@ function fromPhoto(img){
   const isFace = frac>.045 && frac<.42 && skAsp>.45 && skAsp<2.2
                  && skArea<.60 && skFill>.34;
   const force={
-    grid:{n:G,cells:cells,base:sat(avg,avg,avg,1)},
+    grid:{n:G,idx:idx,pal:pal,base:pal[K-1],detail:detail},
     edges:edges,
-    pal:cells.filter((_,i)=>i%23===0).slice(0,6),
+    pal:pal.slice(),
     wob:.8+busy*2.6,
     dens:.8
   };
@@ -1682,7 +1753,7 @@ function fromPhoto(img){
     force.subject='brainlet';
     force.composition='portrait';
     force.anchor=[(skinX/skinN/N)*300,(skinY/skinN/N)*300];
-    force.scale=Math.max(.6,Math.min(2.1,Math.max(fw,fh)*2.4));
+    force.scale=Math.max(.55,Math.min(1.35,Math.max(fw,fh)*1.9));
   }else{
     /* whatever you shot stays the subject. the invented thing is a
        small intruder off to one side, not a lid over the top. */
