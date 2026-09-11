@@ -623,14 +623,138 @@ function scrawl(x,y,len,segs){
 function ink(s,c){return `fill="none" stroke="${c||'#111'}" stroke-width="${F(s)}" stroke-linecap="round" stroke-linejoin="round"`;}
 
 /* ---------- what they are wearing ---------- */
-const ACCS=[['none',.40],['glasses',.12],['sunglasses',.09],['cap',.09],['beanie',.05],
-  ['beret',.04],['trench',.06],['jersey',.05],['rocker',.04],['monocle',.02],
-  ['cigarette',.025],['cigar',.015],['crown',.01]];
+const ACCS=[['none',.147],['glasses',.085],['sunglasses',.065],['cap',.065],['beanie',.035],
+  ['beret',.03],['trench',.045],['jersey',.035],['rocker',.03],['monocle',.015],
+  ['cigarette',.02],['cigar',.012],['crown',.01],
+  /* the cast — rarer, and the reason anyone reads the object file */
+  ['horns',.028],['halo',.022],['ninja',.026],['spartan',.020],['robot',.024],
+  ['ghost',.018],['wizard',.020],['pirate',.022],['viking',.020],['jester',.016],
+  ['chef',.020],['headphones',.026],['bandana',.024],['laurel',.018],['topknot',.022],
+  ['visor',.020],['astronaut',.014],['plague',.012],['antlers',.018],['bucket',.016]];
 function pickAcc(){let r=R(0,1);for(const[k,w]of ACCS){if((r-=w)<=0)return k;}return 'none';}
 
 function headAcc(kind,cx,cy,hr,s){
   const sw=R(2,3.4)*s;let g='';
   const O=`fill="none" stroke="#111" stroke-width="${F(sw)}" stroke-linecap="round" stroke-linejoin="round"`;
+  const FL=c=>`fill="${c}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round" stroke-linecap="round"`;
+  const top=cy-hr*1.02;
+
+  if(kind==='horns'){
+    for(const d of [-1,1])
+      g+=`<path d="M${F(cx+d*hr*.52)} ${F(top+hr*.22)} Q${F(cx+d*hr*1.05)} ${F(top-hr*.18)} ${F(cx+d*hr*.72)} ${F(top-hr*.62)} Q${F(cx+d*hr*.58)} ${F(top-hr*.1)} ${F(cx+d*hr*.34)} ${F(top+hr*.18)} Z" ${FL('#E8DCC8')}/>`;
+    return g;
+  }
+  if(kind==='antlers'){
+    for(const d of [-1,1]){
+      g+=`<path d="M${F(cx+d*hr*.42)} ${F(top+hr*.2)} L${F(cx+d*hr*.66)} ${F(top-hr*.62)}" ${O}/>`;
+      g+=`<path d="M${F(cx+d*hr*.56)} ${F(top-hr*.22)} L${F(cx+d*hr*.96)} ${F(top-hr*.36)}" ${O}/>`;
+      g+=`<path d="M${F(cx+d*hr*.62)} ${F(top-hr*.46)} L${F(cx+d*hr*.34)} ${F(top-hr*.78)}" ${O}/>`;
+    }
+    return g;
+  }
+  if(kind==='halo'){
+    g+=`<ellipse cx="${F(cx)}" cy="${F(top-hr*.42)}" rx="${F(hr*.62)}" ry="${F(hr*.18)}" fill="none" stroke="#D9B44A" stroke-width="${F(sw*1.3)}"/>`;
+    return g;
+  }
+  if(kind==='laurel'){
+    for(const d of [-1,1])for(let i=0;i<5;i++){
+      const a=-.9+i*.34, rx=cx+d*Math.cos(a)*hr*.95, ry=cy-Math.sin(a)*hr*.5-hr*.25;
+      g+=`<ellipse cx="${F(rx)}" cy="${F(ry)}" rx="${F(hr*.13)}" ry="${F(hr*.07)}" transform="rotate(${F(d*(20+i*12))} ${F(rx)} ${F(ry)})" ${FL('#8FA36B')}/>`;
+    }
+    return g;
+  }
+  if(kind==='ninja'){
+    g+=`<path d="M${F(cx-hr*1.0)} ${F(cy-hr*.18)} Q${F(cx)} ${F(cy-hr*.46)} ${F(cx+hr*1.0)} ${F(cy-hr*.18)} L${F(cx+hr*.98)} ${F(cy+hr*.2)} Q${F(cx)} ${F(cy+hr*.08)} ${F(cx-hr*.98)} ${F(cy+hr*.2)} Z" ${FL('#2A2A32')}/>`;
+    g+=`<path d="M${F(cx+hr*.92)} ${F(cy-hr*.12)} q${F(hr*.5)} ${F(hr*.16)} ${F(hr*.3)} ${F(hr*.6)}" ${O}/>`;
+    return g;
+  }
+  if(kind==='bandana'){
+    g+=`<path d="M${F(cx-hr*1.0)} ${F(cy-hr*.42)} Q${F(cx)} ${F(cy-hr*.72)} ${F(cx+hr*1.0)} ${F(cy-hr*.42)} L${F(cx+hr*.98)} ${F(cy-hr*.16)} Q${F(cx)} ${F(cy-hr*.42)} ${F(cx-hr*.98)} ${F(cy-hr*.16)} Z" ${FL(P(['#C4574A','#4F6FA3','#3A3A42']))}/>`;
+    g+=`<path d="M${F(cx-hr*.96)} ${F(cy-hr*.3)} l${F(-hr*.5)} ${F(hr*.3)}" ${O}/>`;
+    return g;
+  }
+  if(kind==='spartan'){
+    g+=`<path d="M${F(cx-hr*.92)} ${F(cy-hr*.1)} Q${F(cx-hr*.95)} ${F(top-hr*.1)} ${F(cx)} ${F(top-hr*.12)} Q${F(cx+hr*.95)} ${F(top-hr*.1)} ${F(cx+hr*.92)} ${F(cy-hr*.1)} L${F(cx+hr*.55)} ${F(cy-hr*.1)} Q${F(cx+hr*.5)} ${F(cy-hr*.5)} ${F(cx)} ${F(cy-hr*.52)} Q${F(cx-hr*.5)} ${F(cy-hr*.5)} ${F(cx-hr*.55)} ${F(cy-hr*.1)} Z" ${FL('#B8A98C')}/>`;
+    g+=`<path d="M${F(cx)} ${F(top-hr*.14)} q${F(-hr*.2)} ${F(-hr*.5)} ${F(hr*.06)} ${F(-hr*.72)} q${F(hr*.26)} ${F(hr*.3)} ${F(-hr*.06)} ${F(hr*.72)} Z" ${FL('#C4574A')}/>`;
+    return g;
+  }
+  if(kind==='viking'){
+    g+=`<path d="M${F(cx-hr*.9)} ${F(cy-hr*.3)} Q${F(cx)} ${F(top-hr*.2)} ${F(cx+hr*.9)} ${F(cy-hr*.3)} Z" ${FL('#9AA3AD')}/>`;
+    for(const d of [-1,1])
+      g+=`<path d="M${F(cx+d*hr*.78)} ${F(cy-hr*.38)} q${F(d*hr*.7)} ${F(-hr*.45)} ${F(d*hr*.25)} ${F(-hr*.95)} q${F(-d*hr*.1)} ${F(hr*.5)} ${F(-d*hr*.62)} ${F(hr*.62)} Z" ${FL('#EAE2D2')}/>`;
+    return g;
+  }
+  if(kind==='robot'){
+    g+=`<path d="M${F(cx-hr*.95)} ${F(cy-hr*.12)} h${F(hr*1.9)} v${F(hr*.42)} h${F(-hr*1.9)} Z" ${FL('#3A4048')}/>`;
+    g+=`<circle cx="${F(cx-hr*.4)}" cy="${F(cy+hr*.09)}" r="${F(hr*.1)}" fill="#7FE0C8"/>`;
+    g+=`<circle cx="${F(cx+hr*.4)}" cy="${F(cy+hr*.09)}" r="${F(hr*.1)}" fill="#7FE0C8"/>`;
+    g+=`<path d="M${F(cx)} ${F(top+hr*.08)} v${F(-hr*.42)}" ${O}/>`;
+    g+=`<circle cx="${F(cx)}" cy="${F(top-hr*.44)}" r="${F(hr*.13)}" ${FL('#C4574A')}/>`;
+    return g;
+  }
+  if(kind==='visor'){
+    g+=`<path d="M${F(cx-hr*.98)} ${F(cy-hr*.1)} Q${F(cx)} ${F(cy-hr*.34)} ${F(cx+hr*.98)} ${F(cy-hr*.1)} L${F(cx+hr*.9)} ${F(cy+hr*.26)} Q${F(cx)} ${F(cy+hr*.42)} ${F(cx-hr*.9)} ${F(cy+hr*.26)} Z" fill="#2A3A4A" fill-opacity=".85" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
+    return g;
+  }
+  if(kind==='astronaut'){
+    g+=`<circle cx="${F(cx)}" cy="${F(cy-hr*.08)}" r="${F(hr*1.2)}" fill="#DCEBF2" fill-opacity=".35" stroke="#111" stroke-width="${F(sw*1.1)}"/>`;
+    g+=`<path d="M${F(cx-hr*.75)} ${F(cy-hr*.5)} q${F(hr*.3)} ${F(-hr*.3)} ${F(hr*.7)} ${F(-hr*.22)}" fill="none" stroke="#fff" stroke-width="${F(sw)}" stroke-linecap="round" opacity=".8"/>`;
+    return g;
+  }
+  if(kind==='wizard'){
+    g+=`<path d="M${F(cx-hr*.95)} ${F(cy-hr*.34)} L${F(cx+hr*.2)} ${F(top-hr*1.05)} L${F(cx+hr*.95)} ${F(cy-hr*.34)} Z" ${FL('#4A4470')}/>`;
+    g+=`<path d="M${F(cx-hr*1.02)} ${F(cy-hr*.3)} h${F(hr*2.04)}" ${O}/>`;
+    g+=`<path d="M${F(cx+hr*.3)} ${F(top-hr*.5)} l${F(hr*.12)} ${F(hr*.2)} l${F(hr*.2)} ${F(hr*.04)} l${F(-hr*.16)} ${F(hr*.16)} l${F(hr*.04)} ${F(hr*.2)} l${F(-hr*.2)} ${F(-hr*.12)} l${F(-hr*.2)} ${F(hr*.1)} Z" fill="#E8D27A" stroke="#111" stroke-width="${F(sw*.6)}"/>`;
+    return g;
+  }
+  if(kind==='pirate'){
+    g+=`<path d="M${F(cx-hr*1.05)} ${F(cy-hr*.34)} Q${F(cx)} ${F(top-hr*.35)} ${F(cx+hr*1.05)} ${F(cy-hr*.34)} Q${F(cx)} ${F(cy-hr*.02)} ${F(cx-hr*1.05)} ${F(cy-hr*.34)} Z" ${FL('#2B2B33')}/>`;
+    g+=`<circle cx="${F(cx)}" cy="${F(cy-hr*.42)}" r="${F(hr*.1)}" fill="#EAE2D2"/>`;
+    g+=`<path d="M${F(cx-hr*.82)} ${F(cy+hr*.02)} L${F(cx-hr*.1)} ${F(cy-hr*.06)}" ${O}/>`;
+    g+=`<ellipse cx="${F(cx-hr*.4)}" cy="${F(cy+hr*.08)}" rx="${F(hr*.26)}" ry="${F(hr*.2)}" ${FL('#2B2B33')}/>`;
+    return g;
+  }
+  if(kind==='jester'){
+    for(const d of [-1,0,1]){
+      const ex=cx+d*hr*.85, ey=top-hr*(d?.28:.62);
+      g+=`<path d="M${F(cx+d*hr*.3)} ${F(top+hr*.1)} Q${F(ex)} ${F(ey-hr*.3)} ${F(ex)} ${F(ey)}" fill="none" stroke="#111" stroke-width="${F(sw*1.6)}" stroke-linecap="round"/>`;
+      g+=`<circle cx="${F(ex)}" cy="${F(ey)}" r="${F(hr*.15)}" ${FL(P(['#C4574A','#D9B44A','#4F6FA3']))}/>`;
+    }
+    return g;
+  }
+  if(kind==='chef'){
+    g+=`<path d="M${F(cx-hr*.72)} ${F(cy-hr*.26)} h${F(hr*1.44)} v${F(-hr*.3)} h${F(-hr*1.44)} Z" ${FL('#F4F1E8')}/>`;
+    g+=`<path d="M${F(cx-hr*.66)} ${F(cy-hr*.56)} q${F(-hr*.3)} ${F(-hr*.62)} ${F(hr*.34)} ${F(-hr*.5)} q${F(hr*.1)} ${F(-hr*.5)} ${F(hr*.66)} ${F(-hr*.18)} q${F(hr*.6)} ${F(-hr*.2)} ${F(hr*.5)} ${F(hr*.44)} q${F(hr*.5)} ${F(hr*.14)} ${F(hr*.16)} ${F(hr*.24)} Z" ${FL('#F4F1E8')}/>`;
+    return g;
+  }
+  if(kind==='headphones'){
+    g+=`<path d="M${F(cx-hr*1.0)} ${F(cy-hr*.05)} Q${F(cx)} ${F(top-hr*.3)} ${F(cx+hr*1.0)} ${F(cy-hr*.05)}" fill="none" stroke="#111" stroke-width="${F(sw*1.5)}" stroke-linecap="round"/>`;
+    for(const d of [-1,1])
+      g+=`<rect x="${F(cx+d*hr*1.0-hr*.17)}" y="${F(cy-hr*.08)}" width="${F(hr*.34)}" height="${F(hr*.46)}" rx="${F(hr*.1)}" ${FL('#3A3A42')}/>`;
+    return g;
+  }
+  if(kind==='topknot'){
+    g+=`<circle cx="${F(cx+hr*.05)}" cy="${F(top-hr*.2)}" r="${F(hr*.22)}" ${FL('#2B2B33')}/>`;
+    g+=`<path d="M${F(cx-hr*.5)} ${F(cy-hr*.55)} q${F(hr*.55)} ${F(-hr*.3)} ${F(hr*1.02)} ${F(-hr*.02)}" ${O}/>`;
+    return g;
+  }
+  if(kind==='bucket'){
+    g+=`<path d="M${F(cx-hr*.62)} ${F(cy-hr*.3)} L${F(cx-hr*.5)} ${F(top-hr*.5)} L${F(cx+hr*.5)} ${F(top-hr*.5)} L${F(cx+hr*.62)} ${F(cy-hr*.3)} Z" ${FL('#B6AE96')}/>`;
+    g+=`<path d="M${F(cx-hr*.9)} ${F(cy-hr*.28)} h${F(hr*1.8)}" ${O}/>`;
+    return g;
+  }
+  if(kind==='plague'){
+    g+=`<path d="M${F(cx-hr*.25)} ${F(cy+hr*.1)} Q${F(cx+hr*.5)} ${F(cy+hr*.16)} ${F(cx+hr*1.15)} ${F(cy+hr*.52)} Q${F(cx+hr*.35)} ${F(cy+hr*.62)} ${F(cx-hr*.2)} ${F(cy+hr*.46)} Z" ${FL('#6E5F4A')}/>`;
+    g+=`<circle cx="${F(cx-hr*.42)}" cy="${F(cy)}" r="${F(hr*.26)}" fill="#EAE2D2" stroke="#111" stroke-width="${F(sw)}"/>`;
+    g+=`<circle cx="${F(cx+hr*.3)}" cy="${F(cy-hr*.04)}" r="${F(hr*.24)}" fill="#EAE2D2" stroke="#111" stroke-width="${F(sw)}"/>`;
+    return g;
+  }
+  if(kind==='ghost'){
+    g+=`<path d="M${F(cx-hr*1.12)} ${F(cy+hr*.5)} Q${F(cx-hr*1.15)} ${F(top-hr*.2)} ${F(cx)} ${F(top-hr*.22)} Q${F(cx+hr*1.15)} ${F(top-hr*.2)} ${F(cx+hr*1.12)} ${F(cy+hr*.5)} q${F(-hr*.28)} ${F(hr*.3)} ${F(-hr*.56)} 0 q${F(-hr*.28)} ${F(hr*.3)} ${F(-hr*.56)} 0 q${F(-hr*.28)} ${F(hr*.3)} ${F(-hr*.56)} 0 Z" fill="#F4F1E8" fill-opacity=".92" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
+    g+=`<ellipse cx="${F(cx-hr*.34)}" cy="${F(cy-hr*.12)}" rx="${F(hr*.13)}" ry="${F(hr*.18)}" fill="#111"/>`;
+    g+=`<ellipse cx="${F(cx+hr*.34)}" cy="${F(cy-hr*.12)}" rx="${F(hr*.13)}" ry="${F(hr*.18)}" fill="#111"/>`;
+    return g;
+  }
   if(kind==='glasses'){
     const r=hr*.3;
     g+=`<circle cx="${F(cx-hr*.38)}" cy="${F(cy)}" r="${F(r)}" fill="#DCEBF2" fill-opacity=".45" stroke="#111" stroke-width="${F(sw)}"/>`;
@@ -1349,7 +1473,7 @@ function photoGround(w,h,grid){
   grid.regions.forEach(g=>{
     const x1=g.x1*w,y1=g.y1*h,x2=g.x2*w,y2=g.y2*h;
     const o={x1:x1,y1:y1,x2:x2,y2:y2,cx:(x1+x2)/2,cy:(y1+y2)/2,bw:x2-x1,bh:y2-y1,
-             col:g.col,dark:g.dark,rr:rr,
+             col:(g.kind!=='plane'&&g.alt&&chance(.22))?g.alt:g.col,dark:g.dark,rr:rr,
              j:Math.min(x2-x1,y2-y1)*.09+2,
              op:F(R(.55,.85)),
              st:`stroke="#1A1712" stroke-width="${F(R(2,3.6))}" stroke-linejoin="round" stroke-linecap="round"`};
@@ -1373,8 +1497,9 @@ function generate(){
   TR={};
   const dark=(FORCE&&FORCE.ground==='nocturne')?true:chance(.16);
   const gid='g'+Math.floor(RNG()*1e6);
-  const COMPW=[['center',.15],['scatter',.12],['diptych',.11],['tiny',.10],
-               ['crowd',.12],['portrait',.16],['landscape',.24]];
+  const names=[];
+  const COMPW=[['center',.14],['scatter',.11],['diptych',.10],['tiny',.09],
+               ['crowd',.11],['portrait',.15],['landscape',.22],['panels',.08]];
   let mode=(()=>{let r=R(0,1);for(const[k,w]of COMPW){if((r-=w)<=0)return k;}return 'center';})();
   if(FORCE&&FORCE.composition)mode=FORCE.composition;
   if(BANNER&&!(FORCE&&FORCE.composition))mode=chance(.75)?'landscape':mode;
@@ -1422,7 +1547,38 @@ function generate(){
   let picks=[];
   const AN=(FORCE&&FORCE.anchor)?FORCE.anchor:null;
   const fx=w/300, fy=h/300;
-  if(mode==='landscape'){
+  if(mode==='panels'){
+    /* the work cut into panels. some hold a flat shape, some hold a
+       fragment of a figure blown up past the edge of its box — an eye,
+       a mouth, the corner of a pair of glasses. */
+    const cols=RI(2,3), rows=RI(2,3);
+    const gap=Math.min(w,h)*R(.004,.016);
+    const cw=(w-gap*(cols+1))/cols, ch=(h-gap*(rows+1))/rows;
+    const uid=Math.floor(R(1000,9999));
+    let n=0;
+    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+      const px=gap+c*(cw+gap), py=gap+r*(ch+gap);
+      const fill=chance(.5)?P(PAL):P(BG);
+      s+=`<rect x="${F(px)}" y="${F(py)}" width="${F(cw)}" height="${F(ch)}" fill="${fill}" stroke="#111" stroke-width="${F(R(1.6,3))}"/>`;
+      if(chance(.55)){
+        const id='pz'+uid+'-'+(n++);
+        const z=R(2.2,4.4)*Math.min(cw,ch)/110;
+        const ox=px+cw*R(.2,.8), oy=py+ch*R(.25,.85);
+        const e=pickSubject(); names.push(e[1]);
+        s+=`<clipPath id="${id}"><rect x="${F(px)}" y="${F(py)}" width="${F(cw)}" height="${F(ch)}"/></clipPath>`;
+        s+=`<g clip-path="url(#${id})">${e[0](ox,oy,z)}</g>`;
+      }else if(chance(.5)){
+        const gx=px+cw/2, gy=py+ch/2, gr=Math.min(cw,ch)*R(.18,.36);
+        const sh=RI(0,2);
+        const gst=`fill="${P(PAL)}" fill-opacity="${F(R(.5,.9))}" stroke="#111" stroke-width="${F(R(1.4,2.6))}" stroke-linejoin="round"`;
+        if(sh===0)s+=`<circle cx="${F(gx)}" cy="${F(gy)}" r="${F(gr)}" ${gst}/>`;
+        else if(sh===1)s+=`<rect x="${F(gx-gr)}" y="${F(gy-gr)}" width="${F(gr*2)}" height="${F(gr*2)}" transform="rotate(${F(R(-20,20))} ${F(gx)} ${F(gy)})" ${gst}/>`;
+        else s+=`<path d="M${F(gx)} ${F(gy-gr)} L${F(gx+gr)} ${F(gy+gr)} L${F(gx-gr)} ${F(gy+gr)} Z" ${gst}/>`;
+      }
+    }
+    TR.ground='panelled';
+    picks=[];
+  }else if(mode==='landscape'){
     if(!PH)s+=scenery(w,h,true);
     picks=[];
   }else if(mode==='portrait'){
@@ -1438,7 +1594,7 @@ function generate(){
   else picks=[...Array(RI(2,3)+(BANNER?1:0))].map(()=>[R(w*.1,w*.9),R(h*.23,h*.6),R(.5,.85)]);
 
   HANDS=0;
-  const names=[];
+
   const forced=FORCE&&FORCE.subject?SUBJECTS.find(e=>e[1]===FORCE.subject):null;
   picks.forEach((p,ix)=>{const e=(forced&&ix===0)?forced:pickSubject();names.push(e[1]);s+=e[0](p[0],p[1],p[2]);});
   TR.subject=names.length?[...new Set(names)].sort().join(' + '):'scenery';
@@ -1448,11 +1604,15 @@ function generate(){
   TR.hands=HANDS?String(HANDS):'—';
 
   /* doodles in the margins, because someone always draws on it */
-  const DOOD=['star','spiral','heart','arrow','smiley','x','cloud'];
+  const DOOD=[['star',.20],['spiral',.16],['heart',.14],['arrow',.14],['smiley',.14],
+              ['x',.10],['cloud',.09],['cross',.015],['fish',.015]];
+  const pickDood=()=>{let r=R(0,1);for(const[k,w]of DOOD){if((r-=w)<=0)return k;}return 'star';};
   for(let i=0;i<(PH?RI(0,1):RI(0,Math.round(3*DENS)));i++){
-    const k=P(DOOD),x=R(14,w-14),y=R(14,h-14),z=R(.55,1.5),c=chance(.55)?'#111':P(PAL);
+    const k=pickDood(),x=R(14,w-14),y=R(14,h-14),z=R(.55,1.5),c=chance(.55)?'#111':P(PAL);
     const st=`fill="none" stroke="${c}" stroke-width="${F(R(1.4,3.2))}" stroke-linecap="round" stroke-linejoin="round" opacity="${F(R(.6,1))}"`;
-    if(k==='star'){let d='';for(let p=0;p<5;p++){const a=-Math.PI/2+p*4*Math.PI/5;d+=(p?'L':'M')+F(x+Math.cos(a)*13*z)+' '+F(y+Math.sin(a)*13*z);}s+=`<path d="${d}Z" ${st}/>`;}
+    if(k==='star'){let d='';for(let p=0;p<10;p++){const a=-Math.PI/2+p*Math.PI/5,r=(p%2?5.4:13)*z;d+=(p?'L':'M')+F(x+Math.cos(a)*r)+' '+F(y+Math.sin(a)*r);}s+=`<path d="${d}Z" ${st}/>`;}
+    else if(k==='cross'){s+=`<path d="M${F(x+R(-1,1))} ${F(y-14*z)} L${F(x+R(-1,1))} ${F(y+14*z)} M${F(x-8*z)} ${F(y-5*z)} L${F(x+8*z)} ${F(y-5*z+R(-1,1))}" ${st}/>`;}
+    else if(k==='fish'){s+=`<path d="M${F(x-15*z)} ${F(y)} q${F(11*z)} ${F(-9*z)} ${F(22*z)} 0 q${F(4*z)} ${F(-5*z)} ${F(8*z)} ${F(-6*z)} M${F(x-15*z)} ${F(y)} q${F(11*z)} ${F(9*z)} ${F(22*z)} 0 q${F(4*z)} ${F(5*z)} ${F(8*z)} ${F(6*z)}" ${st}/>`;}
     else if(k==='spiral'){let d=`M${F(x)} ${F(y)}`;for(let p=1;p<26;p++){const a=p*.55,r=p*.9*z;d+=`L${F(x+Math.cos(a)*r)} ${F(y+Math.sin(a)*r)}`;}s+=`<path d="${d}" ${st}/>`;}
     else if(k==='heart'){s+=`<path d="M${F(x)} ${F(y+9*z)} q${F(-13*z)} ${F(-10*z)} ${F(-6*z)} ${F(-17*z)} q${F(6*z)} ${F(-6*z)} ${F(6*z)} ${F(2*z)} q0 ${F(-8*z)} ${F(6*z)} ${F(-2*z)} q${F(7*z)} ${F(7*z)} ${F(-6*z)} ${F(17*z)} Z" ${st}/>`;}
     else if(k==='arrow'){const a=R(0,6.28);s+=`<path d="M${F(x)} ${F(y)} l${F(Math.cos(a)*26*z)} ${F(Math.sin(a)*26*z)} m0 0 l${F(-Math.cos(a-.6)*10*z)} ${F(-Math.sin(a-.6)*10*z)} m${F(Math.cos(a-.6)*10*z)} ${F(Math.sin(a-.6)*10*z)} l${F(-Math.cos(a+.6)*10*z)} ${F(-Math.sin(a+.6)*10*z)}" ${st}/>`;}
@@ -1989,7 +2149,10 @@ function fromPhoto(img){
     }
     const c=cent[tag], L=(c[0]*.299+c[1]*.587+c[2]*.114)/255;
     regions.push({x1:mnx/G,y1:mny/G,x2:(mxx+1)/G,y2:(mxy+1)/G,
-                  area:area/(G*G), dark:1-L, col:sat(c[0],c[1],c[2],1.25)});
+                  area:area/(G*G), dark:1-L, col:sat(c[0],c[1],c[2],1.25),
+                  /* a fifth of objects ignore the photograph's colour and take
+                     one of ours, so a beige room isn't a beige picture */
+                  alt:P(PAL)});
   }
 
   /* keep the ones big enough to be worth drawing, and decide what each
@@ -2051,7 +2214,18 @@ function fromPhoto(img){
     const fill=g.area/(bw*bh);
     const cands=CAT.filter(c=>inR(asp,c.asp)&&inR(cy,c.cy)&&inR(fill,c.fill)
                               &&inR(g.dark,c.dark)&&inR(bw,c.w)&&inR(g.area,c.area));
-    g.kind=cands.length?P(cands).k:'blob';
+    /* weighted, so a permissive shape like the hand stops turning up in
+       every empty slot on the board */
+    if(!cands.length){ g.kind='blob'; return; }
+    const W={paw:.35,thing:.5,cube:.6,blob:.7,animal:1.5,plant:1.2,figure:1.4,
+             vehicle:1.3,cage:1.2,arch:1.1,stairs:1.1,sunburst:1.2,lamp:1.1,
+             pot:1.2,bottle:1,window:1.1,rug:1.1,bowl:1,shelf:1,cup:.8,
+             ball:.8,cushion:.8,sign:.9,crate:.9,table:1.1,door:1.1,
+             tower:1,slab:1,stick:1,lump:.9,frond:1.1};
+    let tot=0; cands.forEach(c=>tot+=(W[c.k]||1));
+    let r=R(0,tot);
+    g.kind=cands[cands.length-1].k;
+    for(const c of cands){ if((r-=(W[c.k]||1))<=0){ g.kind=c.k; break; } }
   });
   const wash=[];
   edgeCount=objs.length;
