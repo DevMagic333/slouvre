@@ -1,2286 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The Slouvre</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,600&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap');
-
-:root{
-  --wall:#D9D6CD;
-  --wall-lit:#E4E1D9;
-  --ink:#000000;
-  --oxblood:#6B1E22;
-  --brass:#7E6A2E;
-  --label:#FBFAF7;
-  --sold:#C0221F;
-}
-*{box-sizing:border-box}
-html,body{margin:0;padding:0}
-body{
-  background:var(--wall);
-  background-image:radial-gradient(120% 70% at 50% 0%, var(--wall-lit) 0%, var(--wall) 62%);
-  background-attachment:fixed;
-  color:var(--ink);
-  font-family:'EB Garamond',Georgia,serif;
-  font-size:17px;
-  line-height:1.55;
-  -webkit-font-smoothing:antialiased;
-}
-
-/* ---------- top ---------- */
-header{
-  display:flex;align-items:baseline;justify-content:space-between;
-  gap:12px;padding:18px 20px 14px;
-  border-bottom:1px solid rgba(0,0,0,.35);
-}
-.mark{
-  font-family:'Bodoni Moda',serif;
-  font-weight:600;
-  font-size:20px;
-  letter-spacing:.20em;
-  text-transform:uppercase;
-  line-height:1;
-}
-.mark small{
-  display:block;
-  font-family:'EB Garamond',serif;
-  font-weight:400;font-size:11.5px;letter-spacing:.06em;
-  text-transform:none;font-style:italic;
-  opacity:.62;margin-top:5px;
-}
-.lang{display:flex;gap:0;border:1px solid rgba(0,0,0,.4)}
-.lang button{
-  font-family:'EB Garamond',serif;font-size:13px;
-  background:none;border:0;padding:5px 10px;cursor:pointer;color:var(--ink);
-}
-.lang button[aria-pressed="true"]{background:var(--ink);color:var(--wall-lit)}
-.lang button:focus-visible{outline:2px solid var(--oxblood);outline-offset:2px}
-
-/* ---------- gallery ---------- */
-main{padding:34px 20px 10px;max-width:760px;margin:0 auto}
-
-.hang{display:flex;flex-direction:column;align-items:center}
-
-.frame{
-  background:#111;
-  padding:13px;
-  border:1px solid #000;
-  box-shadow:0 22px 34px -20px rgba(0,0,0,.75), 0 3px 6px rgba(0,0,0,.28);
-  width:100%;max-width:430px;
-}
-.mat{background:#fff;padding:16px}
-.canvas{display:block;width:100%;height:auto;background:#fff}
-
-/* wall label */
-.placard{
-  background:var(--label);
-  border:1px solid rgba(0,0,0,.22);
-  box-shadow:0 1px 2px rgba(0,0,0,.16);
-  padding:15px 17px 16px;
-  margin:26px 0 0;
-  width:100%;max-width:430px;
-  position:relative;
-}
-.dot{
-  position:absolute;top:15px;right:15px;
-  width:11px;height:11px;border-radius:50%;
-  background:var(--sold);
-  opacity:0;transform:scale(.4);
-  transition:opacity .32s ease,transform .32s cubic-bezier(.2,1.4,.4,1);
-}
-.placard.acquired .dot{opacity:1;transform:scale(1)}
-
-.p-artist{font-variant:small-caps;letter-spacing:.06em;font-size:15px;line-height:1.25}
-.p-title{
-  font-family:'Bodoni Moda',serif;
-  font-style:italic;font-size:21px;line-height:1.2;margin:3px 0 1px;
-  padding-right:16px;
-}
-.p-meta{font-size:14.5px;opacity:.72;line-height:1.4}
-.p-stmt{
-  font-size:15px;line-height:1.5;margin-top:11px;
-  padding-top:11px;border-top:1px solid rgba(0,0,0,.16);
-}
-.p-foot{
-  display:flex;justify-content:space-between;gap:10px;
-  margin-top:11px;font-size:13.5px;
-}
-.p-val{color:var(--brass);font-variant:small-caps;letter-spacing:.05em}
-.p-status{font-style:italic;opacity:.66;text-align:right}
-
-/* ---------- rarity: the frame does the talking ---------- */
-.wall{position:relative;display:flex;flex-direction:column;align-items:center;width:100%}
-.frame.t1{background:#9C8358;padding:8px;box-shadow:0 10px 18px -14px rgba(0,0,0,.6)}
-.frame.t2{background:#141414;padding:13px}
-.frame.t3{background:#080808;padding:20px;box-shadow:0 26px 40px -22px rgba(0,0,0,.8),0 3px 7px rgba(0,0,0,.3)}
-.frame.t4,.frame.t5,.frame.t6{
-  background:linear-gradient(150deg,#8A6E22 0%,#E3C86A 22%,#A8842C 48%,#F0DC9A 68%,#8A6E22 100%);
-  border:1px solid #4E3D10;padding:18px;
-  box-shadow:0 26px 42px -22px rgba(0,0,0,.8),0 3px 8px rgba(0,0,0,.35);
-}
-.frame.t5{padding:22px}
-.frame.t6{padding:26px;outline:3px double #6B5518;outline-offset:5px}
-.frame.t4 .mat,.frame.t5 .mat,.frame.t6 .mat{box-shadow:inset 0 0 0 2px #4E3D10}
-
-.plight{display:none}
-.frame-wrap{position:relative;width:100%;display:flex;justify-content:center}
-.lit .plight{
-  display:block;position:absolute;top:-26px;left:50%;transform:translateX(-50%);
-  width:44%;height:26px;pointer-events:none;
-}
-.lit .plight::before{
-  content:"";position:absolute;top:0;left:50%;transform:translateX(-50%);
-  width:74px;height:7px;border-radius:3px;
-  background:linear-gradient(#E3C86A,#8A6E22);border:1px solid #4E3D10;
-}
-.lit .plight::after{
-  content:"";position:absolute;top:7px;left:50%;transform:translateX(-50%);
-  width:100%;height:120px;
-  background:radial-gradient(60% 100% at 50% 0%, rgba(255,246,214,.62), rgba(255,246,214,0) 72%);
-}
-.rope{margin-top:14px;opacity:.9}
-.rope.hide{display:none}
-
-/* ---------- object file ---------- */
-.file{
-  width:100%;max-width:430px;margin:16px 0 0;
-  border-top:1px solid rgba(0,0,0,.3);padding-top:11px;
-}
-.file-h{font-variant:small-caps;letter-spacing:.07em;font-size:13.5px;opacity:.62;margin-bottom:5px}
-.row{display:flex;align-items:baseline;gap:10px;padding:4px 0;border-bottom:1px dotted rgba(0,0,0,.18);font-size:14.5px}
-.row:last-child{border-bottom:0}
-.row b{font-weight:400;font-variant:small-caps;letter-spacing:.05em;opacity:.58;flex:none;width:104px}
-.row i{font-style:normal;flex:1}
-.row u{text-decoration:none;color:var(--brass);font-variant:small-caps;flex:none;width:50px;text-align:right}
-.row.key i{font-style:italic}
-
-.p-tier{
-  font-variant:small-caps;letter-spacing:.09em;font-size:13px;
-  color:var(--oxblood);margin-bottom:5px;padding-right:16px;
-}
-
-/* ---------- actions ---------- */
-.acts{display:flex;gap:9px;margin:22px 0 6px;width:100%;max-width:430px}
-.acts button{
-  flex:1;font-family:'EB Garamond',serif;font-size:15.5px;
-  padding:11px 8px;cursor:pointer;
-  border:1px solid var(--ink);background:transparent;color:var(--ink);
-  transition:background .16s ease,color .16s ease;
-}
-.acts button:hover{background:var(--ink);color:var(--wall-lit)}
-.acts .buy{background:var(--oxblood);border-color:var(--oxblood);color:#F3EFE6}
-.acts .buy:hover{background:#000;border-color:#000}
-.acts button:disabled{opacity:.34;cursor:default}
-.acts button:disabled:hover{background:transparent;color:var(--ink)}
-.acts button:focus-visible{outline:2px solid var(--oxblood);outline-offset:2px}
-
-.note{
-  max-width:430px;font-size:13.5px;font-style:italic;opacity:.6;
-  text-align:center;margin:2px auto 0;
-}
-
-/* ---------- commission desk ---------- */
-.desk{
-  width:100%;max-width:430px;margin:30px auto 0;
-  border-top:1px solid rgba(0,0,0,.3);padding-top:14px;
-}
-.desk-h{font-variant:small-caps;letter-spacing:.07em;font-size:13.5px;opacity:.62;margin-bottom:3px}
-.desk-p{font-size:14.5px;opacity:.72;font-style:italic;margin:0 0 9px;line-height:1.4}
-.desk-row{display:flex;gap:8px}
-.desk input{
-  flex:1;min-width:0;font-family:'EB Garamond',serif;font-size:16px;
-  padding:9px 11px;border:1px solid rgba(0,0,0,.45);background:var(--label);color:var(--ink);
-}
-.desk input:focus{outline:2px solid var(--oxblood);outline-offset:1px}
-.desk button{
-  font-family:'EB Garamond',serif;font-size:15px;padding:9px 14px;cursor:pointer;
-  border:1px solid var(--oxblood);background:var(--oxblood);color:#F3EFE6;flex:none;
-}
-.desk button:hover{background:#000;border-color:#000}
-.desk button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
-.seedline{
-  font-size:13px;opacity:.55;margin-top:8px;font-style:italic;min-height:1.3em;
-}
-
-/* ---------- curator ---------- */
-.curator{
-  max-width:430px;margin:44px auto 0;padding-top:22px;
-  border-top:1px solid rgba(0,0,0,.3);
-  display:flex;gap:15px;align-items:flex-start;
-}
-.curator svg{width:92px;flex:none}
-.c-name{font-variant:small-caps;letter-spacing:.06em;font-size:15px}
-.c-role{font-size:13.5px;opacity:.65;font-style:italic;margin-bottom:7px}
-.c-quote{font-size:15px;line-height:1.45}
-
-/* ---------- donors ---------- */
-.donors{
-  margin-top:40px;border-top:1px solid rgba(0,0,0,.3);
-  overflow:hidden;padding:9px 0 12px;
-}
-.donors-in{
-  display:inline-block;white-space:nowrap;
-  font-variant:small-caps;letter-spacing:.07em;font-size:13px;color:var(--oxblood);
-  animation:scroll 64s linear infinite;
-}
-.donors-in span{padding:0 22px}
-@keyframes scroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-
-footer{
-  max-width:760px;margin:0 auto;padding:0 20px 40px;
-  font-size:13px;opacity:.55;display:flex;justify-content:space-between;gap:12px;
-  flex-wrap:wrap;align-items:center;
-}
-footer a{color:inherit;text-decoration:none;border-bottom:1px solid rgba(28,27,34,.35);padding-bottom:1px}
-footer a:hover{border-bottom-color:#6E1A1A;color:#6E1A1A}
-.links{display:flex;gap:16px;flex-wrap:wrap}
-
-/* the accession plate — brass, screwed to the wall under the title */
-.plate{
-  max-width:760px;margin:0 auto 6px;padding:10px 20px;
-  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
-}
-.plate .lbl{
-  font:600 10.5px/1 "Bodoni Moda",Georgia,serif;letter-spacing:.22em;
-  text-transform:uppercase;color:#6E1A1A;flex:none;
-}
-.plate code{
-  font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
-  background:#F6F2E8;border:1px solid #cdc4b2;border-radius:2px;
-  padding:6px 9px;word-break:break-all;flex:1 1 220px;min-width:0;
-}
-.plate button{
-  font:11px/1 "EB Garamond",Georgia,serif;letter-spacing:.1em;text-transform:uppercase;
-  padding:8px 13px;border:1px solid #6E1A1A;background:transparent;color:#6E1A1A;
-  border-radius:2px;cursor:pointer;flex:none;
-}
-.plate button:active{background:#6E1A1A;color:#F6F2EA}
-
-@media (prefers-reduced-motion:reduce){
-  *{animation:none!important;transition:none!important}
-}
-@media (min-width:640px){
-  main{padding-top:48px}
-  .mark{font-size:25px}
-  .frame{max-width:470px}
-  .placard,.acts,.note,.curator{max-width:470px}
-}
-</style>
-
-<style>
-#intro{
-  position:fixed;inset:0;z-index:90;
-  background:#171310;
-  display:flex;flex-direction:column;
-  overflow:hidden;
-}
-#intro.gone{display:none}
-.doors{position:absolute;inset:0;z-index:1;pointer-events:none}
-.door{
-  position:absolute;top:0;bottom:0;width:50.6%;
-  background:linear-gradient(100deg,#3A2A1C,#241A11 40%,#4A3624 70%,#2A1E14);
-  transition:transform 2.1s cubic-bezier(.7,0,.3,1);
-}
-.door::after{
-  content:"";position:absolute;top:8%;bottom:8%;left:12%;right:12%;
-  border:2px solid rgba(227,200,106,.28);
-}
-.door.l{left:0;transform:translateX(-101%)}
-.door.r{right:0;transform:translateX(101%)}
-#intro.shut .door.l,#intro.shut .door.r{transform:translateX(0)}
-#intro.opening .stage,#intro.opening .tap{opacity:0;transition:opacity 1.1s ease}
-#intro.opening .door.l{transform:translateX(-101%)}
-#intro.opening .door.r{transform:translateX(101%)}
-
-.stage{
-  position:relative;z-index:3;flex:1;
-  display:flex;flex-direction:column;justify-content:center;align-items:center;
-  gap:16px;padding:26px 22px;max-width:520px;margin:0 auto;width:100%;
-  text-align:center;
-}
-.tstage{width:118px;flex:none}
-.tstage .blink{animation:blink 6.5s infinite}
-@keyframes blink{0%,96%,100%{transform:scaleY(1)}98%{transform:scaleY(.08)}}
-.tstage g.body{animation:bob 7s ease-in-out infinite;transform-origin:60px 140px}
-@keyframes bob{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-3px) rotate(.5deg)}}
-
-.beat{
-  font-family:'EB Garamond',Georgia,serif;
-  color:#EDE4D2;font-size:19px;line-height:1.5;
-  max-width:30em;min-height:4.6em;
-  opacity:0;transform:translateY(9px);
-  transition:opacity .75s ease,transform .75s ease;
-}
-.beat.on{opacity:1;transform:none}
-.vig{
-  height:118px;display:flex;align-items:flex-end;justify-content:center;
-  opacity:0;transform:translateY(8px);transition:opacity .8s ease,transform .8s ease;
-}
-.vig.on{opacity:1;transform:none}
-.vig svg{height:100%;width:auto}
-
-.ictl{
-  position:absolute;z-index:6;display:flex;gap:10px;align-items:center;
-}
-.ictl.tl{top:14px;left:16px}
-.ictl.tr{top:14px;right:16px}
-.ictl button{
-  font-family:'EB Garamond',serif;font-size:13.5px;
-  background:none;border:1px solid rgba(237,228,210,.36);color:#EDE4D2;
-  padding:5px 11px;cursor:pointer;letter-spacing:.05em;
-}
-#iSkip{border-color:rgba(237,228,210,.85);background:rgba(237,228,210,.12);font-size:14.5px;padding:7px 15px}
-#iSkip:hover{background:#EDE4D2;color:#171310}
-.ictl button:hover{background:rgba(237,228,210,.13)}
-.ictl button[aria-pressed="true"]{background:#EDE4D2;color:#171310}
-.ictl button:focus-visible{outline:2px solid #E3C86A;outline-offset:2px}
-
-.tap{
-  position:absolute;bottom:20px;left:0;right:0;z-index:5;text-align:center;
-  font-family:'EB Garamond',serif;font-size:13px;color:rgba(237,228,210,.5);
-  font-style:italic;pointer-events:none;
-}
-#sound{
-  position:fixed;bottom:14px;right:14px;z-index:40;
-  font-family:'EB Garamond',serif;font-size:13px;
-  background:var(--label);border:1px solid rgba(0,0,0,.3);color:var(--ink);
-  padding:5px 10px;cursor:pointer;display:none;
-}
-#sound.show{display:block}
-@media (prefers-reduced-motion:reduce){
-  .door{transition:none}
-  .beat,.vig{transition:none}
-  .tstage .blink,.tstage g.body{animation:none}
-}
-@media (max-width:420px){
-  .beat{font-size:17.5px}
-  .tstage{width:96px}
-  .vig{height:96px}
-}
-</style>
-
-<div id="intro" class="shut">
-  <div class="doors"><div class="door l"></div><div class="door r"></div></div>
-
-  <div class="ictl tl">
-    <button id="iEn" aria-pressed="true">EN</button>
-    <button id="iEs" aria-pressed="false">ES</button>
-  </div>
-  <div class="ictl tr"><button id="iSkip"></button></div>
-
-  <div class="stage">
-    <svg class="tstage" viewBox="0 0 120 190" xmlns="http://www.w3.org/2000/svg">
-      <g class="body" fill="none" stroke="#EDE4D2" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M34 44c-4-16 6-30 24-31 19-1 30 10 30 24 0 8-3 12-2 18 1 5-4 9-11 10-3 6-13 8-22 6-9-2-15-8-16-15-1-6-2-8-3-12z"/>
-        <path d="M36 27c8-6 22-9 34-5 5 2 8 5 9 8"/>
-        <path d="M55 15c-6 6-14 9-19 11"/>
-        <circle cx="49" cy="47" r="7.5"/><circle cx="72" cy="46" r="6"/>
-        <path d="M56.5 47h9"/><path d="M41.5 45l-6-3"/>
-        <g class="blink" style="transform-origin:60px 47px">
-          <path d="M47 47.5h4" stroke-width="3.4"/><path d="M70 46.5h3.4" stroke-width="3.4"/>
-        </g>
-        <path d="M52 66c5 4 13 4 17 0"/>
-        <path d="M42 79c6 5 22 6 30 0"/><path d="M40 86c8 6 26 7 34 0"/>
-        <path d="M40 86c-13 5-20 16-22 30-1 9-1 22 0 36"/>
-        <path d="M74 86c14 5 22 16 24 31 1 9 1 22 0 35"/>
-        <path d="M66 118c-8-3-12-10-9-17 2-5 7-6 10-3"/>
-        <path d="M67 98c4-1 7 1 7 4 0 4-3 6-7 6"/>
-        <path d="M60 104h9M61 109h8"/>
-      </g>
-    </svg>
-    <div class="vig" id="vig"></div>
-    <p class="beat" id="beat"></p>
-  </div>
-
-  <div class="tap" id="tapHint"></div>
-</div>
-<button id="sound">&#9834;</button>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>La Bolsa — an exchange for characters</title>
+<meta name="description" content="Every meme coin character Xavier Perez has launched, tracked in one place. Alive, dead, and duplicated. Every wallet published.">
+<meta property="og:title" content="La Bolsa">
+<meta property="og:description" content="an exchange for characters. only mine launch here. everything gets tracked.">
+<meta property="og:url" content="https://labolsa.fun/">
+<meta property="og:image" content="https://labolsa.fun/og.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="alternate" hreflang="es" href="https://labolsa.fun/es/">
+<link rel="alternate" hreflang="en" href="https://labolsa.fun/">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
 
 <header>
-  <div class="mark">The Slouvre<small data-i="sub">Museum of Generated Art · founded 2026</small></div>
-  <div class="lang">
-    <button id="en" aria-pressed="true">EN</button>
-    <button id="es" aria-pressed="false">ES</button>
+  <div class="wrap">
+    <a class="brand" href="/"><img class="brand-mark" src="/img/logo-gold.png" alt="">La Bolsa</a>
+    <nav>
+      <a href="#cast">the cast</a>
+      <a href="#listings">listings</a>
+      <a href="#bindle">the bindle</a>
+      <a href="#protocol">protocol</a>
+      <a href="#wallets">wallets</a>
+    </nav>
+    <a class="lang" href="/es/" lang="es">ES</a>
+    <a class="btn" href="https://t.me/labolsafun" target="_blank" rel="noopener">enter the room</a>
   </div>
 </header>
 
-<div class="plate" id="plate" hidden>
-  <span class="lbl" id="caLbl">Contract</span>
-  <code id="caVal"></code>
-  <button id="caCopy">Copy</button>
+<main class="wrap">
+
+<div class="hero">
+  <div class="heroin">
+    <div>
+      <h1>an exchange<br>for characters.</h1>
+      <p>only mine launch here. everything gets tracked — alive, dead, and the ones i made twice by accident. every wallet is on this page.</p>
+      <p class="fine">run by one person, independently. no company, no team, no bundles, no bots. read the <a href="#protocol">protocol</a> before you buy anything.</p>
+    </div>
+    <div class="faces" aria-hidden="true">
+      <img src="/img/broli.jpg" alt="" width="76" height="76">
+      <img src="/img/snp.jpg" alt="" width="76" height="76">
+      <img src="/img/prizma.jpg" alt="" width="76" height="76">
+      <img src="/img/gas.jpg" alt="" width="76" height="76">
+      <img src="/img/clog.jpg" alt="" width="76" height="76">
+      <img class="dead" src="/img/jih.jpg" alt="" width="76" height="76">
+      <img class="dead" src="/img/kdog.jpg" alt="" width="76" height="76">
+      <img class="dead" src="/img/chucky.jpg" alt="" width="76" height="76">
+    </div>
+  </div>
+  <div class="stats">
+    <div><b>11</b><span>launched, ever</span></div>
+    <div><b>6</b><span>still listed</span></div>
+    <div><b>4</b><span>in the bindle</span></div>
+    <div><b>~$9</b><span>creator fees earned, total</span></div>
+  </div>
 </div>
 
-<main>
-  <div class="hang">
-    <div class="wall" id="wall">
-      <div class="frame-wrap">
-        <span class="plight"></span>
-        <div class="frame t2" id="frame">
-          <div class="mat"><svg class="canvas" id="art" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg"></svg></div>
-        </div>
-      </div>
-      <svg class="rope hide" id="rope" width="220" height="34" viewBox="0 0 220 34" aria-hidden="true">
-        <path d="M22 9 Q110 34 198 9" fill="none" stroke="#6B1E22" stroke-width="6" stroke-linecap="round"/>
-        <path d="M22 9 Q110 34 198 9" fill="none" stroke="#8B2E32" stroke-width="2" stroke-linecap="round"/>
-        <g fill="#A8842C" stroke="#4E3D10" stroke-width="1.4">
-          <rect x="18" y="6" width="8" height="26" rx="2"/><circle cx="22" cy="5" r="4.4"/>
-          <rect x="194" y="6" width="8" height="26" rx="2"/><circle cx="198" cy="5" r="4.4"/>
-        </g>
-      </svg>
-    </div>
-
-    <div class="placard" id="placard">
-      <span class="dot" id="dot"></span>
-      <div class="p-tier" id="pTier"></div>
-      <div class="p-artist" id="pArtist"></div>
-      <div class="p-title" id="pTitle"></div>
-      <div class="p-meta" id="pMeta"></div>
-      <div class="p-stmt" id="pStmt"></div>
-      <div class="p-foot">
-        <span class="p-val" id="pVal"></span>
-        <span class="p-status" id="pStatus"></span>
-      </div>
-    </div>
-
-    <div class="file">
-      <div class="file-h" id="fileH"></div>
-      <div id="rows"></div>
-    </div>
-
-    <div class="acts">
-      <button class="buy" id="buy"></button>
-      <button id="next"></button>
-    </div>
-    <div class="acts" style="margin-top:-8px">
-      <button id="modeG"></button>
-      <button id="modeB"></button>
-      <button id="saveBtn"></button>
-      <button id="shareBtn"></button>
-    </div>
-    <p class="note" id="note"></p>
+<section id="cast">
+  <h2>the cast</h2>
+  <p class="lead">the characters are the point. the coins are what some of them ended up carrying.</p>
+  <div class="wall">
+      <img src="/img/cast/chairman-arms.webp" alt="" loading="lazy" width="300" height="300">
+      <img src="/img/cast/broli-smug.webp" alt="" loading="lazy" width="300" height="300">
+      <img src="/img/cast/pepper-coffee.webp" alt="" loading="lazy" width="300" height="300">
+      <img src="/img/cast/chairman-laugh.webp" alt="" loading="lazy" width="300" height="300">
+      <img src="/img/cast/broli-angry.webp" alt="" loading="lazy" width="300" height="300">
+      <img src="/img/cast/pepper-chart.webp" alt="" loading="lazy" width="300" height="300">
+      <img src="/img/cast/chairman-news.webp" alt="" loading="lazy" width="300" height="300">
+      <img src="/img/cast/broli-shocked.webp" alt="" loading="lazy" width="300" height="300">
+      <img src="/img/cast/pepper-rain.webp" alt="" loading="lazy" width="300" height="300">
+      <img src="/img/cast/chairman-hardhat.webp" alt="" loading="lazy" width="300" height="300">
+      <img src="/img/cast/broli-crying.webp" alt="" loading="lazy" width="300" height="300">
+      <img src="/img/cast/pepper-audit.webp" alt="" loading="lazy" width="300" height="300">
+      <img src="/img/cast/chairman-trophy.webp" alt="" loading="lazy" width="300" height="300">
+      <img src="/img/cast/broli-bored.webp" alt="" loading="lazy" width="300" height="300">
+      <img src="/img/cast/pepper-walk.webp" alt="" loading="lazy" width="300" height="300">
+      <img src="/img/cast/chairman-dynamite.webp" alt="" loading="lazy" width="300" height="300">
+      <img src="/img/cast/broli-asleep.webp" alt="" loading="lazy" width="300" height="300">
+      <img src="/img/cast/pepper-landing.webp" alt="" loading="lazy" width="300" height="300">
   </div>
+</section>
 
-  <div class="desk">
-    <div class="desk-h" id="deskH"></div>
-    <p class="desk-p" id="deskP"></p>
-    <div class="desk-row">
-      <input id="deskIn" maxlength="140" autocomplete="off">
-      <button id="deskGo"></button>
-    </div>
-    <div class="desk-row" style="margin-top:8px">
-      <button id="camGo" style="flex:1;background:transparent;color:var(--ink);border-color:var(--ink)"></button>
-      <input type="file" id="camIn" accept="image/*" capture="environment" style="display:none">
-    </div>
-    <div class="seedline" id="seedline"></div>
-    <div class="seedline" id="tagline" style="opacity:.45"></div>
+<section id="listings">
+  <h2>listings</h2>
+  <p class="lead">market caps are updated by hand. last update: sept 8, 2026. check the chain if it matters to you.</p>
+  <table>
+    <thead><tr>
+      <th>ticker</th><th>name</th><th class="hide-m">index</th><th>status</th><th class="num">mcap</th><th class="hide-m ca">contract</th>
+    </tr></thead>
+    <tbody>
+    <tr>
+      <td class="tk"><span class="av"><img src="/img/broli.jpg" alt="" loading="lazy" width="34" height="34"></span>BROLI</td>
+      <td>i Hate Broccoli</td>
+      <td class="hide-m">—</td>
+      <td><span class="st live">listed</span></td>
+      <td class="num">$3.0K</td>
+      <td class="hide-m ca">C9eAZmNDiAokkVoai7diynWtME6UpZfgVuCrX4ripump<button class="copy" data-c="C9eAZmNDiAokkVoai7diynWtME6UpZfgVuCrX4ripump">copy</button></td>
+    </tr>
+    <tr>
+      <td class="tk"><span class="av"><img src="/img/snp.jpg" alt="" loading="lazy" width="34" height="34"></span>SNP</td>
+      <td>SNP 500</td>
+      <td class="hide-m">SNP 500</td>
+      <td><span class="st live">listed</span></td>
+      <td class="num">$3.0K</td>
+      <td class="hide-m ca">CW3xfzau82QwpuceVMmFrHeFnGEfGYXapqXj2UpQpump<button class="copy" data-c="CW3xfzau82QwpuceVMmFrHeFnGEfGYXapqXj2UpQpump">copy</button></td>
+    </tr>
+    <tr>
+      <td class="tk"><span class="av"><img src="/img/clog.jpg" alt="" loading="lazy" width="34" height="34"></span>CLOG</td>
+      <td>Clog</td>
+      <td class="hide-m">SNP 500</td>
+      <td><span class="st live">listed</span></td>
+      <td class="num">$860</td>
+      <td class="hide-m ca">ASntdFy1kwTR4iJyfzeUfdXQEDQo2XSGQ2am6uzNpump<button class="copy" data-c="ASntdFy1kwTR4iJyfzeUfdXQEDQo2XSGQ2am6uzNpump">copy</button></td>
+    </tr>
+    <tr>
+      <td class="tk"><span class="av"><img src="/img/gas.jpg" alt="" loading="lazy" width="34" height="34"></span>GAS</td>
+      <td>Gas</td>
+      <td class="hide-m">SNP 500</td>
+      <td><span class="st live">listed</span></td>
+      <td class="num">$2.9K</td>
+      <td class="hide-m ca">6yefDxzKcAdS9j9ETwnUTQjngU6XddjKR5b6EWogpump<button class="copy" data-c="6yefDxzKcAdS9j9ETwnUTQjngU6XddjKR5b6EWogpump">copy</button></td>
+    </tr>
+    <tr>
+      <td class="tk"><span class="av"><img src="/img/prizma.jpg" alt="" loading="lazy" width="34" height="34"></span>PRIZMA</td>
+      <td>Pepper</td>
+      <td class="hide-m">—</td>
+      <td><span class="st live">listed</span></td>
+      <td class="num">$2.8K</td>
+      <td class="hide-m ca">BrwkByeiuVecdYv6GrcrYqf6DTgUJLiWdVrkGTE7pump<button class="copy" data-c="BrwkByeiuVecdYv6GrcrYqf6DTgUJLiWdVrkGTE7pump">copy</button></td>
+    </tr>
+    <tr>
+      <td class="tk"><span class="av"><img src="/img/jih.jpg" alt="" loading="lazy" width="34" height="34"></span>JIH</td>
+      <td>my name is jih</td>
+      <td class="hide-m">—</td>
+      <td><span class="st off">delisted</span></td>
+      <td class="num">$400</td>
+      <td class="hide-m ca">8BbdR6q4bwYgmXYKDskEWsUKJLYWAM9ZTHMYLqjkpump<button class="copy" data-c="8BbdR6q4bwYgmXYKDskEWsUKJLYWAM9ZTHMYLqjkpump">copy</button></td>
+    </tr>
+    <tr>
+      <td class="tk"><span class="av"><img src="/img/cache.jpg" alt="" loading="lazy" width="34" height="34"></span>CACHE</td>
+      <td>El Caché</td>
+      <td class="hide-m">—</td>
+      <td><span class="st pre">not launched</span></td>
+      <td class="num">—</td>
+      <td class="hide-m ca">no contract yet</td>
+    </tr>
+    <tr>
+      <td class="tk"><span class="av"><img src="/img/slouvre.jpg" alt="" loading="lazy" width="34" height="34"></span>SLOUVRE</td>
+      <td><a href="https://theslouvre.com" target="_blank" rel="noopener">The Slouvre</a></td>
+      <td class="hide-m">&mdash;</td>
+      <td><span class="st live">listed</span></td>
+      <td class="num">&mdash;</td>
+      <td class="hide-m ca">AndwTuj1itKZxtG2gjc6CCHKiMsyEgqxrCEyfeqUpump<button class="copy" data-c="AndwTuj1itKZxtG2gjc6CCHKiMsyEgqxrCEyfeqUpump">copy</button></td>
+    </tr>
+    </tbody>
+  </table>
+  <p class="note">delisted means the token is alive on-chain but i took down the site and the room. jih is a resurrection candidate — if it comes back it comes back as the same token, declared here first.</p>
+  <p class="note">not launched means exactly that. if you see a $CACHE contract before this row changes, it isn't mine.</p>
+</section>
+
+<section id="bindle">
+  <h2>the bindle</h2>
+  <p class="lead">the graveyard. one honest line each. tokens still exist on-chain; nothing is built around them and nothing will be, unless it says so below.</p>
+  <ul class="grave">
+    <li><div class="who"><span class="gav none"></span><span>Aural <small>$GOLD</small></span></div><div>retired. the art wasn't mine to use. i didn't check before i launched and i should have. she's not coming back under this name or that image.<div class="gca"><span>F4h9pw1oyekyHNkpakCq1h9bCHaTN35MLNmxBKg6pump</span><button class="copy" data-c="F4h9pw1oyekyHNkpakCq1h9bCHaTN35MLNmxBKg6pump">copy</button></div></div></li>
+    <li><div class="who"><img class="gav" src="/img/chucky.jpg" alt="" loading="lazy"><span>Chucky <small>$GREENS</small></span></div><div>a character i liked with nothing built around him. died in a day. he'll be back if anyone asks for him.<div class="gca"><span>4uwEiDh3esrBqLRbRoPmu92KzNhjB5zVemJWgCacpump</span><button class="copy" data-c="4uwEiDh3esrBqLRbRoPmu92KzNhjB5zVemJWgCacpump">copy</button></div></div></li>
+    <li><div class="who"><img class="gav" src="/img/kdog.jpg" alt="" loading="lazy"><span>Krypto Dog <small>$KDOG</small></span></div><div>test. i wanted to see what the wallet flow felt like. it felt like this.<div class="gca"><span>Fs6mmEmTFvVkQNHwetYWLLy9dT9ntskkoRPvhooMpump</span><button class="copy" data-c="Fs6mmEmTFvVkQNHwetYWLLy9dT9ntskkoRPvhooMpump">copy</button></div></div></li>
+    <li><div class="who"><img class="gav" src="/img/montana.jpg" alt="" loading="lazy"><span>my little fren <small>$MONTANA</small></span></div><div>launched it, didn't build anything for it, moved on. one holder. it's here so it's not hidden.<div class="gca"><span>86A2tcHufiDHoYot8wHD9K4VBdH9zdFzQMvgDN1kpump</span><button class="copy" data-c="86A2tcHufiDHoYot8wHD9K4VBdH9zdFzQMvgDN1kpump">copy</button></div></div></li>
+  </ul>
+
+  <h3 style="margin-top:36px">not the real token</h3>
+  <p class="lead">while testing i re-created three coins by accident on a second wallet. these are duplicates. the real ones are in the listings above.</p>
+  <table>
+    <thead><tr><th>duplicate of</th><th>status</th><th class="hide-m ca">contract</th></tr></thead>
+    <tbody>
+    <tr><td class="tk">BROLY&nbsp;<span style="font-weight:400;color:var(--mute)">(dupe of BROLI)</span></td>
+      <td><span class="st dupe">not the real token</span></td><td class="hide-m ca">4NGBv29EtDt3vyYJ8Mv4L3CKJhv523MaPVMwb7u7pump<button class="copy" data-c="4NGBv29EtDt3vyYJ8Mv4L3CKJhv523MaPVMwb7u7pump">copy</button></td></tr>
+    <tr><td class="tk">JIH&nbsp;<span style="font-weight:400;color:var(--mute)">(dupe)</span></td>
+      <td><span class="st dupe">not the real token</span></td><td class="hide-m ca">6Ssyzh5JV6BH4T5q2iVg5v5k6g2V8qD4ZzjC7zvCpump<button class="copy" data-c="6Ssyzh5JV6BH4T5q2iVg5v5k6g2V8qD4ZzjC7zvCpump">copy</button></td></tr>
+    <tr><td class="tk">KDOG&nbsp;<span style="font-weight:400;color:var(--mute)">(dupe)</span></td>
+      <td><span class="st dupe">not the real token</span></td><td class="hide-m ca">91Q8g2cTjSWmCd8B3hNdZmas8N35osLeedYWRkfPpump<button class="copy" data-c="91Q8g2cTjSWmCd8B3hNdZmas8N35osLeedYWRkfPpump">copy</button></td></tr>
+    </tbody>
+  </table>
+  <p class="note">if you hold the duplicate jih, message me in the room and i'll swap you into the real one. the duplicate kdog earned more creator fees than the original, which tells you everything about how much i know.</p>
+</section>
+
+<section id="protocol">
+  <h2>protocol</h2>
+  <p class="lead">how every launch works from here on. if i break one of these, screenshot it and post it.</p>
+  <div class="proto">
+    <p class="note" style="margin:0 0 14px"><strong>"launch" means the moment the contract is revealed to the room and anyone can buy it.</strong> creating the token quietly, hours or days earlier, is not a launch — nobody knows it exists and nobody can be sniped.</p>
+
+    <ol>
+      <li>fresh wallet per launch. funded from an exchange, never from a wallet on this page.</li>
+      <li>no bundles, no volume bots, no fake buyers.</li>
+      <li>silent create. no countdown, no announcement.</li>
+      <li>the contract goes to the telegram room first. x gets it hours or days later.</li>
+      <li>wallet ownership is proven after launch, never before.</li>
+      <li>any creator allocation is one disclosed wallet, small, and named in the same message that reveals the contract — so nobody can buy without knowing. never multiple wallets. it gets locked and the lock is shown.</li>
+      <li>the flat chart gets posted after every launch as the receipt.</li>
+      <li>one name, one token, ever. a resurrection is declared here and named as such. the old contract is marked retired.</li>
+      <li>all wallets published — prize, index, tests, duplicates. never "i don't have one." always "here's where it is."</li>
+    </ol>
+    <div class="rule">no creator allocation on any launch. creator fees stay on — that's what pays for the sites, the domains, and the prizes. every wallet that collects them is published <a href="#wallets">on this page</a>.</div>
+    <div class="rule">standing rule: nothing launches until the room has a pulse. that means about a hundred real people in the telegram, not a hundred wallets.</div>
+    <div class="rule amend">slouvre launched at six people in the room. the hundred-person rule was written for launches where the room is the only distribution — slouvre ships with a free site that works without the coin, so it isn't. i'm noting it here instead of quietly editing the rule.</div>
   </div>
+</section>
 
-  <div class="curator">
-    <svg viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg" aria-label="Thierry, curator">
-      <g fill="none" stroke="#000" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-        <!-- lumpy head -->
-        <path d="M34 44c-4-16 6-30 24-31 19-1 30 10 30 24 0 8-3 12-2 18 1 5-4 9-11 10-3 6-13 8-22 6-9-2-15-8-16-15-1-6-2-8-3-12z"/>
-        <!-- severe side part -->
-        <path d="M36 27c8-6 22-9 34-5 5 2 8 5 9 8"/>
-        <path d="M55 15c-6 6-14 9-19 11"/>
-        <!-- tiny round glasses -->
-        <circle cx="49" cy="47" r="7.5"/>
-        <circle cx="72" cy="46" r="6"/>
-        <path d="M56.5 47h9"/>
-        <path d="M41.5 45l-6-3"/>
-        <!-- eyes -->
-        <path d="M47 47.5h4" stroke-width="3.4"/>
-        <path d="M70 46.5h3.4" stroke-width="3.4"/>
-        <!-- smug little mouth -->
-        <path d="M52 66c5 4 13 4 17 0"/>
-        <!-- turtleneck -->
-        <path d="M42 79c6 5 22 6 30 0"/>
-        <path d="M40 86c8 6 26 7 34 0"/>
-        <!-- shoulders / body -->
-        <path d="M40 86c-13 5-20 16-22 30-1 9-1 20 0 32"/>
-        <path d="M74 86c14 5 22 16 24 31 1 9 1 20 0 31"/>
-        <!-- hand permanently under chin -->
-        <path d="M66 118c-8-3-12-10-9-17 2-5 7-6 10-3"/>
-        <path d="M67 98c4-1 7 1 7 4 0 4-3 6-7 6"/>
-        <path d="M60 104h9M61 109h8"/>
-      </g>
-    </svg>
-    <div>
-      <div class="c-name" id="cName">Thierry</div>
-      <div class="c-role" id="cRole"></div>
-      <div class="c-quote" id="cQuote"></div>
-    </div>
-  </div>
+<section id="wallets">
+  <h2>wallets</h2>
+  <p class="lead">every wallet i've used to create or hold these tokens. click to copy. look them up.</p>
+  <ul class="wal">
+    <li>
+      <b>creator wallet — BROLI, PRIZMA, JIH</b>
+      <span class="ca">CiDmewWFfa6hsZxXz4zLJ7yBCpiUQE4oeo6po24LB4pq <button class="copy" data-c="CiDmewWFfa6hsZxXz4zLJ7yBCpiUQE4oeo6po24LB4pq">copy</button></span>
+      <span class="what">pump.fun name: LordBroli. the real broli, pepper, and jih came from here.</span>
+    </li>
+    <li>
+      <b>creator wallet — SNP 500 index</b>
+      <span class="ca">Bg64M4VxSJiCS9wLm5d1c4hVsySGkMXJevLUCbph6xsH <button class="copy" data-c="Bg64M4VxSJiCS9wLm5d1c4hVsySGkMXJevLUCbph6xsH">copy</button></span>
+      <span class="what">pump.fun name: SNPChairman. SNP, CLOG, GAS. holds a small amount of each, never sold. <span class="tbd">lock status: TBD</span></span>
+    </li>
+    <li>
+      <b>test wallet — graveyard and duplicates</b>
+      <span class="ca">4fBQKGd2qgSWvmRyA6tqsqpnDqzctiVM4jnygmCZEKHX <button class="copy" data-c="4fBQKGd2qgSWvmRyA6tqsqpnDqzctiVM4jnygmCZEKHX">copy</button></span>
+      <span class="what">seven coins came from here: aural, chucky, kdog (twice), montana, and the duplicate broly and jih. none of the real listings.</span>
+    </li>
+    <li>
+      <b>creator wallet &mdash; SLOUVRE</b>
+      <span class="ca">AV39E5m48csdiMkNT16SqTzxdDurTzMerYXdYoqNs86z <button class="copy" data-c="AV39E5m48csdiMkNT16SqTzxdDurTzMerYXdYoqNs86z">copy</button></span>
+      <span class="what">pump.fun name: TBD. the slouvre only. no creator allocation taken.</span>
+    </li>
+    <li>
+      <b>prize payouts — there is no prize wallet</b>
+      <span class="what">the one broli prize was paid in sol, not in tokens. the market cap was already low and handing the winner a bag to dump would have cost them and everyone still holding. it went out of the broli creator wallet listed above, so the transaction is already public — go look at it.</span>
+    </li>
+  </ul>
+  <p class="fees">total creator fees earned across every launch, ever: <strong>about $9</strong><br><span class="what">as of sept 8, 2026. that's the whole number.</span></p>
+</section>
 
-  <div class="donors"><div class="donors-in" id="donors"></div></div>
 </main>
 
 <footer>
-  <span id="fLeft"></span>
-  <span class="links">
-    <a href="https://x.com/0xZangetsu" target="_blank" rel="noopener">X</a>
-    <a href="https://t.me/labolsafun/41" target="_blank" rel="noopener">Telegram</a>
-    <a id="fPump" href="#" target="_blank" rel="noopener" hidden>pump.fun</a>
-    <a href="https://labolsa.fun" target="_blank" rel="noopener">La Bolsa</a>
-  </span>
-  <span>La Bolsa · $SLOUVRE</span>
+  <div class="wrap">
+    <p>La Bolsa is run by Xavier Perez as an individual. Not a company, and not affiliated with any company he owns or works for.</p>
+    <p>these are jokes with wallets attached. nothing here is advice. don't put in money you need.</p>
+    <p>x: <a href="https://x.com/0xZangetsu">@0xZangetsu</a> · tracker: <a href="https://prospector-brown-xi.vercel.app">prospector</a></p>
+  </div>
 </footer>
 
 <script>
-
-/* ============ the slop engine, v2 ============ */
-/* procedural SVG. no model, no API, no cost per image. */
-
-const BAD=['#C9A227','#8E4FA8','#5FA83E','#E0417A','#25A7B0','#E2711D','#3F52C4','#C43A3A','#7BC043','#F2C511','#FF5EA8','#00C2A8','#9B5DE5','#F15BB5'];
-const BG=['#F0E6D2','#D8E6E0','#EFD9E6','#DCE6F2','#F5E3CE','#E6E6DC','#F2D9D9','#1A1A22','#2B1F3A','#E8F0C8'];
-const SKIN=['#F2D2B6','#E0B08A','#C98C63','#8D5A3B','#B4E07A','#D9A8E0','#EDEDED'];
-const GIBBER=['GALERIE','MUSSEUM','ARTT','EXHIBTION','ORIGNAL','MASTERPEICE','SGNATURE','COLLECTON','ARTISTE','LIMITEDD','AUTHENTC','PAINTNG','SLOUVER','SLOVRE','THE SLOURVE','SLOUVRE'];
-
-/* one generator, three inputs: a free roll, a description, a photograph.
-   each one only has to produce a seed. */
-let RNG=Math.random, FORCE=null, SEED=null, PAL=null, WOB=1, DENS=1;
-let CW=300, CH=300, BANNER=false, SPECIES=null, ACC=null;
-function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;
-  var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;
-  return ((t^t>>>14)>>>0)/4294967296;};}
-function norm(t){return t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-  .replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();}
-function hash(s){let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return h>>>0;}
-
-const R=(a,b)=>a+RNG()*(b-a);
-const RI=(a,b)=>Math.floor(R(a,b+1));
-const P=a=>a[Math.floor(RNG()*a.length)];
-const chance=p=>RNG()<p;
-
-/* the museum's reading of your words. it is confident and it is wrong. */
-const LEX=[
-  [/\b(dog|perro|cat|gato|bird|pajaro|ave|pez|fish|horse|caballo|animal|pet|mascota|cow|vaca|rat|raton|bear|oso|wolf|lobo|frog|rana|snake|vibora|pig|puerco|chicken|pollo)\b/,{subject:'animal'}],
-  [/\b(hand|hands|mano|manos|finger|dedo|dedos|grab|hold|touch|tocar|palm|fist|pu(n|nn)o|wave)\b/,{subject:'hand'}],
-  [/\b(cactus|nopal|plant|planta|tree|arbol|desert|desierto|garden|jardin|flower|flor|texas|arizona|sun|sol|hot|calor|green|verde|weed|hierba)\b/,{subject:'cactus'}],
-  [/\b(robot|block|blocks|cube|caja|box|brick|ladrillo|machine|maquina|computer|compu|pixel|minecraft|lego|building|edificio|city|ciudad|phone|telefono|tv|screen|pantalla)\b/,{subject:'block'}],
-  [/\b(banana|platano|food|comida|hotdog|egg|huevo|coffee|cafe|chair|silla|shoe|zapato|taco|pizza|beer|cerveza|burger|torta|drink|bebida|cup|taza|table|mesa|car|carro|fish|shrimp)\b/,{subject:'object'}],
-  [/\b(anime|waifu|manga|kawaii|cute|linda|bonita|girl|chica|senpai|otaku|weeb|cosplay)\b/,{subject:'anime'}],
-  [/\b(me|myself|man|woman|guy|dude|person|hombre|mujer|persona|gente|face|cara|yo|bro|homie|friend|amigo|boss|jefe|dad|papa|mom|mama|kid|nino|baby|bebe)\b/,{subject:'brainlet'}],
-
-  [/\b(night|noche|dark|oscuro|black|negro|midnight|madrugada|sleep|dormir|dream|sueno|void|vacio|death|muerte|evil|space|espacio|cave|basement)\b/,{ground:'nocturne'}],
-  [/\b(sunset|atardecer|sunrise|amanecer|sky|cielo|beach|playa|ocean|mar|fire|fuego|warm|glow)\b/,{ground:'gradient'}],
-  [/\b(spotlight|halo|holy|santo|god|dios|light|luz|angel|heaven|cielo|blessed|bendecido)\b/,{ground:'aureole'}],
-
-  [/\b(everyone|todos|crowd|multitud|family|familia|team|equipo|party|fiesta|friends|amigos|gente|market|mercado|group|grupo|army|club|concert|stadium)\b/,{composition:'crowd'}],
-  [/\b(alone|solo|lonely|solitario|small|tiny|pequeno|chiquito|empty|vacio|quiet|silence|silencio|nothing|nada|lost|perdido|far|lejos)\b/,{composition:'tiny'}],
-  [/\b(two|dos|both|ambos|couple|pareja|versus|vs|fight|pelea|twins|gemelos|before|after|left|right)\b/,{composition:'diptych'}],
-
-  [/\b(sad|triste|cry|llorar|llorando|dead|muerto|died|murio|grief|luto|funeral|broke|quebrado|depressed|deprimido|hurt|dolor|rain|lluvia|flood|tears|lagrimas)\b/,{condition:'water damage'}],
-  [/\b(old|viejo|ancient|antiguo|memory|recuerdo|childhood|infancia|grandma|abuela|grandpa|abuelo|history|historia|vintage|retro|dusty|forgotten|olvidado)\b/,{condition:'craquelure'}],
-  [/\b(rich|rico|money|dinero|luxury|lujo|gold|oro|expensive|caro|rug|scam|estafa|fake|falso|liar|mentira|cover|hide|esconder)\b/,{condition:'overpainted'}],
-  [/\b(sick|enfermo|rot|podrido|mold|moho|stain|mancha|dirty|sucio|gross|asco|smell|nasty)\b/,{condition:'foxing'}],
-
-  [/\b(red|rojo|blood|sangre|angry|enojado|rage|hot|love|amor|heart|corazon)\b/,{pal:['#C43A3A','#E0417A','#8E2B2B','#FF5EA8','#E2711D']}],
-  [/\b(blue|azul|cold|frio|water|agua|ice|hielo|sea|mar|sky|cielo|calm|sad)\b/,{pal:['#3F52C4','#25A7B0','#5B6BB5','#00C2A8','#4FA3D8']}],
-  [/\b(green|verde|money|dinero|nature|naturaleza|grass|pasto|forest|bosque|slime|toxic)\b/,{pal:['#5FA83E','#7BC043','#6E8F3E','#B4E07A','#00C2A8']}],
-  [/\b(pink|rosa|purple|morado|violeta|girly|dream|vapor|neon|magic|magia)\b/,{pal:['#FF5EA8','#9B5DE5','#8E4FA8','#F15BB5','#D2557A']}],
-  [/\b(yellow|amarillo|gold|oro|sun|sol|piss|cheese|queso|bright|shiny)\b/,{pal:['#F2C511','#C9A227','#E2711D','#C4713A','#E3C86A']}]
-];
-function readWords(t){
-  const n=' '+norm(t)+' ',f={};
-  LEX.forEach(([re,set])=>{ if(re.test(n)) Object.keys(set).forEach(k=>{ if(!f[k]) f[k]=set[k]; }); });
-  /* every word does something, listed or not: the letters themselves
-     set how badly the piece is drawn and how crowded it gets. */
-  const s=norm(t)||' ';
-  const vow=(s.match(/[aeiou]/g)||[]).length/Math.max(s.length,1);
-  const uniq=new Set(s.replace(/ /g,'')).size;
-  f.wob=0.55+vow*2.4+(uniq%5)*0.11;
-  f.dens=0.6+Math.min(s.length,90)/60;
-  return f;
-}
-const F=n=>n.toFixed(1);
-
-let HANDS=0;
-function wobble(pts,amt){return pts.map(p=>[p[0]+R(-amt,amt),p[1]+R(-amt,amt)]);}
-
-function blob(cx,cy,r,n,amt){ amt*=WOB;
-  const pts=[];
-  for(let i=0;i<n;i++){
-    const a=(i/n)*Math.PI*2, rr=r*R(.7,1.32);
-    pts.push([cx+Math.cos(a)*rr,cy+Math.sin(a)*rr*R(.78,1.28)]);
-  }
-  const w=wobble(pts,amt);
-  let d=`M${F(w[0][0])} ${F(w[0][1])}`;
-  for(let i=1;i<=w.length;i++){
-    const a=w[i%w.length],b=w[(i+1)%w.length];
-    d+=` Q${F(a[0])} ${F(a[1])} ${F((a[0]+b[0])/2)} ${F((a[1]+b[1])/2)}`;
-  }
-  return d+'Z';
-}
-function scrawl(x,y,len,segs){
-  let d=`M${F(x)} ${F(y)}`,cx=x,cy=y;
-  for(let i=0;i<segs;i++){
-    const nx=cx+R(-len,len),ny=cy+R(-len,len);
-    d+=` Q${F(cx+R(-len,len))} ${F(cy+R(-len,len))} ${F(nx)} ${F(ny)}`;
-    cx=nx;cy=ny;
-  }
-  return d;
-}
-function ink(s,c){return `fill="none" stroke="${c||'#111'}" stroke-width="${F(s)}" stroke-linecap="round" stroke-linejoin="round"`;}
-
-/* ---------- what they are wearing ---------- */
-const ACCS=[['none',.40],['glasses',.12],['sunglasses',.09],['cap',.09],['beanie',.05],
-  ['beret',.04],['trench',.06],['jersey',.05],['rocker',.04],['monocle',.02],
-  ['cigarette',.025],['cigar',.015],['crown',.01]];
-function pickAcc(){let r=R(0,1);for(const[k,w]of ACCS){if((r-=w)<=0)return k;}return 'none';}
-
-function headAcc(kind,cx,cy,hr,s){
-  const sw=R(2,3.4)*s;let g='';
-  const O=`fill="none" stroke="#111" stroke-width="${F(sw)}" stroke-linecap="round" stroke-linejoin="round"`;
-  if(kind==='glasses'){
-    const r=hr*.3;
-    g+=`<circle cx="${F(cx-hr*.38)}" cy="${F(cy)}" r="${F(r)}" fill="#DCEBF2" fill-opacity=".45" stroke="#111" stroke-width="${F(sw)}"/>`;
-    g+=`<circle cx="${F(cx+hr*.38)}" cy="${F(cy-hr*.05)}" r="${F(r*R(.8,1.15))}" fill="#DCEBF2" fill-opacity=".45" stroke="#111" stroke-width="${F(sw)}"/>`;
-    g+=`<path d="M${F(cx-hr*.09)} ${F(cy)} h${F(hr*.2)}" ${O}/>`;
-    g+=`<path d="M${F(cx-hr*.68)} ${F(cy-hr*.06)} l${F(-hr*.28)} ${F(-hr*.1)}" ${O}/>`;
-  }else if(kind==='sunglasses'){
-    g+=`<path d="M${F(cx-hr*.72)} ${F(cy-hr*.16)} h${F(hr*1.44)} v${F(hr*.1)} q${F(-hr*.06)} ${F(hr*.42)} ${F(-hr*.5)} ${F(hr*.38)} q${F(-hr*.2)} ${F(-hr*.06)} ${F(-hr*.22)} ${F(-hr*.3)} q${F(-hr*.02)} ${F(hr*.26)} ${F(-hr*.24)} ${F(hr*.3)} q${F(-hr*.44)} ${F(.04*hr)} ${F(-hr*.48)} ${F(-hr*.38)} Z" fill="#141414" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
-    g+=`<path d="M${F(cx-hr*.72)} ${F(cy-hr*.12)} l${F(-hr*.26)} ${F(-hr*.12)} M${F(cx+hr*.72)} ${F(cy-hr*.12)} l${F(hr*.26)} ${F(-hr*.12)}" ${O}/>`;
-    g+=`<path d="M${F(cx-hr*.58)} ${F(cy-hr*.04)} l${F(hr*.16)} ${F(hr*.16)}" stroke="#fff" stroke-width="${F(sw*.8)}" opacity=".55"/>`;
-  }else if(kind==='monocle'){
-    g+=`<circle cx="${F(cx+hr*.36)}" cy="${F(cy-hr*.04)}" r="${F(hr*.34)}" fill="#DCEBF2" fill-opacity=".4" stroke="#C9A227" stroke-width="${F(sw*1.2)}"/>`;
-    g+=`<path d="M${F(cx+hr*.66)} ${F(cy+hr*.16)} q${F(hr*.3)} ${F(hr*.5)} ${F(-hr*.1)} ${F(hr*.9)}" fill="none" stroke="#C9A227" stroke-width="${F(sw*.7)}"/>`;
-  }else if(kind==='cap'){
-    const c=P(PAL);
-    g+=`<path d="M${F(cx-hr*.9)} ${F(cy-hr*.42)} q${F(hr*.9)} ${F(-hr*1.05)} ${F(hr*1.8)} 0 Z" fill="${c}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
-    g+=`<path d="M${F(cx+hr*.6)} ${F(cy-hr*.44)} q${F(hr*.85)} ${F(-hr*.06)} ${F(hr*.8)} ${F(hr*.22)} q${F(-hr*.5)} ${F(hr*.16)} ${F(-hr*.86)} ${F(hr*.04)} Z" fill="${c}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
-    g+=`<circle cx="${F(cx)}" cy="${F(cy-hr*.98)}" r="${F(hr*.09)}" fill="${c}" stroke="#111" stroke-width="${F(sw*.6)}"/>`;
-  }else if(kind==='beanie'){
-    const c=P(PAL);
-    g+=`<path d="M${F(cx-hr*.92)} ${F(cy-hr*.36)} q${F(hr*.92)} ${F(-hr*1.15)} ${F(hr*1.84)} 0 Z" fill="${c}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
-    g+=`<rect x="${F(cx-hr*.95)}" y="${F(cy-hr*.46)}" width="${F(hr*1.9)}" height="${F(hr*.26)}" fill="${c}" stroke="#111" stroke-width="${F(sw)}"/>`;
-    g+=`<circle cx="${F(cx+R(-6,6)*s)}" cy="${F(cy-hr*1.14)}" r="${F(hr*.2)}" fill="${c}" stroke="#111" stroke-width="${F(sw*.7)}"/>`;
-  }else if(kind==='beret'){
-    g+=`<ellipse cx="${F(cx-hr*.1)}" cy="${F(cy-hr*.7)}" rx="${F(hr*.95)}" ry="${F(hr*.34)}" fill="#1E1E1E" stroke="#111" stroke-width="${F(sw)}" transform="rotate(-11 ${F(cx)} ${F(cy-hr*.7)})"/>`;
-    g+=`<circle cx="${F(cx-hr*.5)}" cy="${F(cy-hr*.95)}" r="${F(hr*.11)}" fill="#1E1E1E" stroke="#111" stroke-width="${F(sw*.6)}"/>`;
-  }else if(kind==='crown'){
-    let d=`M${F(cx-hr*.72)} ${F(cy-hr*.5)}`;
-    for(let i=0;i<4;i++){d+=` L${F(cx-hr*.72+i*hr*.48+hr*.24)} ${F(cy-hr*R(.95,1.2))} L${F(cx-hr*.72+(i+1)*hr*.48)} ${F(cy-hr*.5)}`;}
-    g+=`<path d="${d} Z" fill="#E3C86A" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
-  }
-  return g;
-}
-function mouthAcc(kind,cx,my,hr,s){
-  const sw=R(2,3)*s;let g='';
-  if(kind==='cigarette'){
-    g+=`<rect x="${F(cx+hr*.24)}" y="${F(my-hr*.06)}" width="${F(hr*.62)}" height="${F(hr*.13)}" fill="#F3EFE4" stroke="#111" stroke-width="${F(sw*.7)}" transform="rotate(9 ${F(cx)} ${F(my)})"/>`;
-    g+=`<rect x="${F(cx+hr*.78)}" y="${F(my-hr*.06)}" width="${F(hr*.1)}" height="${F(hr*.13)}" fill="#C4523A" transform="rotate(9 ${F(cx)} ${F(my)})"/>`;
-    g+=`<path d="${scrawl(cx+hr*.95,my-hr*.2,hr*.22,4)}" fill="none" stroke="#9AA0A6" stroke-width="${F(sw*.8)}" opacity=".75" stroke-linecap="round"/>`;
-  }else if(kind==='cigar'){
-    g+=`<rect x="${F(cx+hr*.22)}" y="${F(my-hr*.12)}" width="${F(hr*.78)}" height="${F(hr*.24)}" rx="${F(hr*.1)}" fill="#6B4A28" stroke="#111" stroke-width="${F(sw*.7)}" transform="rotate(7 ${F(cx)} ${F(my)})"/>`;
-    g+=`<rect x="${F(cx+hr*.36)}" y="${F(my-hr*.12)}" width="${F(hr*.14)}" height="${F(hr*.24)}" fill="#C9A227" transform="rotate(7 ${F(cx)} ${F(my)})"/>`;
-    g+=`<path d="${scrawl(cx+hr*1.1,my-hr*.26,hr*.3,5)}" fill="none" stroke="#9AA0A6" stroke-width="${F(sw*1.1)}" opacity=".8" stroke-linecap="round"/>`;
-  }
-  return g;
-}
-function bodyAcc(kind,cx,by,s){
-  const sw=R(2.2,3.6)*s;let g='';
-  const O=`stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round" stroke-linecap="round"`;
-  if(kind==='trench'){
-    g+=`<path d="M${F(cx-30*s)} ${F(by+4*s)} L${F(cx+30*s)} ${F(by+4*s)} L${F(cx+26*s)} ${F(by+82*s)} L${F(cx-26*s)} ${F(by+82*s)} Z" fill="#C0A878" ${O}/>`;
-    g+=`<path d="M${F(cx)} ${F(by+4*s)} v${F(78*s)}" ${O} fill="none"/>`;
-    g+=`<path d="M${F(cx-30*s)} ${F(by+40*s)} h${F(60*s)}" stroke="#8A7333" stroke-width="${F(sw*2)}"/>`;
-    g+=`<circle cx="${F(cx-9*s)}" cy="${F(by+20*s)}" r="${F(3*s)}" fill="#111"/>`;
-  }else if(kind==='jersey'){
-    const c1=P(PAL);
-    g+=`<path d="M${F(cx-28*s)} ${F(by+4*s)} L${F(cx+28*s)} ${F(by+4*s)} L${F(cx+24*s)} ${F(by+66*s)} L${F(cx-24*s)} ${F(by+66*s)} Z" fill="${c1}" ${O}/>`;
-    g+=`<text x="${F(cx)}" y="${F(by+46*s)}" font-family="Georgia,serif" font-size="${F(30*s)}" text-anchor="middle" fill="#F5F0E4" stroke="#111" stroke-width="${F(sw*.4)}">${RI(0,9)}${RI(0,9)}</text>`;
-  }else if(kind==='rocker'){
-    g+=`<path d="M${F(cx-29*s)} ${F(by+4*s)} L${F(cx+29*s)} ${F(by+4*s)} L${F(cx+25*s)} ${F(by+70*s)} L${F(cx-25*s)} ${F(by+70*s)} Z" fill="#1C1C1C" ${O}/>`;
-    g+=`<path d="M${F(cx-14*s)} ${F(by+4*s)} l${F(8*s)} ${F(22*s)} l${F(-10*s)} ${F(6*s)} Z M${F(cx+14*s)} ${F(by+4*s)} l${F(-8*s)} ${F(22*s)} l${F(10*s)} ${F(6*s)} Z" fill="#2E2E2E" ${O}/>`;
-    for(let i=0;i<RI(3,7);i++)
-      g+=`<circle cx="${F(cx+R(-22,22)*s)}" cy="${F(by+R(14,60)*s)}" r="${F(2.2*s)}" fill="#C9C9C9"/>`;
-  }
-  return g;
-}
-function applyAcc(kind,cx,cy,hr,s,by){
-  if(!kind||kind==='none')return '';
-  let g='';
-  g+=headAcc(kind,cx,cy,hr,s);
-  g+=mouthAcc(kind,cx,cy+hr*.45,hr,s);
-  if(by!==undefined)g+=bodyAcc(kind,cx,by,s);
-  return g;
-}
-
-/* wrong eyes — the house style */
-function eyes(cx,cy,r,s){
-  let g='';
-  const e=[[cx-r*R(.28,.58),cy-r*R(0,.3)],[cx+r*R(.14,.52),cy-r*R(-.16,.34)]];
-  e.forEach(p=>{
-    const k=R(.12,.44);
-    if(chance(.36)){
-      g+=`<ellipse cx="${F(p[0])}" cy="${F(p[1])}" rx="${F(r*k)}" ry="${F(r*k*R(.4,1.6))}" fill="#111"/>`;
-    }else{
-      g+=`<ellipse cx="${F(p[0])}" cy="${F(p[1])}" rx="${F(r*k)}" ry="${F(r*k*R(.5,1.3))}" fill="#fff" ${chance(.5)?`stroke="#111" stroke-width="${F(s*.7)}"`:''}/>`;
-      g+=`<circle cx="${F(p[0]+R(-5,5))}" cy="${F(p[1]+R(-4,4))}" r="${F(r*k*.4)}" fill="#111"/>`;
-    }
+document.querySelectorAll('.copy').forEach(function(b){
+  b.addEventListener('click',function(){
+    navigator.clipboard.writeText(b.dataset.c).then(function(){
+      var t=b.textContent;b.textContent='copied';setTimeout(function(){b.textContent=t},1200);
+    });
   });
-  return g;
-}
-function mouth(cx,cy,r,s){
-  const w=r*R(.35,1.0);
-  if(chance(.3)){
-    return `<path d="${blob(cx,cy,r*R(.15,.3),6,3)}" fill="#8E2B2B" ${chance(.5)?`stroke="#111" stroke-width="${F(s*.7)}"`:''}/>`;
-  }
-  return `<path d="M${F(cx-w/2)} ${F(cy)} Q${F(cx+R(-16,16))} ${F(cy+r*R(.15,.6))} ${F(cx+w/2)} ${F(cy+R(-8,8))}" ${ink(s)}/>`;
-}
-function drip(x,y,len,col,w){
-  return `<path d="M${F(x)} ${F(y)} q${F(R(-4,4))} ${F(len*.5)} ${F(R(-6,6))} ${F(len)}" fill="none" stroke="${col}" stroke-width="${F(w)}" stroke-linecap="round" opacity="${F(R(.5,.95))}"/>`;
-}
-
-/* ---------- subjects ---------- */
-
-function subjBrainlet(cx,cy,s){
-  let g='';const sw=R(2.4,4.6)*s;let hr=36*s;
-  const sp=(()=>{const r=R(0,1);
-    if(r<.055)return 'alien'; if(r<.105)return 'zombie'; return 'human';})();
-  SPECIES=SPECIES||sp;
-  let skin=P(SKIN);
-  if(sp==='alien'){skin=P(['#9BD46A','#8FD1C0','#C7E86A']);hr*=1.22;}
-  if(sp==='zombie')skin=P(['#8FA36B','#9AA88C','#7E9160']);
-
-  g+=`<path d="${blob(cx,cy,hr,RI(6,9),4*s)}" fill="${skin}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
-  if(sp==='alien'){
-    for(let a=0;a<2;a++){const dir=a?1:-1;
-      g+=`<path d="M${F(cx+dir*hr*.45)} ${F(cy-hr*.8)} q${F(dir*10*s)} ${F(-26*s)} ${F(dir*2*s)} ${F(-36*s)}" ${ink(sw*.9)}/>`;
-      g+=`<circle cx="${F(cx+dir*hr*.5)}" cy="${F(cy-hr*.8-36*s)}" r="${F(5*s)}" fill="${skin}" stroke="#111" stroke-width="${F(sw*.7)}"/>`;}
-    for(let e=0;e<2;e++){const dir=e?1:-1;
-      g+=`<ellipse cx="${F(cx+dir*hr*.36)}" cy="${F(cy+hr*.05)}" rx="${F(hr*.28)}" ry="${F(hr*.4)}" fill="#111" transform="rotate(${F(dir*18)} ${F(cx+dir*hr*.36)} ${F(cy)})"/>`;}
-  }else{
-    g+=eyes(cx,cy,hr,sw);
-  }
-  if(sp==='zombie'){
-    g+=`<path d="M${F(cx-hr*.5)} ${F(cy-hr*.55)} l${F(hr*.3)} ${F(hr*.12)}" ${ink(sw*.8)}/>`;
-    for(let i=0;i<3;i++)g+=`<path d="M${F(cx-hr*.46+i*hr*.12)} ${F(cy-hr*.62)} l0 ${F(hr*.2)}" ${ink(sw*.6)}/>`;
-    g+=`<path d="M${F(cx+hr*.3)} ${F(cy+hr*.18)} q${F(4*s)} ${F(18*s)} ${F(-2*s)} ${F(26*s)}" ${ink(sw*.7,'#5C7A3E')}/>`;
-  }
-  g+=mouth(cx,cy+hr*R(.36,.62),hr,sw);
-  if(sp!=='alien'&&chance(.4))
-    g+=`<path d="M${F(cx-hr*.5)} ${F(cy+hr*.35)} q${F(R(-6,6))} ${F(hr*.5)} ${F(R(-5,5))} ${F(hr*R(.7,1.3))}" ${ink(sw,'#4FA3D8')}/>`;
-  const by=cy+hr*R(1.0,1.3);
-  g+=`<path d="M${F(cx+R(-8,8)*s)} ${F(cy+hr*.9)} L${F(cx+R(-14,14)*s)} ${F(by+70*s)}" ${ink(sw)}/>`;
-  const acc=ACC;
-  const dressed=acc==='trench'||acc==='jersey'||acc==='rocker';
-  if(!dressed)for(let a=0;a<RI(1,3);a++){
-    const dir=chance(.5)?-1:1,ex=cx+dir*R(42,90)*s,ey=by+R(-28,58)*s;
-    g+=`<path d="M${F(cx)} ${F(by+R(2,20)*s)} Q${F(cx+dir*R(30,66)*s)} ${F(by+R(-32,26)*s)} ${F(ex)} ${F(ey)}" ${ink(sw)}/>`;
-    for(let i=0;i<RI(2,7);i++){const an=R(-1.5,1.5);
-      g+=`<path d="M${F(ex)} ${F(ey)} l${F(Math.cos(an)*R(9,24)*s*dir)} ${F(Math.sin(an)*R(9,24)*s)}" ${ink(sw)}/>`;}
-  }
-  if(chance(.5)&&!dressed)for(let l=0;l<2;l++)
-    g+=`<path d="M${F(cx+R(-10,10)*s)} ${F(by+68*s)} q${F(R(-20,20))} ${F(40*s)} ${F(R(-26,26)*s)} ${F(R(50,80)*s)}" ${ink(sw)}/>`;
-  g+=applyAcc(acc,cx,cy,hr,s,by);
-  return g;
-}
-
-function subjCube(cx,cy,s){
-  let g='';const sw=R(2.6,4.4)*s;
-  if(chance(.4)){ /* a building. nobody asked for a building. */
-    const bw=R(46,74)*s,bh=R(100,168)*s,col=P(PAL);
-    g+=`<rect x="${F(cx-bw/2)}" y="${F(cy-bh/2)}" width="${F(bw)}" height="${F(bh)}" fill="${col}" stroke="#111" stroke-width="${F(sw)}" transform="rotate(${F(R(-5,5))} ${F(cx)} ${F(cy)})"/>`;
-    const cols=RI(2,4),rows=RI(3,6),pw=bw/(cols+1),ph=bh/(rows+1);
-    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-      const lit=chance(.45);
-      g+=`<rect x="${F(cx-bw/2+pw*.5+c*pw*1.08)}" y="${F(cy-bh/2+ph*.5+r*ph*1.05)}" width="${F(pw*.62)}" height="${F(ph*.55)}" fill="${lit?'#F2C511':'#2A2A2A'}" stroke="#111" stroke-width="${F(sw*.4)}" opacity="${F(R(.7,1))}"/>`;
-    }
-    if(chance(.5))g+=`<rect x="${F(cx-bw*.14)}" y="${F(cy+bh/2-22*s)}" width="${F(bw*.28)}" height="${F(22*s)}" fill="#2A2A2A" stroke="#111" stroke-width="${F(sw*.6)}"/>`;
-    if(chance(.35))g+=`<path d="M${F(cx)} ${F(cy-bh/2)} v${F(-R(16,40)*s)}" ${ink(sw*.8)}/>`;
-    return g;
-  }
-  const hw=54*s,hh=48*s,rot=R(-12,12);
-  g+=`<g transform="rotate(${F(rot)} ${F(cx)} ${F(cy)})">`;
-  g+=`<rect x="${F(cx-hw/2)}" y="${F(cy-hh/2)}" width="${F(hw)}" height="${F(hh)}" fill="${P(SKIN)}" stroke="#111" stroke-width="${F(sw)}"/>`;
-  g+=`<rect x="${F(cx-hw*.3)}" y="${F(cy-hh*.16)}" width="${F(hw*R(.1,.22))}" height="${F(hh*R(.1,.3))}" fill="#111"/>`;
-  g+=`<rect x="${F(cx+hw*.08)}" y="${F(cy-hh*R(.05,.24))}" width="${F(hw*R(.1,.26))}" height="${F(hh*R(.08,.26))}" fill="#111"/>`;
-  g+=`<rect x="${F(cx-hw*.2)}" y="${F(cy+hh*.2)}" width="${F(hw*R(.2,.55))}" height="${F(hh*R(.06,.16))}" fill="#111"/>`;
-  g+=`</g>`;
-  const by=cy+hh*.5+R(6,16)*s;
-  g+=`<rect x="${F(cx-hw*.42)}" y="${F(by)}" width="${F(hw*.84)}" height="${F(hh*R(1.0,1.5))}" fill="${P(PAL)}" stroke="#111" stroke-width="${F(sw)}" transform="rotate(${F(R(-8,8))} ${F(cx)} ${F(by)})"/>`;
-  for(let a=0;a<2;a++){const dir=a?1:-1;
-    g+=`<rect x="${F(cx+dir*hw*.42-(dir<0?26*s:0))}" y="${F(by+R(4,26)*s)}" width="${F(26*s)}" height="${F(11*s)}" fill="${P(SKIN)}" stroke="#111" stroke-width="${F(sw*.8)}" transform="rotate(${F(R(-40,40))} ${F(cx+dir*hw*.42)} ${F(by+10*s)})"/>`;}
-  for(let l=0;l<2;l++)
-    g+=`<rect x="${F(cx-hw*.3+l*hw*.36)}" y="${F(by+hh*1.3)}" width="${F(13*s)}" height="${F(R(26,54)*s)}" fill="#111"/>`;
-  return g;
-}
-
-function subjCactus(cx,cy,s){
-  let g='';const sw=R(2.6,4.2)*s;
-  const col=P(['#4E9B3E','#6FBF4E','#3E7B45','#8FD16B','#5C8F52']);
-  const kind=P(['saguaro','saguaro','barrel','pear']);
-  let botY=cy+46*s, halfW=40*s;
-
-  if(kind==='saguaro'){
-    const w=R(30,46)*s,h=R(74,112)*s;halfW=w/2;botY=cy+h/2;
-    g+=`<rect x="${F(cx-w/2)}" y="${F(cy-h/2)}" width="${F(w)}" height="${F(h)}" rx="${F(w/2)}" fill="${col}" stroke="#111" stroke-width="${F(sw)}"/>`;
-    for(let a=0;a<RI(0,3);a++){const dir=chance(.5)?1:-1,ay=cy-h*R(-.1,.3);
-      g+=`<path d="M${F(cx+dir*w*.4)} ${F(ay)} h${F(dir*R(16,34)*s)} v${F(-R(20,46)*s)}" fill="none" stroke="${col}" stroke-width="${F(19*s)}" stroke-linecap="round"/>`;
-      g+=`<path d="M${F(cx+dir*w*.4)} ${F(ay)} h${F(dir*R(16,34)*s)} v${F(-R(20,46)*s)}" fill="none" stroke="#111" stroke-width="${F(sw)}" stroke-linecap="round" opacity=".45"/>`;}
-    for(let i=0;i<RI(6,16);i++)
-      g+=`<path d="M${F(cx+R(-w/2,w/2))} ${F(cy+R(-h/2,h/2))} l${F(R(-7,7))} ${F(R(-7,7))}" ${ink(sw*.5)}/>`;
-    g+=eyes(cx,cy-h*.1,25*s,sw);g+=mouth(cx,cy+h*.05,25*s,sw);
-  }else if(kind==='barrel'){
-    const r=R(34,50)*s;halfW=r;botY=cy+r;
-    g+=`<path d="${blob(cx,cy,r,9,3*s)}" fill="${col}" stroke="#111" stroke-width="${F(sw)}"/>`;
-    for(let i=0;i<RI(4,8);i++)
-      g+=`<path d="M${F(cx-r+i*r*2/6)} ${F(cy-r*.8)} q${F(R(-5,5))} ${F(r)} 0 ${F(r*1.6)}" fill="none" stroke="#111" stroke-width="${F(sw*.55)}" opacity=".5"/>`;
-    for(let i=0;i<RI(8,18);i++)
-      g+=`<path d="M${F(cx+R(-r,r))} ${F(cy+R(-r,r))} l${F(R(-6,6))} ${F(R(-6,6))}" ${ink(sw*.5)}/>`;
-    g+=eyes(cx,cy-r*.15,r*.85,sw);g+=mouth(cx,cy+r*.3,r*.8,sw);
-    if(chance(.6))for(let i=0;i<RI(3,6);i++)
-      g+=`<circle cx="${F(cx+R(-r*.7,r*.7))}" cy="${F(cy-r*.95)}" r="${F(R(4,8)*s)}" fill="${P(['#FF5EA8','#F2C511','#E0417A'])}" stroke="#111" stroke-width="${F(sw*.6)}"/>`;
-  }else{
-    const pads=RI(2,4);let py=cy+30*s,pw=R(30,42)*s;halfW=pw;botY=cy+46*s;
-    for(let i=0;i<pads;i++){
-      const px=cx+R(-16,16)*s*i;
-      g+=`<ellipse cx="${F(px)}" cy="${F(py)}" rx="${F(pw*.55)}" ry="${F(pw*.72)}" fill="${col}" stroke="#111" stroke-width="${F(sw)}" transform="rotate(${F(R(-24,24))} ${F(px)} ${F(py)})"/>`;
-      for(let k=0;k<RI(4,9);k++)
-        g+=`<path d="M${F(px+R(-pw*.5,pw*.5))} ${F(py+R(-pw*.6,pw*.6))} l${F(R(-6,6))} ${F(R(-6,6))}" ${ink(sw*.5)}/>`;
-      if(i===0){g+=eyes(px,py-pw*.15,pw*.6,sw);g+=mouth(px,py+pw*.22,pw*.55,sw);}
-      py-=pw*R(.85,1.15);pw*=R(.72,.92);
-    }
-  }
-  if(chance(.75)){
-    g+=`<path d="M${F(cx-halfW*1.5)} ${F(botY)} L${F(cx+halfW*1.5)} ${F(botY)} L${F(cx+halfW*1.1)} ${F(botY+38*s)} L${F(cx-halfW*1.1)} ${F(botY+38*s)} Z" fill="${P(['#C4713A','#A85B5B','#8E6FA8','#B98A4E'])}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
-    if(chance(.4))g+=`<path d="M${F(cx-halfW*1.5)} ${F(botY+8*s)} h${F(halfW*3)}" ${ink(sw*.7)} opacity=".6"/>`;
-  }
-  return g;
-}
-
-function subjHand(cx,cy,s){
-  let g='';const sw=R(2.6,4.4)*s,r=32*s,col=P(SKIN);
-  g+=`<path d="${blob(cx,cy+r*.5,r,7,4*s)}" fill="${col}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
-  const n=RI(5,8); HANDS=Math.max(HANDS,n);
-  for(let i=0;i<n;i++){
-    const a=-Math.PI*.92+ (i/(n-1))*Math.PI*.84;
-    const len=R(30,70)*s, bx=cx+Math.cos(a)*r*.85, by=cy+r*.5+Math.sin(a)*r*.85;
-    const tx=bx+Math.cos(a+R(-.4,.4))*len, ty=by+Math.sin(a+R(-.4,.4))*len;
-    g+=`<path d="M${F(bx)} ${F(by)} Q${F(bx+R(-14,14))} ${F((by+ty)/2)} ${F(tx)} ${F(ty)}" fill="none" stroke="${col}" stroke-width="${F(15*s)}" stroke-linecap="round"/>`;
-    g+=`<path d="M${F(bx)} ${F(by)} Q${F(bx+R(-14,14))} ${F((by+ty)/2)} ${F(tx)} ${F(ty)}" fill="none" stroke="#111" stroke-width="${F(sw*.7)}" stroke-linecap="round" opacity=".55"/>`;
-    // a finger growing out of a finger
-    if(chance(.18)){const mx=(bx+tx)/2,my=(by+ty)/2;
-      g+=`<path d="M${F(mx)} ${F(my)} l${F(R(-30,30))} ${F(R(-28,10))}" fill="none" stroke="${col}" stroke-width="${F(12*s)}" stroke-linecap="round"/>`;}
-  }
-  g+=`<path d="M${F(cx-r*.5)} ${F(cy+r*1.3)} q${F(r*.5)} ${F(r*.3)} ${F(r)} 0" ${ink(sw*.6)} opacity=".5"/>`;
-  return g;
-}
-
-function subjAnimal(cx,cy,s){
-  let g='';const sw=R(2.4,4.2)*s;
-  const col=P(['#E2C08A','#9A9A9A','#D9743A','#EDEDED','#5B4636','#F2C511','#C9A227','#8B5E3C']);
-  const kind=(()=>{const r=R(0,1);
-    if(r<.035)return 'bull'; if(r<.065)return 'goat';
-    return P(['generic','chicken','bird','long','horned','bunny','mouse','tiger','monkey','worm']);})();
-  SPECIES=SPECIES||kind;
-  const bw=(kind==='long'?R(62,84):R(44,58))*s;
-  g+=`<path d="${blob(cx,cy+26*s,bw,8,5*s)}" fill="${col}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
-  if(chance(.35)){ /* markings */
-    for(let i=0;i<RI(2,5);i++)
-      g+=`<path d="${blob(cx+R(-bw*.6,bw*.6),cy+26*s+R(-16,16)*s,R(7,15)*s,6,4)}" fill="#111" opacity="${F(R(.2,.45))}"/>`;
-  }
-  const hx=cx+R(-24,24)*s,hy=cy-R(24,44)*s,hr=(kind==='bird'?22:27)*s;
-  g+=`<path d="${blob(hx,hy,hr,7,4*s)}" fill="${col}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
-
-  if(kind==='chicken'){
-    for(let i=0;i<3;i++)
-      g+=`<path d="${blob(hx-hr*.3+i*hr*.34,hy-hr*.95,hr*.24,6,2)}" fill="#C43A3A" stroke="#111" stroke-width="${F(sw*.6)}"/>`;
-    g+=`<path d="M${F(hx+hr*.7)} ${F(hy+hr*.1)} l${F(16*s)} ${F(5*s)} l${F(-15*s)} ${F(7*s)} Z" fill="#F2C511" stroke="#111" stroke-width="${F(sw*.7)}" stroke-linejoin="round"/>`;
-    g+=`<path d="${blob(hx-hr*.1,hy+hr*.85,hr*.26,6,2)}" fill="#C43A3A" stroke="#111" stroke-width="${F(sw*.6)}"/>`;
-  }else if(kind==='bird'){
-    g+=`<path d="M${F(hx+hr*.75)} ${F(hy)} l${F(R(16,30)*s)} ${F(R(2,8)*s)} l${F(-R(15,28)*s)} ${F(R(6,11)*s)} Z" fill="#E2711D" stroke="#111" stroke-width="${F(sw*.7)}" stroke-linejoin="round"/>`;
-    g+=`<path d="M${F(cx-bw*.2)} ${F(cy+18*s)} q${F(bw*.5)} ${F(-26*s)} ${F(bw*.8)} ${F(6*s)}" fill="${col}" stroke="#111" stroke-width="${F(sw)}"/>`;
-  }else if(kind==='horned'){
-    for(let e=0;e<2;e++){const dir=e?1:-1;
-      g+=`<path d="M${F(hx+dir*hr*.5)} ${F(hy-hr*.7)} q${F(dir*20*s)} ${F(-18*s)} ${F(dir*6*s)} ${F(-30*s)}" fill="none" stroke="#EDE0C4" stroke-width="${F(7*s)}" stroke-linecap="round"/>`;
-      g+=`<path d="M${F(hx+dir*hr*.5)} ${F(hy-hr*.7)} q${F(dir*20*s)} ${F(-18*s)} ${F(dir*6*s)} ${F(-30*s)}" fill="none" stroke="#111" stroke-width="${F(sw*.6)}" stroke-linecap="round" opacity=".6"/>`;}
-  }else if(kind==='bunny'){
-    for(let e=0;e<2;e++){const dir=e?1:-1;
-      g+=`<ellipse cx="${F(hx+dir*hr*.34)}" cy="${F(hy-hr*1.15)}" rx="${F(hr*.24)}" ry="${F(hr*.75)}" fill="${col}" stroke="#111" stroke-width="${F(sw)}" transform="rotate(${F(dir*11)} ${F(hx)} ${F(hy)})"/>`;
-      g+=`<ellipse cx="${F(hx+dir*hr*.34)}" cy="${F(hy-hr*1.15)}" rx="${F(hr*.11)}" ry="${F(hr*.5)}" fill="#F2B9C4" transform="rotate(${F(dir*11)} ${F(hx)} ${F(hy)})"/>`;}
-  }else if(kind==='mouse'){
-    for(let e=0;e<2;e++){const dir=e?1:-1;
-      g+=`<circle cx="${F(hx+dir*hr*.72)}" cy="${F(hy-hr*.6)}" r="${F(hr*.46)}" fill="${col}" stroke="#111" stroke-width="${F(sw)}"/>`;
-      g+=`<circle cx="${F(hx+dir*hr*.72)}" cy="${F(hy-hr*.6)}" r="${F(hr*.26)}" fill="#F2B9C4"/>`;}
-  }else if(kind==='tiger'){
-    for(let e=0;e<2;e++){const dir=e?1:-1;
-      g+=`<path d="M${F(hx+dir*hr*.6)} ${F(hy-hr*.62)} l${F(dir*14*s)} ${F(-20*s)} l${F(-dir*20*s)} ${F(4*s)} Z" fill="${col}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;}
-    for(let i=0;i<RI(4,8);i++)
-      g+=`<path d="M${F(cx-bw*.6+i*bw*.28)} ${F(cy+8*s)} q${F(4*s)} ${F(14*s)} 0 ${F(26*s)}" ${ink(sw*1.3)} opacity=".8"/>`;
-    for(let i=0;i<3;i++)
-      g+=`<path d="M${F(hx-hr*.5+i*hr*.4)} ${F(hy-hr*.75)} v${F(hr*.3)}" ${ink(sw)}/>`;
-  }else if(kind==='monkey'){
-    for(let e=0;e<2;e++){const dir=e?1:-1;
-      g+=`<circle cx="${F(hx+dir*hr*.95)}" cy="${F(hy)}" r="${F(hr*.34)}" fill="${col}" stroke="#111" stroke-width="${F(sw)}"/>`;}
-    g+=`<path d="${blob(hx,hy+hr*.32,hr*.6,7,3)}" fill="#E8C9A8" stroke="#111" stroke-width="${F(sw*.7)}"/>`;
-  }else if(kind==='worm'){
-    g+=`<path d="M${F(cx-bw)} ${F(cy+30*s)} q${F(bw*.5)} ${F(-34*s)} ${F(bw)} 0 q${F(bw*.5)} ${F(34*s)} ${F(bw)} 0" fill="none" stroke="${col}" stroke-width="${F(26*s)}" stroke-linecap="round"/>`;
-    g+=`<path d="M${F(cx-bw)} ${F(cy+30*s)} q${F(bw*.5)} ${F(-34*s)} ${F(bw)} 0 q${F(bw*.5)} ${F(34*s)} ${F(bw)} 0" fill="none" stroke="#111" stroke-width="${F(sw*.7)}" stroke-linecap="round" opacity=".5"/>`;
-  }else if(kind==='bull'||kind==='goat'){
-    const hc=kind==='bull'?'#EDE0C4':'#DCD2B8';
-    for(let e=0;e<2;e++){const dir=e?1:-1;
-      const d=kind==='bull'
-        ?`M${F(hx+dir*hr*.6)} ${F(hy-hr*.55)} q${F(dir*30*s)} ${F(-6*s)} ${F(dir*26*s)} ${F(-26*s)}`
-        :`M${F(hx+dir*hr*.45)} ${F(hy-hr*.75)} q${F(dir*14*s)} ${F(-26*s)} ${F(dir*4*s)} ${F(-40*s)}`;
-      g+=`<path d="${d}" fill="none" stroke="${hc}" stroke-width="${F(9*s)}" stroke-linecap="round"/>`;
-      g+=`<path d="${d}" fill="none" stroke="#111" stroke-width="${F(sw*.7)}" stroke-linecap="round" opacity=".65"/>`;}
-    if(kind==='goat')g+=`<path d="M${F(hx)} ${F(hy+hr*.8)} q${F(-4*s)} ${F(20*s)} ${F(2*s)} ${F(30*s)}" ${ink(sw*1.2,col)}/>`;
-    if(kind==='bull')g+=`<circle cx="${F(hx+hr*.1)}" cy="${F(hy+hr*.42)}" r="${F(hr*.13)}" fill="#C9A227" stroke="#111" stroke-width="${F(sw*.6)}"/>`;
-  }else{
-    for(let e=0;e<2;e++){const dir=e?1:-1;
-      g+=`<path d="M${F(hx+dir*hr*.55)} ${F(hy-hr*.6)} l${F(dir*R(6,20)*s)} ${F(-R(16,34)*s)} l${F(-dir*R(10,22)*s)} ${F(R(4,14)*s)} Z" fill="${col}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;}
-  }
-  g+=eyes(hx,hy,hr,sw);
-  if(ACC&&ACC!=='none'&&chance(.55))g+=applyAcc(ACC,hx,hy,hr,s);
-  if(kind!=='chicken'&&kind!=='bird'){
-    g+=`<path d="${blob(hx+R(-6,6)*s,hy+hr*.42,hr*.16,5,2)}" fill="#111"/>`;
-    for(let i=0;i<RI(4,6);i++)
-      g+=`<path d="M${F(hx+R(-6,6)*s)} ${F(hy+hr*.5)} l${F(R(-28,28)*s)} ${F(R(-8,10)*s)}" ${ink(sw*.5)}/>`;
-  }
-  const legs=kind==='bird'||kind==='chicken'?2:RI(3,6);
-  for(let l=0;l<legs;l++)
-    g+=`<path d="M${F(cx-bw*.6+l*(bw*1.2/legs))} ${F(cy+26*s+bw*.5)} q${F(R(-8,8))} ${F(20*s)} ${F(R(-10,10)*s)} ${F(R(24,46)*s)}" fill="none" stroke="${kind==='chicken'?'#E2711D':col}" stroke-width="${F((kind==='chicken'?6:11)*s)}" stroke-linecap="round"/>`;
-  if(kind!=='bird')
-    g+=`<path d="M${F(cx+bw*.8)} ${F(cy+20*s)} q${F(R(20,44)*s)} ${F(R(-30,10)*s)} ${F(R(10,40)*s)} ${F(R(-40,20)*s)}" fill="none" stroke="${col}" stroke-width="${F(10*s)}" stroke-linecap="round"/>`;
-  return g;
-}
-
-function subjAnime(cx,cy,s){
-  let g='';const sw=R(2,3.4)*s,hr=40*s;
-  const hair=P(['#FF5EA8','#9B5DE5','#25A7B0','#F2C511','#3F52C4']);
-  // hair, not quite attached
-  g+=`<path d="${blob(cx+R(-8,8)*s,cy-hr*.5,hr*1.35,RI(7,11),9*s)}" fill="${hair}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
-  g+=`<path d="${blob(cx,cy,hr,9,2.5*s)}" fill="${P(['#F7DCC6','#FBE6D4'])}" stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round"/>`;
-  // enormous glossy eyes, different sizes
-  for(let e=0;e<2;e++){const dir=e?1:-1,ex=cx+dir*hr*R(.3,.44),ey=cy+hr*R(.02,.16),rx=hr*R(.2,.34),ry=rx*R(1.1,1.7);
-    g+=`<ellipse cx="${F(ex)}" cy="${F(ey)}" rx="${F(rx)}" ry="${F(ry)}" fill="#fff" stroke="#111" stroke-width="${F(sw)}"/>`;
-    g+=`<ellipse cx="${F(ex)}" cy="${F(ey+ry*.1)}" rx="${F(rx*.6)}" ry="${F(ry*.6)}" fill="${P(['#3F52C4','#8E4FA8','#25A7B0'])}"/>`;
-    g+=`<circle cx="${F(ex-rx*.3)}" cy="${F(ey-ry*.35)}" r="${F(rx*.24)}" fill="#fff"/>`;}
-  g+=`<path d="M${F(cx-hr*.1)} ${F(cy+hr*.5)} q${F(hr*.1)} ${F(hr*.12)} ${F(hr*.2)} 0" ${ink(sw)}/>`;
-  // spikes
-  for(let i=0;i<RI(3,7);i++){const a=R(-Math.PI,0);
-    g+=`<path d="M${F(cx+Math.cos(a)*hr)} ${F(cy-hr*.4+Math.sin(a)*hr*.7)} l${F(Math.cos(a)*R(16,40)*s)} ${F(Math.sin(a)*R(16,40)*s)} l${F(R(-14,14)*s)} ${F(R(6,18)*s)} Z" fill="${hair}" stroke="#111" stroke-width="${F(sw*.8)}" stroke-linejoin="round"/>`;}
-  g+=`<path d="M${F(cx)} ${F(cy+hr)} l${F(R(-16,16)*s)} ${F(R(40,70)*s)}" ${ink(sw*2)}/>`;
-  return g;
-}
-
-function subjObject(cx,cy,s){
-  const kind=P(['banana','hotdog','egg','cup','chair','fish','shoe','pizza','donut',
-                'icecream','toilet','tv','lamp','trafficcone','guitar','bottle',
-                'mushroom','trashcan','ladder','key']);
-  const sw=R(2.4,4)*s;let g='';
-  const rot=R(-40,40);
-  g+=`<g transform="rotate(${F(rot)} ${F(cx)} ${F(cy)}) scale(${F(s)}) translate(${F(cx/s-cx)} ${F(cy/s-cy)})">`;
-  const O=`stroke="#111" stroke-width="${F(sw)}" stroke-linejoin="round" stroke-linecap="round"`;
-  if(kind==='banana'){
-    g+=`<path d="M${F(cx-40)} ${F(cy-16)} Q${F(cx)} ${F(cy+44)} ${F(cx+46)} ${F(cy+8)} Q${F(cx+12)} ${F(cy+34)} ${F(cx-30)} ${F(cy-6)} Z" fill="#E2C13F" ${O}/>`;
-    g+=`<path d="M${F(cx-40)} ${F(cy-16)} l-8 -12" stroke="#5A4A22" stroke-width="${F(sw*2)}" stroke-linecap="round"/>`;
-    g+=`<rect x="${F(cx-20)}" y="${F(cy-24)}" width="40" height="16" fill="#D8D2C0" ${O} opacity=".9"/>`;
-  }else if(kind==='hotdog'){
-    g+=`<rect x="${F(cx-46)}" y="${F(cy-14)}" width="92" height="30" rx="15" fill="#E0A756" ${O}/>`;
-    g+=`<rect x="${F(cx-40)}" y="${F(cy-20)}" width="80" height="20" rx="10" fill="#C4523A" ${O}/>`;
-    g+=`<path d="${scrawl(cx-32,cy-12,14,6)}" fill="none" stroke="#F2C511" stroke-width="${F(sw*1.6)}" stroke-linecap="round"/>`;
-  }else if(kind==='egg'){
-    g+=`<path d="${blob(cx,cy,42,9,7)}" fill="#FBFBF4" ${O}/>`;
-    g+=`<circle cx="${F(cx+R(-10,10))}" cy="${F(cy+R(-8,8))}" r="17" fill="#F2B411" ${O}/>`;
-  }else if(kind==='cup'){
-    g+=`<path d="M${F(cx-26)} ${F(cy-24)} L${F(cx+26)} ${F(cy-24)} L${F(cx+18)} ${F(cy+30)} L${F(cx-18)} ${F(cy+30)} Z" fill="${P(PAL)}" ${O}/>`;
-    g+=`<path d="M${F(cx+26)} ${F(cy-14)} q22 12 -4 26" fill="none" ${O}/>`;
-    for(let i=0;i<3;i++)g+=`<path d="${scrawl(cx-14+i*14,cy-34,9,4)}" fill="none" stroke="#111" stroke-width="${F(sw*.6)}" opacity=".6"/>`;
-  }else if(kind==='chair'){
-    g+=`<rect x="${F(cx-30)}" y="${F(cy-6)}" width="60" height="12" fill="${P(PAL)}" ${O}/>`;
-    g+=`<rect x="${F(cx+18)}" y="${F(cy-56)}" width="12" height="52" fill="${P(PAL)}" ${O}/>`;
-    for(let l=0;l<RI(3,6);l++)g+=`<path d="M${F(cx-26+l*R(12,20))} ${F(cy+6)} l${F(R(-8,8))} ${F(R(26,48))}" ${ink(sw*1.4)}/>`;
-  }else if(kind==='fish'){
-    g+=`<path d="${blob(cx,cy,36,8,6)}" fill="${P(PAL)}" ${O}/>`;
-    g+=`<path d="M${F(cx+30)} ${F(cy)} l30 -20 l0 40 Z" fill="${P(PAL)}" ${O}/>`;
-    g+=`<circle cx="${F(cx-14)}" cy="${F(cy-8)}" r="6" fill="#111"/>`;
-  }else if(kind==='shoe'){
-    g+=`<path d="M${F(cx-40)} ${F(cy+14)} L${F(cx+10)} ${F(cy+14)} Q${F(cx+46)} ${F(cy+10)} ${F(cx+44)} ${F(cy-8)} L${F(cx-34)} ${F(cy-12)} Z" fill="${P(PAL)}" ${O}/>`;
-    g+=`<path d="M${F(cx-30)} ${F(cy-2)} h40" ${ink(sw*.7)}/>`;
-  }else if(kind==='pizza'){
-    g+=`<path d="M${F(cx)} ${F(cy-42)} L${F(cx-34)} ${F(cy+34)} Q${F(cx)} ${F(cy+48)} ${F(cx+34)} ${F(cy+34)} Z" fill="#E9B44C" ${O}/>`;
-    g+=`<path d="M${F(cx-30)} ${F(cy+26)} Q${F(cx)} ${F(cy+40)} ${F(cx+30)} ${F(cy+26)}" fill="none" stroke="#C4813A" stroke-width="${F(sw*2.2)}"/>`;
-    for(let i=0;i<RI(3,7);i++)
-      g+=`<circle cx="${F(cx+R(-22,22))}" cy="${F(cy+R(-24,24))}" r="${F(R(4,7))}" fill="#C4523A" stroke="#111" stroke-width="${F(sw*.5)}"/>`;
-  }else if(kind==='donut'){
-    g+=`<path d="${blob(cx,cy,38,9,5)}" fill="#D9A05B" ${O}/>`;
-    g+=`<path d="${blob(cx,cy-4,32,9,5)}" fill="${P(['#F15BB5','#9B5DE5','#F2C511','#7BC043'])}" ${O}/>`;
-    g+=`<path d="${blob(cx,cy,12,7,3)}" fill="#DCD6C6" ${O}/>`;
-    for(let i=0;i<RI(4,10);i++)
-      g+=`<path d="M${F(cx+R(-28,28))} ${F(cy+R(-24,20))} l${F(R(-7,7))} ${F(R(-5,5))}" stroke="${P(PAL)}" stroke-width="${F(sw*1.1)}" stroke-linecap="round"/>`;
-  }else if(kind==='icecream'){
-    g+=`<path d="M${F(cx-22)} ${F(cy-2)} L${F(cx+22)} ${F(cy-2)} L${F(cx)} ${F(cy+48)} Z" fill="#D9A05B" ${O}/>`;
-    for(let i=0;i<RI(1,3);i++)
-      g+=`<path d="${blob(cx+R(-8,8),cy-16-i*18,R(18,24),8,4)}" fill="${P(['#F7C1D9','#FBF3D0','#B5D9C0','#E0A0A0'])}" ${O}/>`;
-    if(chance(.5))g+=`<path d="M${F(cx+R(-10,10))} ${F(cy-40)} q6 -12 12 -4" fill="none" stroke="#C43A3A" stroke-width="${F(sw*1.4)}" stroke-linecap="round"/>`;
-  }else if(kind==='toilet'){
-    g+=`<rect x="${F(cx-6)}" y="${F(cy-46)}" width="40" height="34" fill="#F0F0EA" ${O}/>`;
-    g+=`<path d="M${F(cx-34)} ${F(cy-12)} h62 q4 26 -20 30 h-22 q-22 -6 -20 -30 Z" fill="#F0F0EA" ${O}/>`;
-    g+=`<ellipse cx="${F(cx-3)}" cy="${F(cy+4)}" rx="20" ry="12" fill="#CFE0E6" ${O}/>`;
-    g+=`<rect x="${F(cx-16)}" y="${F(cy+18)}" width="26" height="22" fill="#F0F0EA" ${O}/>`;
-  }else if(kind==='tv'){
-    g+=`<rect x="${F(cx-42)}" y="${F(cy-32)}" width="84" height="60" rx="4" fill="#3A3A3A" ${O}/>`;
-    g+=`<rect x="${F(cx-34)}" y="${F(cy-24)}" width="68" height="44" fill="${P(PAL)}" ${O} opacity=".9"/>`;
-    for(let i=0;i<RI(2,6);i++)
-      g+=`<path d="M${F(cx-32)} ${F(cy-20+i*9)} h${F(R(20,64))}" stroke="#111" stroke-width="${F(sw*.7)}" opacity=".35"/>`;
-    g+=`<path d="M${F(cx-14)} ${F(cy-32)} l-16 -22 M${F(cx+14)} ${F(cy-32)} l16 -22" ${ink(sw)}/>`;
-  }else if(kind==='lamp'){
-    g+=`<path d="M${F(cx-26)} ${F(cy-10)} L${F(cx-14)} ${F(cy-42)} L${F(cx+14)} ${F(cy-42)} L${F(cx+26)} ${F(cy-10)} Z" fill="${P(PAL)}" ${O}/>`;
-    g+=`<path d="M${F(cx)} ${F(cy-10)} v40" ${ink(sw*1.4)}/>`;
-    g+=`<ellipse cx="${F(cx)}" cy="${F(cy+34)}" rx="24" ry="7" fill="#8A7333" ${O}/>`;
-    g+=`<path d="M${F(cx)} ${F(cy+2)} l-14 12 M${F(cx)} ${F(cy+2)} l14 12" stroke="#F2C511" stroke-width="${F(sw)}" opacity=".8"/>`;
-  }else if(kind==='trafficcone'){
-    g+=`<path d="M${F(cx)} ${F(cy-40)} L${F(cx+22)} ${F(cy+28)} L${F(cx-22)} ${F(cy+28)} Z" fill="#E2711D" ${O}/>`;
-    g+=`<path d="M${F(cx-13)} ${F(cy-2)} h26 M${F(cx-17)} ${F(cy+12)} h34" stroke="#F5F0E4" stroke-width="${F(sw*2)}"/>`;
-    g+=`<rect x="${F(cx-30)}" y="${F(cy+28)}" width="60" height="10" rx="2" fill="#E2711D" ${O}/>`;
-  }else if(kind==='guitar'){
-    g+=`<path d="${blob(cx,cy+14,30,9,4)}" fill="${P(['#C4713A','#8B5E3C','#C43A3A'])}" ${O}/>`;
-    g+=`<circle cx="${F(cx)}" cy="${F(cy+12)}" r="9" fill="#2A1F14" ${O}/>`;
-    g+=`<rect x="${F(cx-5)}" y="${F(cy-52)}" width="10" height="48" fill="#5B4636" ${O}/>`;
-    g+=`<rect x="${F(cx-9)}" y="${F(cy-62)}" width="18" height="13" fill="#5B4636" ${O}/>`;
-    for(let i=0;i<RI(3,6);i++)g+=`<path d="M${F(cx-3+i*1.6)} ${F(cy-50)} v${F(60)}" stroke="#EDE4D2" stroke-width=".9" opacity=".8"/>`;
-  }else if(kind==='bottle'){
-    g+=`<path d="M${F(cx-16)} ${F(cy+36)} v-32 q0 -12 8 -18 v-14 h16 v14 q8 6 8 18 v32 Z" fill="${P(PAL)}" ${O} opacity=".92"/>`;
-    g+=`<rect x="${F(cx-9)}" y="${F(cy-34)}" width="18" height="8" fill="#8A7333" ${O}/>`;
-    g+=`<rect x="${F(cx-16)}" y="${F(cy+2)}" width="32" height="16" fill="#F5F0E4" ${O} opacity=".85"/>`;
-  }else if(kind==='mushroom'){
-    g+=`<path d="M${F(cx-34)} ${F(cy+2)} q4 -34 34 -34 q30 0 34 34 Z" fill="${P(['#C43A3A','#E0417A','#C4713A'])}" ${O}/>`;
-    for(let i=0;i<RI(3,7);i++)
-      g+=`<circle cx="${F(cx+R(-26,26))}" cy="${F(cy+R(-24,-2))}" r="${F(R(4,8))}" fill="#F5F0E4" opacity=".9"/>`;
-    g+=`<path d="M${F(cx-11)} ${F(cy+2)} v28 q11 6 22 0 v-28 Z" fill="#EDE4C8" ${O}/>`;
-  }else if(kind==='trashcan'){
-    g+=`<path d="M${F(cx-24)} ${F(cy-18)} L${F(cx+24)} ${F(cy-18)} L${F(cx+18)} ${F(cy+38)} L${F(cx-18)} ${F(cy+38)} Z" fill="#8E9AA0" ${O}/>`;
-    g+=`<rect x="${F(cx-29)}" y="${F(cy-27)}" width="58" height="10" rx="3" fill="#7A868C" ${O}/>`;
-    for(let i=0;i<3;i++)g+=`<path d="M${F(cx-13+i*13)} ${F(cy-10)} v${F(40)}" stroke="#111" stroke-width="${F(sw*.7)}" opacity=".45"/>`;
-    if(chance(.5))g+=`<path d="${scrawl(cx+R(-14,14),cy-34,10,5)}" fill="none" ${ink(sw*.8)}/>`;
-  }else if(kind==='ladder'){
-    g+=`<path d="M${F(cx-18)} ${F(cy-46)} L${F(cx-26)} ${F(cy+42)} M${F(cx+18)} ${F(cy-46)} L${F(cx+26)} ${F(cy+42)}" ${ink(sw*1.6)}/>`;
-    for(let i=0;i<RI(3,6);i++){const y=cy-36+i*R(16,22);
-      g+=`<path d="M${F(cx-19-i*1.6)} ${F(y)} h${F(38+i*3)}" ${ink(sw*1.3)}/>`;}
-  }else{
-    g+=`<circle cx="${F(cx-14)}" cy="${F(cy-8)}" r="16" fill="none" stroke="#C9A227" stroke-width="${F(sw*2)}"/>`;
-    g+=`<path d="M${F(cx-2)} ${F(cy+2)} l32 30" stroke="#C9A227" stroke-width="${F(sw*2)}" stroke-linecap="round"/>`;
-    g+=`<path d="M${F(cx+18)} ${F(cy+22)} l10 -8 M${F(cx+26)} ${F(cy+30)} l10 -8" stroke="#C9A227" stroke-width="${F(sw*1.6)}" stroke-linecap="round"/>`;
-  }
-  g+=`</g>`;
-  return g;
-}
-
-const SUBJECTS=[
-  [subjBrainlet,'brainlet',26],[subjCube,'block',13],[subjCactus,'cactus',11],
-  [subjHand,'hand',11],[subjAnimal,'animal',13],[subjObject,'object',20],[subjAnime,'anime',6]
-];
-function pickSubject(){
-  const tot=SUBJECTS.reduce((a,b)=>a+b[2],0);let r=R(0,tot);
-  for(const e of SUBJECTS){if((r-=e[2])<=0)return e;}
-  return SUBJECTS[0];
-}
-
-/* traits recorded as the piece is made */
-let TR={};
-
-function condition(w,h){
-  let r=RNG();
-  if(FORCE&&FORCE.condition)r={'craquelure':.7,'foxing':.85,'overpainted':.95,'water damage':.99}[FORCE.condition];
-  let k,s='';
-  if(r<.60){k='pristine';}
-  else if(r<.80){
-    k='craquelure';
-    for(let i=0;i<Math.round(RI(30,70)*(w/300));i++)
-      s+=`<path d="${scrawl(R(0,w),R(0,h),R(4,13),RI(2,4))}" fill="none" stroke="#2A1F14" stroke-width="${F(R(.4,1))}" opacity="${F(R(.25,.55))}"/>`;
-  }else if(r<.92){
-    k='foxing';
-    for(let i=0;i<Math.round(RI(6,16)*(w/300));i++)
-      s+=`<path d="${blob(R(0,w),R(0,h),R(4,15),7,4)}" fill="#7A5A33" opacity="${F(R(.16,.4))}"/>`;
-  }else if(r<.98){
-    k='overpainted';
-    for(let i=0;i<RI(1,3);i++)
-      s+=`<rect x="${F(R(0,w-70))}" y="${F(R(0,h-60))}" width="${F(R(40,110))}" height="${F(R(30,90))}" fill="${P(BG)}" opacity=".96" transform="rotate(${F(R(-6,6))} ${F(w/2)} ${F(h/2)})"/>`;
-  }else{
-    k='water damage';
-    s+=`<path d="${blob(R(w*.2,w*.8),R(h*.6,h),R(70,120),10,26)}" fill="#6B4A28" opacity=".28"/>`;
-    s+=`<path d="${blob(R(w*.2,w*.8),R(h*.66,h),R(45,80),9,20)}" fill="#4E3417" opacity=".2"/>`;
-  }
-  TR.condition=k;
-  return s;
-}
-
-/* the world behind them. this is the part people will actually
-   want to look at, so it is drawn straight. */
-function scenery(W,H,small){
-  let g='';const hz=H*R(.56,.74);
-  const kind=P(['city','hills','desert','sea']);
-  const far=P(PAL), near=P(PAL);
-  if(chance(.7)){
-    const r=R(14,30);
-    g+=`<circle cx="${F(R(W*.15,W*.85))}" cy="${F(hz-R(40,120))}" r="${F(r)}" fill="${P(['#F2C511','#F5F0E4','#E2711D','#FF5EA8'])}" opacity="${F(R(.6,.95))}"/>`;
-  }
-  if(kind==='city'){
-    for(let layer=0;layer<2;layer++){
-      const c=layer?near:far, base=hz+layer*R(6,18), op=layer?1:.55;
-      let x=-10;
-      while(x<W+10){
-        const bw=R(18,46), bh=R(30,120)*(layer?1:.8);
-        g+=`<rect x="${F(x)}" y="${F(base-bh)}" width="${F(bw)}" height="${F(bh+40)}" fill="${c}" opacity="${op}" stroke="#111" stroke-width="1.1"/>`;
-        if(layer)for(let r=0;r<Math.floor(bh/16);r++)for(let cc=0;cc<Math.floor(bw/13);cc++)
-          if(chance(.4))g+=`<rect x="${F(x+5+cc*13)}" y="${F(base-bh+6+r*16)}" width="5" height="7" fill="#F2C511" opacity=".85"/>`;
-        x+=bw+R(2,9);
-      }
-    }
-  }else if(kind==='hills'){
-    for(let layer=0;layer<3;layer++){
-      const c=layer===2?near:far;
-      let d=`M-10 ${F(H+10)} L-10 ${F(hz+layer*16)}`;
-      for(let x=-10;x<W+20;x+=R(30,70))
-        d+=` Q${F(x+20)} ${F(hz+layer*16-R(10,58))} ${F(x+50)} ${F(hz+layer*16-R(-8,20))}`;
-      d+=` L${F(W+20)} ${F(H+10)} Z`;
-      g+=`<path d="${d}" fill="${c}" opacity="${F(.4+layer*.24)}" stroke="#111" stroke-width="1.1"/>`;
-    }
-  }else if(kind==='desert'){
-    g+=`<path d="M-10 ${F(H+10)} L-10 ${F(hz)} Q${F(W*.4)} ${F(hz-24)} ${F(W+20)} ${F(hz+10)} L${F(W+20)} ${F(H+10)} Z" fill="${P(['#D9A05B','#E0B87A','#C9964E'])}" stroke="#111" stroke-width="1.1"/>`;
-    for(let i=0;i<RI(2,6);i++){
-      const x=R(0,W),y=hz+R(0,26),h=R(20,48),col='#3E7B45';
-      g+=`<rect x="${F(x)}" y="${F(y-h)}" width="8" height="${F(h)}" rx="4" fill="${col}" stroke="#111" stroke-width="1"/>`;
-      if(chance(.6))g+=`<path d="M${F(x+4)} ${F(y-h*.55)} h${F(R(7,13))} v${F(-R(8,18))}" fill="none" stroke="${col}" stroke-width="5" stroke-linecap="round"/>`;
-    }
-  }else{
-    g+=`<rect x="-10" y="${F(hz)}" width="${F(W+20)}" height="${F(H-hz+20)}" fill="${P(['#25A7B0','#3F52C4','#4FA3D8'])}" opacity=".85"/>`;
-    for(let i=0;i<RI(5,14);i++)
-      g+=`<path d="M${F(R(0,W))} ${F(hz+R(6,H-hz))} q8 -5 18 0" fill="none" stroke="#F5F0E4" stroke-width="1.6" opacity=".7"/>`;
-  }
-  if(small)for(let i=0;i<RI(1,4);i++){
-    const e=pickSubject();
-    g+=`<g opacity="${F(R(.75,1))}">${e[0](R(W*.12,W*.88),hz-R(-6,14),R(.16,.3))}</g>`;
-  }
-  return g;
-}
-
-/* the photograph, redrawn badly: one wobbly blob per cell of a
-   coarse grid, then the strong edges scribbled over the top. */
-/* The photograph is not filtered — it is re-staged. We find the large
-   shapes, measure where they sit and how they lean, then draw our own
-   crude object in each place. The room keeps its layout. Nothing in it
-   keeps its identity. */
-function drawWob(x,y,w2,h2,pts,jit){
-  let d='';
-  for(let i=0;i<pts;i++){
-    const t=i/pts*Math.PI*2;
-    const px=x+Math.cos(t)*w2*(1+R(-jit,jit));
-    const py=y+Math.sin(t)*h2*(1+R(-jit,jit));
-    d+=(i?'L':'M')+F(px)+' '+F(py);
-  }
-  return d+'Z';
-}
-function boxWob(x1,y1,x2,y2,j){
-  const m=(a,b,t)=>a+(b-a)*t;
-  let d=`M${F(x1+R(-j,j))} ${F(y1+R(-j,j))}`;
-  for(let i=1;i<=3;i++)d+=`L${F(m(x1,x2,i/3)+R(-j,j))} ${F(y1+R(-j,j))}`;
-  for(let i=1;i<=3;i++)d+=`L${F(x2+R(-j,j))} ${F(m(y1,y2,i/3)+R(-j,j))}`;
-  for(let i=1;i<=3;i++)d+=`L${F(m(x2,x1,i/3)+R(-j,j))} ${F(y2+R(-j,j))}`;
-  for(let i=1;i<=3;i++)d+=`L${F(x1+R(-j,j))} ${F(m(y2,y1,i/3)+R(-j,j))}`;
-  return d+'Z';
-}
-/* our own creatures, scaled into whatever slot the photograph left */
-function placeSubj(fn,o,w0,h0,yf){
-  const sc=Math.min(o.bw/w0,o.bh/h0)*R(.82,1.12);
-  return `<g transform="translate(${F(o.cx)},${F(o.y1+o.bh*yf)}) scale(${F(sc)})" opacity="${F(R(.85,1))}">${fn(0,0,1)}</g>`;
-}
-const SUBJKIND={figure:1,animal:1,plant:1,thing:1,cube:1,paw:1};
-const SHAPES={
- sky:(o)=>{let s='';for(let i=0;i<RI(1,3);i++){const ax=R(o.x1,o.x2),ay=R(o.y1,o.y1+o.bh*.6),aw=o.bw*R(.12,.3);
-   s+=`<path d="M${F(ax-aw)} ${F(ay)} q${F(aw*.5)} ${F(-aw*.45)} ${F(aw)} 0 q${F(aw*.5)} ${F(-aw*.3)} ${F(aw)} ${F(aw*.1)}" fill="none" ${o.st} opacity=".5"/>`;}return s;},
-
- tower:(o)=>{let s=`<path d="${boxWob(o.x1,o.y1,o.x2,o.y2,o.j)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
-   const v=RI(0,2);
-   if(v===0){const rows=Math.max(1,Math.round(o.bh/(o.rr*2.2)));
-     for(let r=0;r<rows;r++)if(chance(.55)){const yy=o.y1+o.bh*(r+.5)/rows,ww=o.bw*R(.2,.42);
-       s+=`<rect x="${F(o.cx-ww/2)}" y="${F(yy-o.rr*.4)}" width="${F(ww)}" height="${F(o.rr*.8)}" fill="#EFE7D4" ${o.st} opacity=".8"/>`;}}
-   else if(v===1){const n=RI(2,4);for(let i=1;i<n;i++)
-     s+=`<path d="M${F(o.x1+o.bw*i/n)} ${F(o.y1+o.bh*.06)} L${F(o.x1+o.bw*i/n+R(-3,3))} ${F(o.y2-o.bh*.06)}" fill="none" ${o.st} opacity=".55"/>`;}
-   else{s+=`<path d="M${F(o.x1)} ${F(o.y1)} L${F(o.cx)} ${F(o.y1-o.bh*R(.08,.2))} L${F(o.x2)} ${F(o.y1)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;}
-   return s;},
-
- slab:(o)=>{let s=`<path d="${boxWob(o.x1,o.y1,o.x2,o.y2,o.j)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
-   if(chance(.6))s+=`<path d="M${F(o.x1+o.bw*.1)} ${F(o.y1+o.bh*R(.3,.7))} L${F(o.x2-o.bw*.1)} ${F(o.y1+o.bh*R(.3,.7))}" fill="none" ${o.st} opacity=".5"/>`;
-   return s;},
-
- stick:(o)=>{let s=`<path d="M${F(o.cx+R(-o.j,o.j))} ${F(o.y2)} Q${F(o.cx+R(-o.bw,o.bw))} ${F(o.cy)} ${F(o.cx+R(-o.j,o.j))} ${F(o.y1)}" fill="none" ${o.st} opacity="${o.op}"/>`;
-   if(chance(.5))s+=`<circle cx="${F(o.cx)}" cy="${F(o.y1)}" r="${F(Math.max(3,o.bw*.5))}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
-   return s;},
-
- lump:(o)=>`<path d="M${F(o.x1)} ${F(o.y2)} Q${F(o.x1+o.bw*.1)} ${F(o.y1+o.bh*R(.05,.3))} ${F(o.cx)} ${F(o.y1)} Q${F(o.x2-o.bw*.1)} ${F(o.y1+o.bh*R(.05,.3))} ${F(o.x2)} ${F(o.y2)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`,
-
- frond:(o)=>{let s='';const n=RI(4,7);
-   for(let i=0;i<n;i++){const a=-Math.PI/2+R(-1.1,1.1),L=Math.max(o.bw,o.bh)*R(.3,.62);
-     const ex=o.cx+Math.cos(a)*L,ey=o.cy+Math.sin(a)*L;
-     s+=`<path d="M${F(o.cx)} ${F(o.cy)} Q${F(o.cx+Math.cos(a)*L*.5+R(-10,10))} ${F(o.cy+Math.sin(a)*L*.5)} ${F(ex)} ${F(ey)}" fill="none" ${o.st} opacity="${o.op}"/>`;
-     s+=`<path d="${drawWob(ex,ey,L*.16,L*.11,7,.4)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;}
-   return s;},
-
- arch:(o)=>{const sp=o.y1+o.bh*.45;
-   let s=`<path d="M${F(o.x1)} ${F(o.y2)} L${F(o.x1)} ${F(sp)} Q${F(o.cx)} ${F(o.y1-o.bh*.06)} ${F(o.x2)} ${F(sp)} L${F(o.x2)} ${F(o.y2)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
-   const ix=o.bw*R(.18,.28),iy=o.bh*R(.16,.26);
-   s+=`<path d="M${F(o.x1+ix)} ${F(o.y2)} L${F(o.x1+ix)} ${F(sp+iy*.5)} Q${F(o.cx)} ${F(o.y1+iy)} ${F(o.x2-ix)} ${F(sp+iy*.5)} L${F(o.x2-ix)} ${F(o.y2)}" fill="#EFE7D4" ${o.st} opacity="${F(R(.6,.9))}"/>`;
-   return s;},
-
- stairs:(o)=>{const n=RI(3,6),dir=chance(.5)?1:-1;
-   let d=`M${F(dir>0?o.x1:o.x2)} ${F(o.y2)}`;
-   for(let i=0;i<n;i++){const sx=(dir>0?o.x1:o.x2)+dir*o.bw*(i+1)/n,sy=o.y2-o.bh*(i+1)/n;
-     d+=`L${F(sx-dir*o.bw/n)} ${F(sy)}L${F(sx)} ${F(sy)}`;}
-   return `<path d="${d}L${F(dir>0?o.x2:o.x1)} ${F(o.y2)}Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;},
-
- door:(o)=>{let s=`<path d="${boxWob(o.x1,o.y1,o.x2,o.y2,o.j)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
-   const px=o.bw*R(.16,.24),py=o.bh*R(.1,.18);
-   s+=`<path d="${boxWob(o.x1+px,o.y1+py,o.x2-px,o.y2-py*R(1.4,2.6),o.j*.6)}" fill="none" ${o.st} opacity=".65"/>`;
-   s+=`<circle cx="${F(o.x2-px*R(.4,.7))}" cy="${F(o.cy+o.bh*R(0,.12))}" r="${F(Math.max(2.4,o.bw*.05))}" fill="#EFE7D4" ${o.st} opacity=".9"/>`;
-   return s;},
-
- figure:(o)=>placeSubj(subjBrainlet,o,78,150,.46),
- animal: (o)=>placeSubj(subjAnimal, o,120,100,.5),
- plant:  (o)=>placeSubj(subjCactus, o,100,130,.5),
- thing:  (o)=>placeSubj(subjObject, o,105,105,.5),
- cube:   (o)=>placeSubj(subjCube,   o,110,110,.5),
- paw:    (o)=>placeSubj(subjHand,   o,105,105,.5),
-
- vehicle:(o)=>{const wr=Math.max(3,o.bh*R(.2,.3)),base=o.y2-wr*.9;
-   let s=`<path d="M${F(o.x1)} ${F(base)} L${F(o.x1+o.bw*.08)} ${F(o.y1+o.bh*R(.42,.6))} L${F(o.x1+o.bw*R(.26,.34))} ${F(o.y1+o.bh*R(.38,.55))} L${F(o.x1+o.bw*.36)} ${F(o.y1)} L${F(o.x2-o.bw*R(.24,.34))} ${F(o.y1)} L${F(o.x2-o.bw*.1)} ${F(o.y1+o.bh*R(.4,.56))} L${F(o.x2)} ${F(base)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
-   s+=`<circle cx="${F(o.x1+o.bw*R(.2,.28))}" cy="${F(base)}" r="${F(wr)}" fill="#26231C" ${o.st} opacity="${o.op}"/>`;
-   s+=`<circle cx="${F(o.x2-o.bw*R(.2,.28))}" cy="${F(base)}" r="${F(wr)}" fill="#26231C" ${o.st} opacity="${o.op}"/>`;
-   return s;},
-
- lamp:(o)=>{const sh=o.bh*R(.22,.38);
-   let s=`<path d="M${F(o.cx-o.bw*R(.3,.45))} ${F(o.y1+sh)} L${F(o.cx-o.bw*R(.12,.2))} ${F(o.y1)} L${F(o.cx+o.bw*R(.12,.2))} ${F(o.y1)} L${F(o.cx+o.bw*R(.3,.45))} ${F(o.y1+sh)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
-   s+=`<path d="M${F(o.cx)} ${F(o.y1+sh)} L${F(o.cx+R(-4,4))} ${F(o.y2-o.bh*.04)}" fill="none" ${o.st} opacity="${o.op}"/>`;
-   s+=`<path d="M${F(o.cx-o.bw*.24)} ${F(o.y2)} L${F(o.cx+o.bw*.24)} ${F(o.y2)}" fill="none" ${o.st} opacity="${o.op}"/>`;
-   return s;},
-
- pot:(o)=>{const py=o.y1+o.bh*R(.5,.66);
-   let s=`<path d="M${F(o.cx-o.bw*.32)} ${F(py)} L${F(o.cx+o.bw*.32)} ${F(py)} L${F(o.cx+o.bw*.22)} ${F(o.y2)} L${F(o.cx-o.bw*.22)} ${F(o.y2)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
-   const n=RI(3,6);
-   for(let i=0;i<n;i++){const a=-Math.PI/2+R(-1,1),L=(py-o.y1)*R(.6,1);
-     s+=`<path d="M${F(o.cx)} ${F(py)} Q${F(o.cx+Math.cos(a)*L*.6+R(-8,8))} ${F(py+Math.sin(a)*L*.6)} ${F(o.cx+Math.cos(a)*L)} ${F(py+Math.sin(a)*L)}" fill="none" ${o.st} opacity="${o.op}"/>`;
-     s+=`<path d="${drawWob(o.cx+Math.cos(a)*L,py+Math.sin(a)*L,L*.2,L*.12,7,.35)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;}
-   return s;},
-
- bottle:(o)=>{const sh=o.y1+o.bh*R(.26,.42),nw=o.bw*R(.16,.28);
-   return `<path d="M${F(o.cx-nw)} ${F(o.y1)} L${F(o.cx+nw)} ${F(o.y1)} L${F(o.cx+nw)} ${F(sh)} L${F(o.x2)} ${F(sh+o.bh*.12)} L${F(o.x2)} ${F(o.y2)} L${F(o.x1)} ${F(o.y2)} L${F(o.x1)} ${F(sh+o.bh*.12)} L${F(o.cx-nw)} ${F(sh)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;},
-
- table:(o)=>{const tt=o.y1+o.bh*R(.1,.26);
-   let s=`<path d="${boxWob(o.x1,tt,o.x2,tt+o.bh*R(.12,.2),o.j*.5)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
-   const legs=chance(.5)?2:4;
-   for(let i=0;i<legs;i++){const lx=o.x1+o.bw*(i+.5)/legs;
-     s+=`<path d="M${F(lx)} ${F(tt+o.bh*.18)} L${F(lx+R(-6,6))} ${F(o.y2)}" fill="none" ${o.st} opacity="${o.op}"/>`;}
-   return s;},
-
- window:(o)=>{let s=`<path d="${boxWob(o.x1,o.y1,o.x2,o.y2,o.j)}" fill="#EAE4D6" ${o.st} opacity="${o.op}"/>`;
-   s+=`<path d="M${F(o.cx)} ${F(o.y1)} L${F(o.cx)} ${F(o.y2)} M${F(o.x1)} ${F(o.cy)} L${F(o.x2)} ${F(o.cy)}" fill="none" ${o.st} opacity=".7"/>`;
-   return s;},
-
- rug:(o)=>{const sk=o.bw*R(.08,.2);
-   let s=`<path d="M${F(o.x1+sk)} ${F(o.y1)} L${F(o.x2)} ${F(o.y1)} L${F(o.x2-sk)} ${F(o.y2)} L${F(o.x1)} ${F(o.y2)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
-   for(let i=1;i<RI(2,5);i++){const t=i/4;
-     s+=`<path d="M${F(o.x1+sk*(1-t))} ${F(o.y1+o.bh*t)} L${F(o.x2-sk*t)} ${F(o.y1+o.bh*t)}" fill="none" stroke="#EFE7D4" stroke-width="${F(R(1.6,3))}" opacity=".8"/>`;}
-   return s;},
-
- crate:(o)=>{let s=`<path d="${boxWob(o.x1,o.y1,o.x2,o.y2,o.j)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
-   s+=`<path d="M${F(o.x1)} ${F(o.y1)} L${F(o.x2)} ${F(o.y2)} M${F(o.x2)} ${F(o.y1)} L${F(o.x1)} ${F(o.y2)}" fill="none" ${o.st} opacity=".6"/>`;
-   return s;},
-
- cage:(o)=>{let s=`<path d="${boxWob(o.x1,o.y1,o.x2,o.y2,o.j*.5)}" fill="#EFE7D4" ${o.st} opacity="${F(R(.25,.5))}"/>`;
-   const n=Math.max(3,Math.round(o.bw/(o.rr*.8)));
-   for(let i=1;i<n;i++)s+=`<path d="M${F(o.x1+o.bw*i/n)} ${F(o.y1)} L${F(o.x1+o.bw*i/n+R(-2,2))} ${F(o.y2)}" fill="none" stroke="#1A1712" stroke-width="${F(R(.8,1.6))}" opacity=".75"/>`;
-   const m=Math.max(2,Math.round(o.bh/(o.rr*1.4)));
-   for(let i=1;i<m;i++)s+=`<path d="M${F(o.x1)} ${F(o.y1+o.bh*i/m)} L${F(o.x2)} ${F(o.y1+o.bh*i/m+R(-2,2))}" fill="none" stroke="#1A1712" stroke-width="${F(R(.8,1.6))}" opacity=".75"/>`;
-   return s;},
-
- bowl:(o)=>{let s=`<path d="M${F(o.x1)} ${F(o.cy)} Q${F(o.cx)} ${F(o.y2+o.bh*.25)} ${F(o.x2)} ${F(o.cy)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
-   s+=`<ellipse cx="${F(o.cx)}" cy="${F(o.cy)}" rx="${F(o.bw/2)}" ry="${F(o.bh*R(.1,.18))}" fill="#EFE7D4" ${o.st} opacity="${o.op}"/>`;
-   return s;},
-
- shelf:(o)=>{let s=`<path d="M${F(o.x1)} ${F(o.cy)} L${F(o.x2)} ${F(o.cy+R(-3,3))}" fill="none" stroke="#1A1712" stroke-width="${F(R(2.4,4))}" stroke-linecap="round" opacity="${o.op}"/>`;
-   for(let i=0;i<RI(2,4);i++){const bx=R(o.x1+o.bw*.1,o.x2-o.bw*.2),bwid=o.bw*R(.08,.18),bht=o.bh*R(.3,.8);
-     s+=`<path d="${boxWob(bx,o.cy-bht,bx+bwid,o.cy,o.j*.4)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;}
-   return s;},
-
- cup:(o)=>{let s=`<path d="M${F(o.x1+o.bw*.12)} ${F(o.y1)} L${F(o.x2-o.bw*.12)} ${F(o.y1)} L${F(o.x2-o.bw*.22)} ${F(o.y2)} L${F(o.x1+o.bw*.22)} ${F(o.y2)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
-   s+=`<path d="M${F(o.x2-o.bw*.14)} ${F(o.y1+o.bh*.22)} q${F(o.bw*.34)} ${F(o.bh*.18)} ${F(-o.bw*.06)} ${F(o.bh*.42)}" fill="none" ${o.st} opacity="${o.op}"/>`;
-   return s;},
-
- ball:(o)=>{const r=Math.min(o.bw,o.bh)/2;
-   let s=`<path d="${drawWob(o.cx,o.cy,r,r,RI(9,13),.08)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
-   s+=`<path d="M${F(o.cx-r*.8)} ${F(o.cy)} q${F(r*.8)} ${F(-r*R(.5,.9))} ${F(r*1.6)} 0" fill="none" ${o.st} opacity=".6"/>`;
-   return s;},
-
- cushion:(o)=>{let s=`<path d="M${F(o.x1)} ${F(o.cy)} Q${F(o.x1)} ${F(o.y1)} ${F(o.cx)} ${F(o.y1)} Q${F(o.x2)} ${F(o.y1)} ${F(o.x2)} ${F(o.cy)} Q${F(o.x2)} ${F(o.y2)} ${F(o.cx)} ${F(o.y2)} Q${F(o.x1)} ${F(o.y2)} ${F(o.x1)} ${F(o.cy)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
-   if(chance(.6))s+=`<circle cx="${F(o.cx)}" cy="${F(o.cy)}" r="${F(Math.min(o.bw,o.bh)*.06)}" fill="none" ${o.st} opacity=".7"/>`;
-   return s;},
-
- sign:(o)=>{const bh2=o.bh*R(.3,.5);
-   let s=`<path d="${boxWob(o.x1,o.y1,o.x2,o.y1+bh2,o.j*.6)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
-   s+=`<path d="M${F(o.cx)} ${F(o.y1+bh2)} L${F(o.cx+R(-3,3))} ${F(o.y2)}" fill="none" ${o.st} opacity="${o.op}"/>`;
-   for(let i=0;i<RI(1,3);i++)s+=`<path d="M${F(o.x1+o.bw*.15)} ${F(o.y1+bh2*(i+1)/3)} L${F(o.x2-o.bw*R(.15,.4))} ${F(o.y1+bh2*(i+1)/3)}" fill="none" ${o.st} opacity=".55"/>`;
-   return s;},
-
- sunburst:(o)=>{const r=Math.min(o.bw,o.bh)/2,n=RI(10,20);
-   let s='';
-   for(let i=0;i<n;i++){const a=i/n*Math.PI*2,a2=(i+.5)/n*Math.PI*2;
-     s+=`<path d="M${F(o.cx+Math.cos(a)*r*.35)} ${F(o.cy+Math.sin(a)*r*.35)} L${F(o.cx+Math.cos(a2)*r*R(.85,1.05))} ${F(o.cy+Math.sin(a2)*r*R(.85,1.05))} L${F(o.cx+Math.cos(a+Math.PI*2/n)*r*.35)} ${F(o.cy+Math.sin(a+Math.PI*2/n)*r*.35)} Z" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;}
-   s+=`<circle cx="${F(o.cx)}" cy="${F(o.cy)}" r="${F(r*.3)}" fill="#EFE7D4" ${o.st} opacity="${o.op}"/>`;
-   return s;},
-
- plane:(o)=>{
-   const x1=o.x1-o.bw*.04,y1=o.y1-o.bh*.04,x2=o.x2+o.bw*.04,y2=o.y2+o.bh*.04;
-   let s=`<path d="${boxWob(x1,y1,x2,y2,Math.min(o.bw,o.bh)*.05+3)}" fill="${o.col}" fill-opacity="${F(R(.5,.75))}" stroke="#1A1712" stroke-width="${F(R(1,2))}" stroke-linejoin="round" opacity="${F(R(.5,.8))}"/>`;
-   if(chance(.45)){const yy=R(y1+o.bh*.2,y2-o.bh*.1);
-     s+=`<path d="M${F(x1)} ${F(yy)} L${F(x2)} ${F(yy+R(-6,6))}" fill="none" stroke="#1A1712" stroke-width="${F(R(1,2.2))}" stroke-linecap="round" opacity=".4"/>`;}
-   return s;},
-
- blob:(o)=>{let s=`<path d="${drawWob(o.cx,o.cy,o.bw/2,o.bh/2,RI(7,11),.22)}" fill="${o.col}" ${o.st} opacity="${o.op}"/>`;
-   if(o.dark>.55&&chance(.5))s+=`<path d="M${F(o.cx-o.bw*.2)} ${F(o.cy)} q${F(o.bw*.2)} ${F(o.bh*.14)} ${F(o.bw*.4)} 0" fill="none" ${o.st} opacity=".6"/>`;
-   return s;}
-};
-
-function photoGround(w,h,grid){
-  let s=`<rect width="${w}" height="${h}" fill="${grid.paper}"/>`;
-  const rr=Math.min(w,h)/grid.n;
-  grid.regions.forEach(g=>{
-    const x1=g.x1*w,y1=g.y1*h,x2=g.x2*w,y2=g.y2*h;
-    const o={x1:x1,y1:y1,x2:x2,y2:y2,cx:(x1+x2)/2,cy:(y1+y2)/2,bw:x2-x1,bh:y2-y1,
-             col:g.col,dark:g.dark,rr:rr,
-             j:Math.min(x2-x1,y2-y1)*.09+2,
-             op:F(R(.55,.85)),
-             st:`stroke="#1A1712" stroke-width="${F(R(2,3.6))}" stroke-linejoin="round" stroke-linecap="round"`};
-    let piece=(SHAPES[g.kind]||SHAPES.blob)(o);
-    /* no two objects come out of the same mould — everything gets its
-       own lean, its own stretch, and sometimes a stray mark. */
-    const soft=SUBJKIND[g.kind];
-    const rot=soft?R(-4,4):R(-9,9);
-    const sx=soft?R(.97,1.03):R(.9,1.1), sy=soft?R(.97,1.03):R(.9,1.1);
-    s+=`<g transform="rotate(${F(rot)} ${F(o.cx)} ${F(o.cy)}) translate(${F(o.cx)} ${F(o.cy)}) scale(${F(sx)} ${F(sy)}) translate(${F(-o.cx)} ${F(-o.cy)})">${piece}</g>`;
-    if(!soft&&chance(.3)){
-      const mx=R(o.x1,o.x2), my=R(o.y1,o.y2), ml=Math.min(o.bw,o.bh)*R(.1,.3);
-      s+=`<path d="M${F(mx)} ${F(my)} q${F(ml*R(-.6,.6))} ${F(ml*R(-.7,.7))} ${F(ml*R(-1,1))} ${F(ml*R(-1,1))}" fill="none" stroke="#1A1712" stroke-width="${F(R(1,2.2))}" stroke-linecap="round" opacity="${F(R(.3,.6))}"/>`;
-    }
-  });
-  return s;
-}
-
-function generate(){
-  const w=CW,h=CH;let s='';
-  TR={};
-  const dark=(FORCE&&FORCE.ground==='nocturne')?true:chance(.16);
-  const gid='g'+Math.floor(RNG()*1e6);
-  const COMPW=[['center',.15],['scatter',.12],['diptych',.11],['tiny',.10],
-               ['crowd',.12],['portrait',.16],['landscape',.24]];
-  let mode=(()=>{let r=R(0,1);for(const[k,w]of COMPW){if((r-=w)<=0)return k;}return 'center';})();
-  if(FORCE&&FORCE.composition)mode=FORCE.composition;
-  if(BANNER&&!(FORCE&&FORCE.composition))mode=chance(.75)?'landscape':mode;
-  TR.composition=mode;
-  SPECIES=null;
-  ACC=pickAcc();
-
-  /* ground */
-  const PH=(FORCE&&FORCE.grid)?FORCE.grid:null;
-  const style=RI(0,3);
-  if(PH){
-    TR.ground='photographic';
-    s+=photoGround(w,h,PH);
-  }else{
-  TR.ground=dark?'nocturne':['gradient','aureole','colour field','flat'][style];
-  if(style===0){
-    const c1=P(PAL),c2=dark?'#1A1A22':P(BG);
-    s+=`<defs><linearGradient id="${gid}" x1="0" y1="0" x2="${F(R(0,1))}" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs><rect width="${w}" height="${h}" fill="url(#${gid})"/>`;
-  }else if(style===1){
-    s+=`<defs><radialGradient id="${gid}"><stop offset="0" stop-color="${P(PAL)}"/><stop offset="1" stop-color="${dark?'#1A1A22':P(BG)}"/></radialGradient></defs><rect width="${w}" height="${h}" fill="url(#${gid})"/>`;
-  }else if(style===2){
-    s+=`<rect width="${w}" height="${h}" fill="${dark?'#1A1A22':P(BG)}"/>`;
-    s+=`<rect width="${w}" height="${F(R(80,200))}" y="${F(R(0,120))}" fill="${P(PAL)}" opacity="${F(R(.4,.9))}"/>`;
-  }else{
-    s+=`<rect width="${w}" height="${h}" fill="${dark?'#2B1F3A':P(BG)}"/>`;
-  }
-  }
-
-  /* colour that actually lands */
-  const blobs=PH?RI(1,3):Math.max(2,Math.round(RI(3,9)*DENS));
-  TR.palette=blobs>=7?'saturated':blobs>=5?'mixed':'restrained';
-  for(let i=0;i<blobs;i++){
-    const c=P(PAL),x=R(0,w),y=R(0,h),r=R(10,64);
-    s+=`<path d="${blob(x,y,r,RI(6,10),r*.4)}" fill="${c}" opacity="${F(R(.45,.95))}"/>`;
-    for(let d=0;d<RI(0,3);d++)s+=drip(x+R(-r,r),y+r*.7,R(20,90),c,R(2,7));
-  }
-  for(let i=0;i<(PH?RI(2,6):Math.round(RI(4,16)*DENS*(w/300)));i++)
-    s+=`<circle cx="${F(R(0,w))}" cy="${F(R(0,h))}" r="${F(R(1.5,9))}" fill="${P(PAL)}" opacity="${F(R(.5,1))}"/>`;
-  for(let i=0;i<RI(0,3);i++)
-    s+=`<rect x="${F(R(-20,w))}" y="${F(R(-20,h))}" width="${F(R(24,150))}" height="${F(R(12,130))}" fill="${P(PAL)}" opacity="${F(R(.25,.7))}" transform="rotate(${F(R(-45,45))} ${F(R(0,w))} ${F(R(0,h))})"/>`;
-  for(let i=0;i<Math.round(RI(1,5)*(w/300));i++)
-    s+=`<path d="${scrawl(R(20,w-20),R(20,h-20),R(20,58),RI(3,10))}" fill="none" stroke="${chance(.45)?'#111':P(PAL)}" stroke-width="${F(R(1.6,8))}" stroke-linecap="round" opacity="${F(R(.6,1))}"/>`;
-
-  /* subjects */
-  let picks=[];
-  const AN=(FORCE&&FORCE.anchor)?FORCE.anchor:null;
-  const fx=w/300, fy=h/300;
-  if(mode==='landscape'){
-    if(!PH)s+=scenery(w,h,true);
-    picks=[];
-  }else if(mode==='portrait'){
-    /* the sitter, three-quarter, with a view behind them */
-    if(!PH)s+=`<g opacity=".85">${scenery(w,h,false)}</g>`;
-    picks=[[AN?AN[0]*fx:w*.5+R(-14,14)*fx, AN?AN[1]*fy:h*R(.52,.6),
-            (FORCE&&FORCE.scale?FORCE.scale:R(1.15,1.5))*Math.min(fx,fy)]];
-  }
-  else if(mode==='center')picks=[[AN?AN[0]*fx:w*.5,AN?AN[1]*fy:h*.5,(FORCE&&FORCE.scale?FORCE.scale:R(.95,1.25))*Math.min(fx,fy)]];
-  else if(mode==='tiny')picks=[[R(w*.3,w*.7),R(h*.3,h*.7),R(.28,.45)]];
-  else if(mode==='diptych')picks=[[R(w*.2,w*.34),R(h*.4,h*.57),R(.55,.8)],[R(w*.66,w*.8),R(h*.4,h*.57),R(.55,.8)]];
-  else if(mode==='crowd')picks=[...Array(RI(3,5)+(BANNER?2:0))].map(()=>[R(w*.08,w*.92),R(h*.2,h*.63),R(.34,.6)]);
-  else picks=[...Array(RI(2,3)+(BANNER?1:0))].map(()=>[R(w*.1,w*.9),R(h*.23,h*.6),R(.5,.85)]);
-
-  HANDS=0;
-  const names=[];
-  const forced=FORCE&&FORCE.subject?SUBJECTS.find(e=>e[1]===FORCE.subject):null;
-  picks.forEach((p,ix)=>{const e=(forced&&ix===0)?forced:pickSubject();names.push(e[1]);s+=e[0](p[0],p[1],p[2]);});
-  TR.subject=names.length?[...new Set(names)].sort().join(' + '):'scenery';
-  TR.figures=String(picks.length);
-  TR.species=SPECIES||'\u2014';
-  TR.accessory=ACC||'none';
-  TR.hands=HANDS?String(HANDS):'—';
-
-  /* doodles in the margins, because someone always draws on it */
-  const DOOD=['star','spiral','heart','arrow','smiley','x','cloud'];
-  for(let i=0;i<(PH?RI(0,1):RI(0,Math.round(3*DENS)));i++){
-    const k=P(DOOD),x=R(14,w-14),y=R(14,h-14),z=R(.55,1.5),c=chance(.55)?'#111':P(PAL);
-    const st=`fill="none" stroke="${c}" stroke-width="${F(R(1.4,3.2))}" stroke-linecap="round" stroke-linejoin="round" opacity="${F(R(.6,1))}"`;
-    if(k==='star'){let d='';for(let p=0;p<5;p++){const a=-Math.PI/2+p*4*Math.PI/5;d+=(p?'L':'M')+F(x+Math.cos(a)*13*z)+' '+F(y+Math.sin(a)*13*z);}s+=`<path d="${d}Z" ${st}/>`;}
-    else if(k==='spiral'){let d=`M${F(x)} ${F(y)}`;for(let p=1;p<26;p++){const a=p*.55,r=p*.9*z;d+=`L${F(x+Math.cos(a)*r)} ${F(y+Math.sin(a)*r)}`;}s+=`<path d="${d}" ${st}/>`;}
-    else if(k==='heart'){s+=`<path d="M${F(x)} ${F(y+9*z)} q${F(-13*z)} ${F(-10*z)} ${F(-6*z)} ${F(-17*z)} q${F(6*z)} ${F(-6*z)} ${F(6*z)} ${F(2*z)} q0 ${F(-8*z)} ${F(6*z)} ${F(-2*z)} q${F(7*z)} ${F(7*z)} ${F(-6*z)} ${F(17*z)} Z" ${st}/>`;}
-    else if(k==='arrow'){const a=R(0,6.28);s+=`<path d="M${F(x)} ${F(y)} l${F(Math.cos(a)*26*z)} ${F(Math.sin(a)*26*z)} m0 0 l${F(-Math.cos(a-.6)*10*z)} ${F(-Math.sin(a-.6)*10*z)} m${F(Math.cos(a-.6)*10*z)} ${F(Math.sin(a-.6)*10*z)} l${F(-Math.cos(a+.6)*10*z)} ${F(-Math.sin(a+.6)*10*z)}" ${st}/>`;}
-    else if(k==='smiley'){s+=`<circle cx="${F(x)}" cy="${F(y)}" r="${F(13*z)}" ${st}/><circle cx="${F(x-4.5*z)}" cy="${F(y-4*z)}" r="${F(1.6*z)}" fill="${c}"/><circle cx="${F(x+4.5*z)}" cy="${F(y-4*z)}" r="${F(1.6*z)}" fill="${c}"/><path d="M${F(x-6*z)} ${F(y+4*z)} q${F(6*z)} ${F(6*z)} ${F(12*z)} 0" ${st}/>`;}
-    else if(k==='x'){s+=`<path d="M${F(x-10*z)} ${F(y-10*z)} l${F(20*z)} ${F(20*z)} M${F(x+10*z)} ${F(y-10*z)} l${F(-20*z)} ${F(20*z)}" ${st}/>`;}
-    else{s+=`<path d="M${F(x-16*z)} ${F(y)} q${F(2*z)} ${F(-12*z)} ${F(12*z)} ${F(-8*z)} q${F(6*z)} ${F(-9*z)} ${F(15*z)} ${F(1*z)} q${F(9*z)} ${F(1*z)} ${F(5*z)} ${F(7*z)} Z" ${st}/>`;}
-  }
-
-  /* the tells */
-  if(chance(PH?.10:.34)){
-    const t=P(GIBBER);TR.inscription=t;
-    s+=`<text x="${F(R(20,w-110))}" y="${F(R(40,h-20))}" font-family="Georgia,serif" font-size="${F(R(15,38))}" fill="${chance(.5)?'#111':P(PAL)}" opacity="${F(R(.5,.95))}" transform="rotate(${F(R(-14,14))} ${F(w/2)} ${F(h/2)})" letter-spacing="${F(R(-1,4))}">${t}</text>`;
-  }else TR.inscription='none';
-
-  const sg=RNG();
-  if(sg<.42){TR.signature='signed';}
-  else if(sg<.52){TR.signature='signed and dated';}
-  else TR.signature='unsigned';
-  if(TR.signature!=='unsigned')
-    s+=`<path d="${scrawl(R(w-100,w-45),R(h-45,h-15),R(8,16),RI(4,8))}" fill="none" stroke="#111" stroke-width="${F(R(1.2,2.6))}" stroke-linecap="round" opacity=".8"/>`;
-  if(TR.signature==='signed and dated')
-    s+=`<text x="${F(R(w-104,w-68))}" y="${F(h-4)}" font-family="Georgia,serif" font-size="11" fill="#111" opacity=".7">'${RI(61,99)}</text>`;
-
-  if(chance(.18))
-    s+=`<rect width="${w}" height="${h}" fill="${P(PAL)}" opacity="${F(R(.08,.2))}"/>`;
-
-  if(mode==='portrait'){
-    const vid='v'+Math.floor(RNG()*1e6);
-    s+=`<defs><radialGradient id="${vid}"><stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".62"/></radialGradient></defs>`;
-    s+=`<rect width="${w}" height="${h}" fill="url(#${vid})"/>`;
-    if(chance(.35))
-      s+=`<ellipse cx="${F(w/2)}" cy="${F(h*.5)}" rx="${F(w*.42)}" ry="${F(h*.46)}" fill="none" stroke="#C9A227" stroke-width="${F(R(3,7))}" opacity=".75"/>`;
-  }
-  s+=condition(w,h);
-
-  const el=document.getElementById('art');
-  el.setAttribute('viewBox','0 0 '+w+' '+h);
-  el.innerHTML=s;
-}
-
-/* ============ rarity ============ */
-/* every trait carries its own odds; the score is the sum of their
-   inverses, which is how the rest of the market does it too. */
-const ODDS={
-  subject:{brainlet:.26,object:.20,block:.13,animal:.13,cactus:.11,hand:.11,anime:.06},
-  composition:{center:.15,scatter:.12,diptych:.11,tiny:.10,crowd:.12,portrait:.16,landscape:.24},
-  ground:{gradient:.21,aureole:.21,'colour field':.21,flat:.21,nocturne:.16},
-  condition:{pristine:.60,craquelure:.20,foxing:.12,overpainted:.06,'water damage':.02},
-  signature:{unsigned:.48,signed:.42,'signed and dated':.10},
-  inscription:{none:.66},
-  palette:{restrained:.29,mixed:.28,saturated:.43},
-  figures:{'0':.24,'1':.31,'2':.18,'3':.18,'4':.045,'5':.045},
-  hands:{'—':.80},
-  species:{'—':.40,human:.16,generic:.035,chicken:.035,bird:.035,long:.035,horned:.035,
-           bunny:.035,mouse:.035,tiger:.035,monkey:.035,worm:.035,
-           goat:.012,bull:.014,zombie:.011,alien:.012},
-  accessory:{none:.40,glasses:.12,sunglasses:.09,cap:.09,trench:.06,beanie:.05,jersey:.05,
-             beret:.04,rocker:.04,monocle:.02,cigarette:.025,cigar:.015,crown:.01}
-};
-function oddsOf(k,v){
-  const t=ODDS[k]; if(!t) return .5;
-  if(t[v]!==undefined) return t[v];
-  if(k==='subject'){ // combinations are rarer than any single subject
-    return v.split(' + ').reduce((a,n)=>a*(ODDS.subject[n]||.1),1);
-  }
-  if(k==='inscription') return .34/12;
-  if(k==='hands') return .20/8;
-  return .05;
-}
-const TIERS=[
-  {en:'Study collection',   es:'Colecci\u00f3n de estudio',        t:1},
-  {en:'General display',    es:'Exhibici\u00f3n general',          t:2},
-  {en:'Permanent collection',es:'Colecci\u00f3n permanente',       t:3},
-  {en:'On loan, private lender',es:'En pr\u00e9stamo, prestamista privado',t:4},
-  {en:'Disputed attribution',es:'Atribuci\u00f3n disputada',       t:5},
-  {en:'The Vault',          es:'La B\u00f3veda',                   t:6}
-];
-const CUTS=[0,79,123,231,847,4541];
-function rarity(){
-  let score=0, rows=[];
-  ['subject','species','accessory','figures','hands','composition','ground','palette','inscription','signature','condition'].forEach(k=>{
-    if(TR[k]===undefined) return;
-    const p=oddsOf(k,TR[k]);
-    score+=1/p;
-    rows.push([k,TR[k],p]);
-  });
-  let ti=0;
-  for(let i=CUTS.length-1;i>=0;i--){ if(score>=CUTS[i]){ti=i;break;} }
-  return {score,tier:TIERS[ti],rows};
-}
-
-/* ============ the placards ============ */
-const D={
-  en:{
-    sub:'Museum of Generated Art · founded 2026',
-    buy:'Acquire this work', next:'Next work',
-    held:'Remains in the permanent collection',
-    got:'Acquired · private collection',
-    note:'Admission is free. The art is not.',
-    role:'Curator, The Slouvre',
-    quotes:[
-      'You do not understand it. That is correct.',
-      'I have been asked to explain the collection. I have declined.',
-      'Nothing here is for sale. Everything here is available.',
-      'The frame is doing nothing. The frame is doing everything.',
-      'If it were pleasant it would be furniture.'
-    ],
-    foot:'Open daily until it isn\u2019t · Denton, TX',
-    fileH:'Object file',
-    unacc:'Unaccessioned study',
-    deskH:'Commissions desk',
-    deskP:'Describe anything. The museum will interpret it, badly, and identically every time.',
-    deskGo:'Commission',
-    after:'after a description by a visitor',
-    seeded:'Seed',
-    camGo:'Photograph something',
-    modeG:'Gallery',modeB:'Banner',save:'Save image',share:'Share',
-    camNote:'Read on your device and discarded. Nothing is uploaded or kept.',
-    fromPhoto:'after a photograph submitted by a visitor',
-    lab:{subject:'Subject',species:'Species',accessory:'Attire',figures:'Figures',hands:'Fingers',composition:'Composition',
-         ground:'Ground',palette:'Palette',inscription:'Inscription',signature:'Signature',condition:'Condition'},
-    val:{},
-    tA:['untitled','study for','after','notes toward','the','remains of'],
-    tB:['descent','the body','a threshold','appetite','the mother','rupture','absence','hunger','the wound','exit','a small betrayal','the father','silence','collapse'],
-    med:['oil','ash','latex','industrial felt','beeswax','pigment','toner','iron oxide','human hair','dial-up','motor oil','gesso','dust','wax crayon'],
-    surf:['reclaimed canvas','unprimed linen','particleboard','a salvaged door','cotton duck','gallery wall','found cardboard'],
-    s1:['The work interrogates the body as a site of late-capital exhaustion.',
-        'Here the artist refuses resolution.',
-        'The picture plane is not a window but a wound.',
-        'This is not composition. It is sedimentation.',
-        'The gesture arrives already exhausted.',
-        'The artist works in the register of the unfinished.'],
-    s2:['What remains is not an image but the residue of one.',
-        'We are asked to look, and then punished for looking.',
-        'The viewer completes nothing.',
-        'Meaning is withheld, deliberately and at cost.',
-        'It is a negation that does not announce itself.',
-        'Legibility would have been a concession.']
-  },
-  es:{
-    sub:'Museo de Arte Generado · fundado en 2026',
-    buy:'Adquirir esta obra', next:'Siguiente obra',
-    held:'Permanece en la colecci\u00f3n permanente',
-    got:'Adquirida · colecci\u00f3n privada',
-    note:'La entrada es gratis. El arte no.',
-    role:'Curador, The Slouvre',
-    quotes:[
-      'Usted no la entiende. Eso es correcto.',
-      'Me pidieron explicar la colecci\u00f3n. Me negu\u00e9.',
-      'Aqu\u00ed nada est\u00e1 a la venta. Todo est\u00e1 disponible.',
-      'El marco no hace nada. El marco lo hace todo.',
-      'Si fuera agradable ser\u00eda un mueble.'
-    ],
-    foot:'Abierto todos los d\u00edas hasta que no · Denton, TX',
-    fileH:'Ficha de la obra',
-    unacc:'Estudio sin registrar',
-    deskH:'Mesa de encargos',
-    deskP:'Describa lo que sea. El museo lo interpretar\u00e1, mal, e igual cada vez.',
-    deskGo:'Encargar',
-    after:'seg\u00fan la descripci\u00f3n de un visitante',
-    seeded:'Semilla',
-    camGo:'Fotografiar algo',
-    modeG:'Galer\u00eda',modeB:'Estandarte',save:'Guardar imagen',share:'Compartir',
-    camNote:'Se lee en su dispositivo y se descarta. Nada se sube ni se guarda.',
-    fromPhoto:'seg\u00fan una fotograf\u00eda de un visitante',
-    lab:{subject:'Tema',species:'Especie',accessory:'Vestimenta',figures:'Figuras',hands:'Dedos',composition:'Composici\u00f3n',
-         ground:'Fondo',palette:'Paleta',inscription:'Inscripci\u00f3n',signature:'Firma',condition:'Conservaci\u00f3n'},
-    val:{brainlet:'cerebrito',object:'objeto',block:'bloque',animal:'animal',cactus:'cactus',
-         hand:'mano',anime:'anime',center:'centro',scatter:'dispersi\u00f3n',diptych:'d\u00edptico',
-         tiny:'miniatura',crowd:'multitud',gradient:'degradado',aureole:'aureola',
-         'colour field':'campo de color',flat:'plano',nocturne:'nocturno',
-         restrained:'contenida',mixed:'mixta',saturated:'saturada',
-         unsigned:'sin firma',signed:'firmada','signed and dated':'firmada y fechada',
-         none:'ninguna',pristine:'impecable',craquelure:'craquelado',foxing:'manchas de humedad',
-         overpainted:'repintada','water damage':'da\u00f1o por agua',
-         portrait:'retrato',landscape:'paisaje',scenery:'paisaje',
-         human:'humano',alien:'extraterrestre',zombie:'zombi',bull:'toro',goat:'cabra',
-         bunny:'conejo',mouse:'rat\u00f3n',tiger:'tigre',monkey:'mono',worm:'gusano',
-         chicken:'gallina',bird:'p\u00e1jaro',long:'alargado',horned:'con cuernos',generic:'gen\u00e9rico',
-         glasses:'lentes',sunglasses:'lentes de sol',cap:'gorra',beanie:'gorro',beret:'boina',
-         trench:'gabardina',jersey:'jersey',rocker:'chaqueta de cuero',monocle:'mon\u00f3culo',
-         cigarette:'cigarro',cigar:'puro',crown:'corona'},
-    tA:['sin t\u00edtulo','estudio para','despu\u00e9s de','apuntes hacia','el','restos de'],
-    tB:['descenso','el cuerpo','un umbral','apetito','la madre','ruptura','ausencia','hambre','la herida','salida','una peque\u00f1a traici\u00f3n','el padre','silencio','derrumbe'],
-    med:['\u00f3leo','ceniza','l\u00e1tex','fieltro industrial','cera de abeja','pigmento','t\u00f3ner','\u00f3xido de hierro','cabello humano','conexi\u00f3n telef\u00f3nica','aceite de motor','yeso','polvo','crayola'],
-    surf:['lienzo recuperado','lino sin imprimar','aglomerado','una puerta rescatada','algod\u00f3n crudo','muro de galer\u00eda','cart\u00f3n encontrado'],
-    s1:['La obra interroga el cuerpo como sitio de agotamiento tardocapitalista.',
-        'Aqu\u00ed el artista se niega a resolver.',
-        'El plano pict\u00f3rico no es una ventana sino una herida.',
-        'Esto no es composici\u00f3n. Es sedimentaci\u00f3n.',
-        'El gesto llega ya agotado.',
-        'El artista trabaja en el registro de lo inconcluso.'],
-    s2:['Lo que queda no es una imagen sino su residuo.',
-        'Se nos pide mirar, y luego se nos castiga por mirar.',
-        'El espectador no completa nada.',
-        'El sentido se retiene, deliberadamente y a un costo.',
-        'Es una negaci\u00f3n que no se anuncia.',
-        'La legibilidad habr\u00eda sido una concesi\u00f3n.']
-  }
-};
-
-const FIRST=['Anneke','Bruno','Cosima','Dieter','Elke','Fabien','Greta','Henning','Ines','Joris','Katrien','Lars','Margit','Nils','Otto','Pia','Rutger','Sanne','Thijs','Ulrike','Vera','Wim','Yara','Zoltan','Mireia','Sol','Ren\u00e9'];
-const LAST=['Vandenhaus','Brekker','Oostrum','Halvard','Maeterlin','Ronsdorf','Kjelling','Vermeulen','Sattler','Duvivier','Nachtwey','Oberkamp','Stroeve','Leclos','Brandhof','Wintermans','Aguirre-B\u00f6hm','Delvaux'];
-const MONO=['SERRA \u2020','VOSS','K.','HOLM','NN','ORTA','B\u00c4R','LUM'];
-
-let cur={}, acquired=false, lang='en';
-
-function newWork(text){
-  if(typeof text==='string'&&text.trim()){
-    /* the words steer. the roll is new every time, so no two
-       visitors ever leave with the same cat. */
-    const variant=Math.floor(Math.random()*4294967296);
-    SEED=(hash(norm(text))^variant)>>>0;
-    RNG=mulberry32(SEED); FORCE=readWords(text); cur.src=text.trim();
-  }else if(text&&text.seedOnly){
-    SEED=text.seedOnly; RNG=mulberry32(SEED); FORCE=text.force||null; cur.src=text.label||null;
-  }else{
-    SEED=Math.floor(Math.random()*4294967296); RNG=mulberry32(SEED); FORCE=null; cur.src=null;
-  }
-  PAL=(FORCE&&FORCE.pal)?FORCE.pal:BAD;
-  WOB=(FORCE&&FORCE.wob)?FORCE.wob:1;
-  DENS=(FORCE&&FORCE.dens)?FORCE.dens:1;
-  const seedA=RI(0,5), seedB=RI(0,13), num=RI(2,97);
-  cur={
-    a:seedA,b:seedB,num:num,
-    artist: chance(.16)?P(MONO):`${P(FIRST)} ${P(LAST)}`,
-    year: RI(1961,2027),
-    m1:RI(0,13), m2:RI(0,13), m3:RI(0,13), sf:RI(0,6),
-    dim:`${RI(18,320)} \u00d7 ${(R(3,240)).toFixed(1)} cm`,
-    st1:RI(0,5), st2:RI(0,5),
-    src:cur.src||null, seed:SEED, force:FORCE
-  };
-  cur.rar=null;
-  acquired=false;
-  generate();
-  cur.rar=rarity();
-  const band=[[180,900],[900,2400],[2400,6000],[6000,14000],[14000,40000],[40000,120000]][cur.rar.tier.t-1];
-  cur.val=RI(band[0],band[1])*1000+RI(1,9)*100;
-  render();
-}
-
-function render(){
-  const d=D[lang], p=document.getElementById('placard');
-  const a=d.tA[cur.a], b=d.tB[cur.b];
-  const title = a==='untitled'||a==='sin t\u00edtulo' ? `${a} (n.\u00ba ${cur.num})` : `${a} ${b}`;
-
-  document.querySelector('[data-i="sub"]').textContent=d.sub;
-  document.getElementById('pArtist').textContent=cur.artist;
-  document.getElementById('pTitle').textContent=title;
-  const credit=cur.src?`<br><span style="opacity:.8">${cur.src==='__photo__'?d.fromPhoto:d.after}</span>`:'';
-  document.getElementById('pMeta').innerHTML=
-    `${cur.year}<br>${d.med[cur.m1]}, ${d.med[cur.m2]} ${lang==='en'?'and':'y'} ${d.med[cur.m3]} ${lang==='en'?'on':'sobre'} ${d.surf[cur.sf]}<br>${cur.dim}${credit}`;
-  document.getElementById('pStmt').textContent=`${d.s1[cur.st1]} ${d.s2[cur.st2]}`;
-  document.getElementById('pVal').textContent='$'+cur.val.toLocaleString('en-US')+' USD';
-
-  const rar=cur.rar, t=rar.tier.t;
-  document.getElementById('pTier').textContent=rar.tier[lang]+'  ·  '+d.unacc;
-  document.getElementById('frame').className='frame t'+t;
-  document.getElementById('wall').classList.toggle('lit',t>=5);
-  document.getElementById('rope').classList.toggle('hide',t<6);
-  document.getElementById('fileH').textContent=d.fileH;
-
-  const tr=v=>d.val&&d.val[v]?d.val[v]:v;
-  document.getElementById('rows').innerHTML=rar.rows.map(([k,v,p])=>{
-    const shown=k==='subject'?v.split(' + ').map(tr).join(' + '):tr(v);
-    const pct=p<.01?(p*100).toFixed(2):(p*100).toFixed(0);
-    const key=p<=.06?' key':'';
-    return `<div class="row${key}"><b>${d.lab[k]}</b><i>${shown}</i><u>${pct}%</u></div>`;
-  }).join('');
-  document.getElementById('pStatus').textContent=acquired?d.got:d.held;
-  p.classList.toggle('acquired',acquired);
-
-  const buy=document.getElementById('buy');
-  buy.textContent=d.buy; buy.disabled=acquired;
-  document.getElementById('next').textContent=d.next;
-  document.getElementById('note').textContent=d.note;
-  document.getElementById('deskH').textContent=d.deskH;
-  document.getElementById('deskP').textContent=d.deskP;
-  document.getElementById('deskGo').textContent=d.deskGo;
-  document.getElementById('camGo').textContent=d.camGo;
-  document.getElementById('modeG').textContent=d.modeG;
-  document.getElementById('modeB').textContent=d.modeB;
-  document.getElementById('saveBtn').textContent=d.save;
-  document.getElementById('shareBtn').textContent=d.share;
-  document.getElementById('modeG').style.opacity=BANNER?'.45':'1';
-  document.getElementById('modeB').style.opacity=BANNER?'1':'.45';
-  document.getElementById('tagline').textContent=d.camNote+'   #Slouvred';
-  document.getElementById('seedline').textContent=
-    (cur.seed===null||cur.seed===undefined)?'' :
-    (cur.src==='__photo__'?`${d.seeded} ${cur.seed}`:`\u201c${cur.src}\u201d \u00b7 ${d.seeded} ${cur.seed}`);
-  document.getElementById('cRole').textContent=d.role;
-  document.getElementById('cQuote').textContent=P(d.quotes);
-  document.getElementById('fLeft').textContent=d.foot;
-
-  const names=[];
-  for(let i=0;i<14;i++) names.push(`${P(FIRST)} ${P(LAST)}`);
-  const row=names.map(n=>`<span>${n}</span>`).join('');
-  document.getElementById('donors').innerHTML=row+row;
-}
-
-document.getElementById('next').onclick=()=>newWork();
-document.getElementById('deskGo').onclick=()=>{
-  const v=document.getElementById('deskIn').value;
-  if(v.trim())newWork(v);
-};
-/* ---- the portrait service ----
-   the photograph is read into a 48x48 grid in the browser, turned into
-   numbers, and thrown away. it never leaves the device. */
-/* stamped on saved images only. the gallery itself stays unstamped,
-   the way a museum does not sign other people's canvases. */
-/* ── After launch, paste the mint address between the quotes. That is the
-   only edit needed: it fills the plate, reveals the pump.fun link, and
-   leaves the page untouched while it is empty. ── */
-const CA='AndwTuj1itKZxtG2gjc6CCHKiMsyEgqxrCEyfeqUpump';
-
-(function(){
-  if(!CA)return;
-  document.getElementById('caVal').textContent=CA;
-  document.getElementById('plate').hidden=false;
-  const p=document.getElementById('fPump');
-  p.href='https://pump.fun/coin/'+CA; p.hidden=false;
-  document.getElementById('caCopy').onclick=function(){
-    const b=this, was=b.textContent;
-    navigator.clipboard.writeText(CA).then(()=>{
-      b.textContent=(lang==='es')?'Copiado':'Copied';
-      setTimeout(()=>{b.textContent=was;},1600);
-    }).catch(()=>{});
-  };
-})();
-
-const MARK='$SLOUVRE';
-function setMode(b){ if(BANNER===b)return; BANNER=b; CW=b?900:300; CH=300; rerender(); }
-function rerender(){
-  if(cur.seed===null||cur.seed===undefined){newWork();return;}
-  newWork({seedOnly:cur.seed,force:cur.force||null,label:cur.src});
-}
-document.getElementById('modeG').onclick=()=>setMode(false);
-document.getElementById('modeB').onclick=()=>setMode(true);
-function exportPNG(cb){
-  const svg=document.getElementById('art').cloneNode(true);
-  svg.setAttribute('xmlns','http://www.w3.org/2000/svg');
-  svg.setAttribute('width',CW);svg.setAttribute('height',CH);
-  /* the plate sits well inside the edge. social sites crop banners
-     hard at the corners, so a corner mark is a mark you lose. */
-  const ns='http://www.w3.org/2000/svg';
-  const fsz=BANNER?CH*.062:10.5;
-  const padX=BANNER?CW*.05:11, padY=BANNER?CH*.13:13;
-  const tw=MARK.length*fsz*.55+fsz*1.5;
-  const px=CW-tw-padX, py=CH-padY-fsz*1.45;
-  const plate=document.createElementNS(ns,'rect');
-  plate.setAttribute('x',px);plate.setAttribute('y',py);
-  plate.setAttribute('width',tw);plate.setAttribute('height',fsz*1.72);
-  plate.setAttribute('fill','#FBFAF7');plate.setAttribute('opacity','.9');
-  plate.setAttribute('stroke','#111');plate.setAttribute('stroke-width',fsz*.06);
-  svg.appendChild(plate);
-  const t=document.createElementNS(ns,'text');
-  t.setAttribute('x',px+fsz*.75);t.setAttribute('y',py+fsz*1.22);
-  t.setAttribute('font-family','Georgia,serif');
-  t.setAttribute('font-size',fsz);
-  t.setAttribute('letter-spacing',fsz*.07);
-  t.setAttribute('fill','#111');
-  t.textContent=MARK;
-  svg.appendChild(t);
-  const str=new XMLSerializer().serializeToString(svg);
-  const url=URL.createObjectURL(new Blob([str],{type:'image/svg+xml;charset=utf-8'}));
-  const im=new Image();
-  im.onload=()=>{
-    /* 1500x500 is exactly what X wants for a header. */
-    const c=document.createElement('canvas');
-    c.width=BANNER?1500:900; c.height=BANNER?500:900;
-    const x=c.getContext('2d');
-    x.fillStyle='#ffffff';x.fillRect(0,0,c.width,c.height);
-    x.drawImage(im,0,0,c.width,c.height);
-    c.toBlob(bl=>{ URL.revokeObjectURL(url);
-      cb(bl,'slouvre-'+(cur.seed||Date.now())+(BANNER?'-banner':'')+'.png'); });
-  };
-  im.onerror=()=>{URL.revokeObjectURL(url);cb(null,null);};
-  im.src=url;
-}
-
-document.getElementById('saveBtn').onclick=()=>{
-  exportPNG((bl,name)=>{
-    if(!bl)return;
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(bl);a.download=name;
-    document.body.appendChild(a);a.click();a.remove();
-  });
-};
-
-/* The share sheet is the only way an image actually reaches a post —
-   no site can attach a file to a tweet on the user's behalf. Where the
-   sheet isn't available we hand over the file and open the composer. */
-document.getElementById('shareBtn').onclick=()=>{
-  const btn=document.getElementById('shareBtn'), was=btn.textContent;
-  btn.disabled=true;
-  exportPNG(async (bl,name)=>{
-    btn.disabled=false;
-    if(!bl)return;
-    const line=(lang==='es')
-      ? 'Mi pieza de El Slouvre. theslouvre.com'
-      : 'My piece from The Slouvre. theslouvre.com';
-    try{
-      const file=new File([bl],name,{type:'image/png'});
-      if(navigator.canShare&&navigator.canShare({files:[file]})){
-        await navigator.share({files:[file],text:line});
-        return;
-      }
-    }catch(e){ if(e&&e.name==='AbortError')return; }
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(bl);a.download=name;
-    document.body.appendChild(a);a.click();a.remove();
-    window.open('https://x.com/intent/post?text='+encodeURIComponent(line),'_blank','noopener');
-    btn.textContent=(lang==='es')?'Imagen guardada \u2014 ad\u00fantala':'Image saved \u2014 attach it';
-    setTimeout(()=>{btn.textContent=was;},4200);
-  });
-};
-
-document.getElementById('camGo').onclick=()=>document.getElementById('camIn').click();
-document.getElementById('camIn').addEventListener('change',e=>{
-  const f=e.target.files&&e.target.files[0]; if(!f)return;
-  const img=new Image(), url=URL.createObjectURL(f);
-  img.onload=()=>{
-    try{ fromPhoto(img); }
-    catch(err){ document.getElementById('seedline').textContent='That image could not be read. Try another.'; }
-    URL.revokeObjectURL(url);
-    e.target.value='';
-  };
-  img.onerror=()=>{URL.revokeObjectURL(url);e.target.value='';};
-  img.src=url;
 });
-function sat(r,g,b,k){
-  k=k===undefined?1.9:k;
-  const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2;
-  if(mx===mn||k===1)return `rgb(${r|0},${g|0},${b|0})`;
-  const push=v=>Math.max(0,Math.min(255,l+(v-l)*k));
-  return `rgb(${push(r)|0},${push(g)|0},${push(b)|0})`;
-}
-function fromPhoto(img){
-  const N=96,c=document.createElement('canvas');
-  c.width=N;c.height=N;
-  const x=c.getContext('2d',{willReadFrequently:true});
-  const sw=img.naturalWidth||img.width||N, sh=img.naturalHeight||img.height||N;
-  const side=Math.min(sw,sh);
-  x.drawImage(img,(sw-side)/2,(sh-side)/2,side,side,0,0,N,N);
-  const d=x.getImageData(0,0,N,N).data;
-
-  const lum=new Float32Array(N*N);
-  let total=0,hsh=2166136261;
-  let skinN=0,skinX=0,skinY=0,skMinX=N,skMaxX=0,skMinY=N,skMaxY=0;
-  for(let i=0;i<N*N;i++){
-    const r=d[i*4],g=d[i*4+1],b=d[i*4+2];
-    const L=r*.299+g*.587+b*.114;
-    lum[i]=L;total+=L;
-    hsh^=(r<<16|g<<8|b);hsh=Math.imul(hsh,16777619);
-    /* skin, and not merely something brown. wood and rust pass the
-       classic test, so the ratios and saturation are bounded too. */
-    const mx=Math.max(r,g,b),mn=Math.min(r,g,b);
-    if(r>95&&g>40&&b>20&&mx-mn>15&&r>g&&r>b&&Math.abs(r-g)>15
-       &&r/g<1.85&&r/b<2.5&&(mx-mn)/mx<.62){
-      const px=i%N,py=(i/N)|0;
-      skinN++;skinX+=px;skinY+=py;
-      if(px<skMinX)skMinX=px; if(px>skMaxX)skMaxX=px;
-      if(py<skMinY)skMinY=py; if(py>skMaxY)skMaxY=py;
-    }
-  }
-  const avg=total/(N*N);
-
-  /* the grid the picture gets redrawn on */
-  const G=34, raw=[], step=N/G;
-  let edgeCount=0;
-  for(let gy=0;gy<G;gy++)for(let gx=0;gx<G;gx++){
-    let r=0,g=0,b=0,cnt=0;
-    for(let yy=Math.floor(gy*step);yy<Math.floor((gy+1)*step);yy++)
-      for(let xx=Math.floor(gx*step);xx<Math.floor((gx+1)*step);xx++){
-        const i=yy*N+xx;r+=d[i*4];g+=d[i*4+1];b+=d[i*4+2];cnt++;
-      }
-    raw.push([r/cnt,g/cnt,b/cnt]);
-  }
-
-  const lums=raw.map(c=>c[0]*.299+c[1]*.587+c[2]*.114).sort((a,b)=>a-b);
-  const lo=lums[Math.floor(lums.length*.03)], hi=lums[Math.floor(lums.length*.97)];
-  const kk=(hi-lo>6)?255/(hi-lo):1;
-  for(let i=0;i<raw.length;i++)for(let ch=0;ch<3;ch++)
-    raw[i][ch]=Math.max(0,Math.min(255,(raw[i][ch]-lo)*kk));
-
-  /* quantise, then vote away the speckle so regions come out solid */
-  const K=5;
-  const byL=raw.map((c,i)=>[c[0]*.299+c[1]*.587+c[2]*.114,i]).sort((a,b)=>a[0]-b[0]);
-  let cent=[];
-  for(let k=0;k<K;k++)cent.push(raw[byL[Math.floor(k*(raw.length-1)/(K-1))][1]].slice());
-  const idx=new Uint8Array(raw.length);
-  for(let it=0;it<8;it++){
-    for(let i=0;i<raw.length;i++){
-      let best=0,bd=Infinity;
-      for(let k=0;k<K;k++){
-        const dr=raw[i][0]-cent[k][0],dg=raw[i][1]-cent[k][1],db=raw[i][2]-cent[k][2];
-        const q=dr*dr+dg*dg+db*db; if(q<bd){bd=q;best=k;}
-      }
-      idx[i]=best;
-    }
-    const sum=cent.map(()=>[0,0,0,0]);
-    for(let i=0;i<raw.length;i++){const k=idx[i];sum[k][0]+=raw[i][0];sum[k][1]+=raw[i][1];sum[k][2]+=raw[i][2];sum[k][3]++;}
-    for(let k=0;k<K;k++)if(sum[k][3])cent[k]=[sum[k][0]/sum[k][3],sum[k][1]/sum[k][3],sum[k][2]/sum[k][3]];
-  }
-  for(let pass=0;pass<2;pass++){
-    const nx=new Uint8Array(idx);
-    for(let gy=0;gy<G;gy++)for(let gx=0;gx<G;gx++){
-      const tal=new Array(K).fill(0);
-      for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){
-        const yy=gy+dy,xx=gx+dx; if(yy<0||yy>=G||xx<0||xx>=G)continue;
-        tal[idx[yy*G+xx]]++;
-      }
-      let bi=idx[gy*G+gx],bc=tal[bi];
-      for(let k=0;k<K;k++)if(tal[k]>bc){bc=tal[k];bi=k;}
-      nx[gy*G+gx]=bi;
-    }
-    idx.set(nx);
-  }
-
-  /* connected blobs of one colour — these are the "things" */
-  const lab=new Int16Array(raw.length).fill(-1);
-  const regions=[];
-  for(let start=0;start<raw.length;start++){
-    if(lab[start]>=0)continue;
-    const tag=idx[start], q=[start]; lab[start]=regions.length;
-    let mnx=G,mxx=0,mny=G,mxy=0,area=0;
-    while(q.length){
-      const p=q.pop(), px=p%G, py=Math.floor(p/G);
-      area++;
-      if(px<mnx)mnx=px; if(px>mxx)mxx=px;
-      if(py<mny)mny=py; if(py>mxy)mxy=py;
-      const nb=[px>0?p-1:-1, px<G-1?p+1:-1, py>0?p-G:-1, py<G-1?p+G:-1];
-      nb.forEach(o=>{ if(o>=0&&lab[o]<0&&idx[o]===tag){lab[o]=regions.length;q.push(o);} });
-    }
-    const c=cent[tag], L=(c[0]*.299+c[1]*.587+c[2]*.114)/255;
-    regions.push({x1:mnx/G,y1:mny/G,x2:(mxx+1)/G,y2:(mxy+1)/G,
-                  area:area/(G*G), dark:1-L, col:sat(c[0],c[1],c[2],1.25)});
-  }
-
-  /* keep the ones big enough to be worth drawing, and decide what each
-     one becomes from its proportions and where it sits */
-  /* A wall is not an object. Regions that sprawl across the frame or
-     lean on two or more edges are the room itself — they stay flat, and
-     the objects get placed on top of them. */
-  regions.forEach(g=>{
-    let ed=0;
-    if(g.x1<=.02)ed++; if(g.y1<=.02)ed++; if(g.x2>=.98)ed++; if(g.y2>=.98)ed++;
-    g.ground=(g.area>.11)||(ed>=2&&g.area>.045);
-  });
-  const planes=regions.filter(g=>g.ground&&g.area>.03)
-                      .sort((a,b)=>b.area-a.area).slice(0,5);
-  planes.forEach(g=>g.kind='plane');
-  const objs=regions.filter(g=>!g.ground&&g.area>.008&&g.area<.10)
-                    .sort((a,b)=>b.area-a.area).slice(0,11);
-  const keep=planes.concat(objs);
-  /* every object that could plausibly fill a region of this shape gets
-     a vote. picking among them is what stops the same five shapes from
-     appearing in every picture. */
-  const CAT=[
-    {k:'sky',     asp:[.3,3],   cy:[0,.45], dark:[0,.36], area:[.10,1]},
-    {k:'stick',   asp:[3,99],   w:[0,.12]},
-    {k:'lamp',    asp:[1.6,6],  w:[0,.3]},
-    {k:'figure',  asp:[1.7,3.6],w:[0,.24], dark:[.34,1]},
-    {k:'bottle',  asp:[1.6,4],  w:[0,.2]},
-    {k:'sign',    asp:[1.3,3.4],w:[0,.3]},
-    {k:'door',    asp:[1.4,2.8],fill:[.68,1], cy:[.3,1]},
-    {k:'tower',   asp:[1.5,5]},
-    {k:'crate',   asp:[.7,1.6], fill:[.66,1]},
-    {k:'window',  asp:[.6,1.8], cy:[0,.62], fill:[.6,1]},
-    {k:'arch',    asp:[.7,1.8], cy:[0,.7],  fill:[.6,1]},
-    {k:'cage',    asp:[.5,1.6], fill:[.5,1]},
-    {k:'sunburst',asp:[.7,1.45],fill:[.45,.9]},
-    {k:'ball',    asp:[.75,1.35],fill:[.62,1]},
-    {k:'cushion', asp:[.6,1.5], cy:[.25,1]},
-    {k:'pot',     asp:[.7,2.2], fill:[.3,.8]},
-    {k:'frond',   asp:[.4,2.4], fill:[0,.56]},
-    {k:'cup',     asp:[.8,1.8], w:[0,.18]},
-    {k:'bowl',    asp:[.3,.9],  cy:[.2,1]},
-    {k:'table',   asp:[.3,1],   cy:[.25,1]},
-    {k:'shelf',   asp:[.15,.6]},
-    {k:'vehicle', asp:[.28,.7], cy:[.5,1],  dark:[.36,1]},
-    {k:'rug',     asp:[.2,.7],  cy:[.55,1]},
-    {k:'stairs',  asp:[.25,.75],cy:[.45,1]},
-    {k:'slab',    asp:[0,.5],   cy:[.4,1]},
-    {k:'lump',    asp:[.5,1.1], cy:[.5,1]},
-    {k:'animal',  asp:[.45,1.5], cy:[.25,1]},
-    {k:'plant',   asp:[.9,2.8],  fill:[.28,.9]},
-    {k:'thing',   asp:[.5,2],    area:[0,.16]},
-    {k:'cube',    asp:[.7,1.5],  fill:[.62,1]},
-    {k:'paw',     asp:[.6,1.7],  area:[0,.12]},
-    {k:'blob',    asp:[.35,2.6]}
-  ];
-  const inR=(v,r)=>!r||(v>=r[0]&&v<=r[1]);
-  objs.forEach(g=>{
-    const bw=g.x2-g.x1, bh=g.y2-g.y1, asp=bh/bw, cy=(g.y1+g.y2)/2;
-    const fill=g.area/(bw*bh);
-    const cands=CAT.filter(c=>inR(asp,c.asp)&&inR(cy,c.cy)&&inR(fill,c.fill)
-                              &&inR(g.dark,c.dark)&&inR(bw,c.w)&&inR(g.area,c.area));
-    g.kind=cands.length?P(cands).k:'blob';
-  });
-  const wash=[];
-  edgeCount=objs.length;
-
-  const busy=keep.length/16;
-  const bw=skMaxX-skMinX+1, bh=skMaxY-skMinY+1;
-  const skAsp=bw/bh, skArea=(bw*bh)/(N*N), skFill=skinN/(bw*bh);
-  const frac=skinN/(N*N);
-  /* a face is a compact patch. a cream wall under warm light passes the
-     colour test but sprawls across the whole frame, so bound it. */
-  const isFace = frac>.045 && frac<.42 && skAsp>.45 && skAsp<2.2
-                 && skArea<.60 && skFill>.34;
-  const force={
-    grid:{n:G,paper:'#EFEAE0',regions:keep},
-    edges:null,
-    pal:objs.map(g=>g.col).slice(0,5),
-    wob:.8+busy*2.6,
-    dens:.8
-  };
-  if(isFace){
-    const fw=(skMaxX-skMinX)/N, fh=(skMaxY-skMinY)/N;
-    force.subject='brainlet';
-    force.composition='portrait';
-    force.anchor=[(skinX/skinN/N)*300,(skinY/skinN/N)*300];
-    force.scale=Math.max(.55,Math.min(1.35,Math.max(fw,fh)*1.9));
-  }else{
-    /* whatever you shot stays the subject. the invented thing is a
-       small intruder off to one side, not a lid over the top. */
-    force.composition='center';
-    force.subject=P(['brainlet','animal','block','object','cactus','hand']);
-    force.scale=R(.3,.55);
-    const corner=P([[52,232],[248,236],[58,74],[244,70],[150,254]]);
-    force.anchor=[corner[0]+R(-16,16),corner[1]+R(-12,12)];
-  }
-  if(avg>214)force.condition='overpainted';
-  if(avg<44)force.condition='foxing';
-  const seed=((hsh>>>0)^Math.floor(Math.random()*4294967296))>>>0;
-  newWork({seedOnly:seed,force:force,label:'__photo__'});
-}
-
-document.getElementById('deskIn').addEventListener('keydown',e=>{
-  if(e.key==='Enter'){const v=e.target.value;if(v.trim())newWork(v);}
-});
-document.getElementById('buy').onclick=()=>{acquired=true;render();};
-document.getElementById('en').onclick=()=>{lang='en';setLang();};
-document.getElementById('es').onclick=()=>{lang='es';setLang();};
-function setLang(){
-  document.getElementById('en').setAttribute('aria-pressed',lang==='en');
-  document.getElementById('es').setAttribute('aria-pressed',lang==='es');
-  render();
-}
-newWork();
 </script>
-
-<script>
-/* ================= the entrance ================= */
-(function(){
-const intro=document.getElementById('intro');
-const beatEl=document.getElementById('beat');
-const vigEl=document.getElementById('vig');
-const tapEl=document.getElementById('tapHint');
-const skipEl=document.getElementById('iSkip');
-const soundBtn=document.getElementById('sound');
-
-/* ---- the loafers ---- */
-const S='stroke="#EDE4D2" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"';
-function loafer(x,flip,tilt){
-  const d=flip?-1:1;
-  return `<g transform="translate(${x} 0) scale(${d} 1) rotate(${tilt||0} 0 60)" ${S}>
-    <ellipse cx="0" cy="18" rx="11" ry="13"/>
-    <path d="M-9 12c4-6 14-6 18 0"/>
-    <path d="M-5 17h3M3 17h3" stroke-width="3.2"/>
-    <path d="M-2 24c2 2 5 2 7 0"/>
-    <path d="M0 31v10"/>
-    <path d="M-14 44c4-4 24-4 28 0 3 3 4 16 3 26h-34c-1-10 0-23 3-26z"/>
-    <path d="M-14 52c-8 6-10 14-4 18 5 3 12 1 16-2"/>
-    <path d="M14 52c8 6 10 14 4 18-5 3-12 1-16-2"/>
-    <path d="M-7 70v22M7 70v22"/>
-    <ellipse cx="-10" cy="97" rx="13" ry="5.5"/>
-    <ellipse cx="10" cy="97" rx="13" ry="5.5"/>
-    <path d="M-14 95h8M6 95h8"/>
-  </g>`;
-}
-const VIGS={
-  nodding:`<svg viewBox="0 0 260 110">
-    <rect x="8" y="12" width="62" height="76" ${S}/>
-    <rect x="16" y="20" width="46" height="60" stroke="#EDE4D2" stroke-width="1.2" fill="none" opacity=".45"/>
-    ${loafer(115,false,0)}${loafer(163,false,-3)}${loafer(211,true,2)}
-  </svg>`,
-  banana:`<svg viewBox="0 0 240 110">
-    <rect x="150" y="8" width="82" height="86" ${S}/>
-    <path d="M172 44 Q186 70 208 54 Q192 66 176 50 Z" ${S}/>
-    <path d="M172 44l-5-7" stroke="#EDE4D2" stroke-width="3.4" stroke-linecap="round"/>
-    <rect x="178" y="32" width="22" height="9" ${S} opacity=".7"/>
-    ${loafer(60,false,0)}
-    <g ${S}><rect x="72" y="30" width="20" height="14" rx="2"/><circle cx="82" cy="37" r="4"/></g>
-  </svg>`,
-  silence:`<svg viewBox="0 0 220 110">
-    ${loafer(40,false,-4)}${loafer(96,false,3)}${loafer(152,true,-2)}
-    <g ${S} opacity=".55">
-      <ellipse cx="40" cy="6" rx="15" ry="8"/><path d="M34 6h12"/>
-      <ellipse cx="152" cy="4" rx="15" ry="8"/><path d="M146 4h12"/>
-    </g>
-  </svg>`
-};
-
-/* ---- the script ---- */
-const BEATS={en:[
-  ['You are early. The museum does not open for eleven minutes. Come in anyway.',null],
-  ['For thirty years I watched men in soft leather shoes stand before a canvas and say nothing, for a very long time, on purpose.','nodding'],
-  ['They did not understand it either. They had only learned that silence looks like understanding.','silence'],
-  ['One of them paid four million dollars for a banana. He did not eat it. That, I think, was his mistake.','banana'],
-  ['So I built this. Everything here is bad. Genuinely, thoroughly bad.',null],
-  ['And it is hung, and lit, and labelled, and insured \u2014 because that is all a masterpiece has ever been.',null],
-  ['Look at it properly. It cost no one anything, and it is yours to judge.',null],
-  ['The doors are open. Mind the rope.',null]
-],es:[
-  ['Lleg\u00f3 temprano. El museo no abre hasta dentro de once minutos. Pase de todos modos.',null],
-  ['Durante treinta a\u00f1os vi a hombres de zapatos suaves pararse ante un lienzo y no decir nada, mucho rato, a prop\u00f3sito.','nodding'],
-  ['Ellos tampoco la entend\u00edan. Solo hab\u00edan aprendido que el silencio parece entendimiento.','silence'],
-  ['Uno pag\u00f3 cuatro millones de d\u00f3lares por un pl\u00e1tano. No se lo comi\u00f3. Ese, creo yo, fue su error.','banana'],
-  ['As\u00ed que constru\u00ed esto. Todo aqu\u00ed es malo. Genuina y completamente malo.',null],
-  ['Y est\u00e1 colgado, iluminado, etiquetado y asegurado \u2014 porque eso es todo lo que una obra maestra ha sido siempre.',null],
-  ['M\u00edrela bien. No le cost\u00f3 nada a nadie, y es suya para juzgarla.',null],
-  ['Las puertas est\u00e1n abiertas. Cuidado con el cord\u00f3n.',null]
-]};
-const UI={en:{skip:'Skip',tap:'tap to continue'},es:{skip:'Saltar',tap:'toque para continuar'}};
-
-let iLang='en', i=-1, timer=null, done=false;
-const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
-
-/* ---- the score: four bars, no samples ---- */
-let AC=null,master=null,filt=null,musicOn=true,barTimer=null;
-const CH=[[110,261.63,329.63,392],[174.61,261.63,349.23,440],[130.81,246.94,329.63,392],[98,246.94,293.66,392]];
-let bar=0;
-const LEVEL=.085;
-function startAudio(){
-  if(!musicOn)return;
-  try{
-    if(!AC){
-      AC=new (window.AudioContext||window.webkitAudioContext)();
-      filt=AC.createBiquadFilter();filt.type='lowpass';filt.frequency.value=2200;
-      master=AC.createGain();
-      filt.connect(master);master.connect(AC.destination);
-      master.gain.setValueAtTime(0,AC.currentTime);
-      master.gain.linearRampToValueAtTime(LEVEL,AC.currentTime+.7);
-    }
-    /* safari hands back a suspended context even inside a gesture, so it
-       has to be resumed explicitly or nothing ever sounds. */
-    if(AC.state!=='running'){
-      AC.resume().then(runBars).catch(()=>{});
-    }else runBars();
-  }catch(e){}
-}
-function runBars(){
-  if(!AC||barTimer)return;
-  playBar();barTimer=setInterval(playBar,3600);
-}
-/* any later tap is another chance to unstick it */
-addEventListener('pointerdown',()=>{
-  if(AC&&musicOn&&AC.state!=='running')AC.resume().then(runBars).catch(()=>{});
-},{passive:true});
-function tone(f,at,dur,vel){
-  const o=AC.createOscillator(),g=AC.createGain();
-  o.type='triangle';o.frequency.value=f;
-  g.gain.setValueAtTime(0,at);
-  g.gain.linearRampToValueAtTime(vel,at+.012);
-  g.gain.exponentialRampToValueAtTime(.0001,at+dur);
-  o.connect(g);g.connect(filt);o.start(at);o.stop(at+dur+.1);
-}
-function playBar(){
-  if(!AC)return;
-  const t=AC.currentTime+.05,c=CH[bar%CH.length];
-  tone(c[0],t,3.4,.20);
-  tone(c[1],t+.45,2.8,.13);
-  tone(c[2],t+.95,2.5,.11);
-  if(Math.random()<.7)tone(c[3],t+1.6,2.2,.085);
-  bar++;
-}
-soundBtn.onclick=()=>{
-  musicOn=!musicOn;
-  soundBtn.textContent=musicOn?'\u266a':'\u266a\u0338';
-  if(musicOn&&(!AC||AC.state!=='running')){startAudio();return;}
-  if(master&&AC)master.gain.linearRampToValueAtTime(musicOn?LEVEL:0,AC.currentTime+.4);
-};
-
-/* ---- beats ---- */
-function show(n){
-  const list=BEATS[iLang];
-  if(n>=list.length){enter();return;}
-  i=n;
-  const [txt,vig]=list[n];
-  beatEl.classList.remove('on');vigEl.classList.remove('on');
-  const paint=()=>{
-    beatEl.textContent=txt;
-    vigEl.innerHTML=vig?VIGS[vig]:'';
-    beatEl.classList.add('on');if(vig)vigEl.classList.add('on');
-  };
-  reduce?paint():setTimeout(paint,340);
-  clearTimeout(timer);
-  timer=setTimeout(()=>show(n+1), n===0?4200:(txt.length>110?6200:5000));
-}
-function advance(){ if(done)return; clearTimeout(timer); show(i+1); }
-function enter(){
-  if(done)return;done=true;
-  clearTimeout(timer);
-  intro.classList.remove('shut');intro.classList.add('opening');
-  if(master&&AC)master.gain.linearRampToValueAtTime(musicOn?LEVEL:0,AC.currentTime+1.2);
-  soundBtn.classList.add('show');
-  setTimeout(()=>intro.classList.add('gone'), reduce?60:2200);
-}
-intro.addEventListener('click',e=>{
-  if(e.target.closest('.ictl'))return;
-  startAudio();advance();
-});
-skipEl.onclick=()=>{startAudio();enter();};
-
-function setIntroLang(l){
-  iLang=l;
-  document.getElementById('iEn').setAttribute('aria-pressed',l==='en');
-  document.getElementById('iEs').setAttribute('aria-pressed',l==='es');
-  skipEl.textContent=UI[l].skip;tapEl.textContent=UI[l].tap;
-  document.getElementById(l).click();
-  if(i>=0){const cur=i;i=-1;show(cur);}
-}
-document.getElementById('iEn').onclick=e=>{e.stopPropagation();startAudio();setIntroLang('en');};
-document.getElementById('iEs').onclick=e=>{e.stopPropagation();startAudio();setIntroLang('es');};
-
-skipEl.textContent=UI.en.skip;tapEl.textContent=UI.en.tap;
-setTimeout(()=>show(0),700);
-})();
-</script>
+</body>
+</html>
