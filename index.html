@@ -228,7 +228,32 @@ main{padding:34px 20px 10px;max-width:760px;margin:0 auto}
 footer{
   max-width:760px;margin:0 auto;padding:0 20px 40px;
   font-size:13px;opacity:.55;display:flex;justify-content:space-between;gap:12px;
+  flex-wrap:wrap;align-items:center;
 }
+footer a{color:inherit;text-decoration:none;border-bottom:1px solid rgba(28,27,34,.35);padding-bottom:1px}
+footer a:hover{border-bottom-color:#6E1A1A;color:#6E1A1A}
+.links{display:flex;gap:16px;flex-wrap:wrap}
+
+/* the accession plate — brass, screwed to the wall under the title */
+.plate{
+  max-width:760px;margin:0 auto 6px;padding:10px 20px;
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+}
+.plate .lbl{
+  font:600 10.5px/1 "Bodoni Moda",Georgia,serif;letter-spacing:.22em;
+  text-transform:uppercase;color:#6E1A1A;flex:none;
+}
+.plate code{
+  font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;
+  background:#F6F2E8;border:1px solid #cdc4b2;border-radius:2px;
+  padding:6px 9px;word-break:break-all;flex:1 1 220px;min-width:0;
+}
+.plate button{
+  font:11px/1 "EB Garamond",Georgia,serif;letter-spacing:.1em;text-transform:uppercase;
+  padding:8px 13px;border:1px solid #6E1A1A;background:transparent;color:#6E1A1A;
+  border-radius:2px;cursor:pointer;flex:none;
+}
+.plate button:active{background:#6E1A1A;color:#F6F2EA}
 
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important}
@@ -378,6 +403,12 @@ footer{
   </div>
 </header>
 
+<div class="plate" id="plate" hidden>
+  <span class="lbl" id="caLbl">Contract</span>
+  <code id="caVal"></code>
+  <button id="caCopy">Copy</button>
+</div>
+
 <main>
   <div class="hang">
     <div class="wall" id="wall">
@@ -485,6 +516,11 @@ footer{
 
 <footer>
   <span id="fLeft"></span>
+  <span class="links">
+    <a href="https://x.com/0xZangetsu" target="_blank" rel="noopener">X</a>
+    <a href="https://t.me/labolsafun/41" target="_blank" rel="noopener">Telegram</a>
+    <a id="fPump" href="#" target="_blank" rel="noopener" hidden>pump.fun</a>
+  </span>
   <span>La Bolsa · $SLOUVRE</span>
 </footer>
 
@@ -1726,6 +1762,26 @@ document.getElementById('deskGo').onclick=()=>{
    numbers, and thrown away. it never leaves the device. */
 /* stamped on saved images only. the gallery itself stays unstamped,
    the way a museum does not sign other people's canvases. */
+/* ── After launch, paste the mint address between the quotes. That is the
+   only edit needed: it fills the plate, reveals the pump.fun link, and
+   leaves the page untouched while it is empty. ── */
+const CA='';
+
+(function(){
+  if(!CA)return;
+  document.getElementById('caVal').textContent=CA;
+  document.getElementById('plate').hidden=false;
+  const p=document.getElementById('fPump');
+  p.href='https://pump.fun/coin/'+CA; p.hidden=false;
+  document.getElementById('caCopy').onclick=function(){
+    const b=this, was=b.textContent;
+    navigator.clipboard.writeText(CA).then(()=>{
+      b.textContent=(lang==='es')?'Copiado':'Copied';
+      setTimeout(()=>{b.textContent=was;},1600);
+    }).catch(()=>{});
+  };
+})();
+
 const MARK='$SLOUVRE';
 function setMode(b){ if(BANNER===b)return; BANNER=b; CW=b?900:300; CH=300; rerender(); }
 function rerender(){
