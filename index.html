@@ -172,6 +172,16 @@ main{padding:34px 20px 10px;max-width:760px;margin:0 auto}
 .acts button:disabled{opacity:.34;cursor:default}
 .acts button:disabled:hover{background:transparent;color:var(--ink)}
 .acts button:focus-visible{outline:2px solid var(--oxblood);outline-offset:2px}
+/* the roll control follows you down the page — the placard and the object
+   file are long, and nobody should have to scroll back up to see the next one */
+.acts.primary{
+  position:sticky;bottom:10px;z-index:5;
+  padding:9px;margin-left:-9px;margin-right:-9px;width:calc(100% + 18px);
+  max-width:448px;border-radius:3px;
+  background:color-mix(in srgb,var(--wall) 88%,transparent);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+}
+@supports not (backdrop-filter:blur(6px)){.acts.primary{background:var(--wall)}}
 
 .note{
   max-width:430px;font-size:13.5px;font-style:italic;opacity:.6;
@@ -254,6 +264,12 @@ footer a:hover{border-bottom-color:#6E1A1A;color:#6E1A1A}
   border-radius:2px;cursor:pointer;flex:none;
 }
 .plate button:active{background:#6E1A1A;color:#F6F2EA}
+.plate .go{
+  font:11px/1 "EB Garamond",Georgia,serif;letter-spacing:.1em;text-transform:uppercase;
+  padding:8px 13px;border:1px solid #6E1A1A;background:#6E1A1A;color:#F6F2EA;
+  border-radius:2px;text-decoration:none;flex:none;
+}
+.plate .go:hover{background:#8A2222;border-color:#8A2222}
 
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important}
@@ -407,6 +423,7 @@ footer a:hover{border-bottom-color:#6E1A1A;color:#6E1A1A}
   <span class="lbl" id="caLbl">Contract</span>
   <code id="caVal"></code>
   <button id="caCopy">Copy</button>
+  <a id="caGo" class="go" href="#" target="_blank" rel="noopener">pump.fun &#8599;</a>
 </div>
 
 <main>
@@ -446,7 +463,7 @@ footer a:hover{border-bottom-color:#6E1A1A;color:#6E1A1A}
       <div id="rows"></div>
     </div>
 
-    <div class="acts">
+    <div class="acts primary">
       <button class="buy" id="buy"></button>
       <button id="next"></button>
     </div>
@@ -3094,7 +3111,16 @@ function render(){
   document.getElementById('donors').innerHTML=row+row;
 }
 
-document.getElementById('next').onclick=()=>newWork();
+document.getElementById('next').onclick=()=>{
+  newWork();
+  /* put the picture back in view — only when it isn't already */
+  const fr=document.querySelector('.frame-wrap');
+  if(fr){
+    const r=fr.getBoundingClientRect();
+    if(r.top<0||r.bottom>window.innerHeight)
+      fr.scrollIntoView({behavior:'smooth',block:'center'});
+  }
+};
 document.getElementById('deskGo').onclick=()=>{
   const v=document.getElementById('deskIn').value;
   if(v.trim())newWork(v);
@@ -3113,8 +3139,10 @@ const CA='AndwTuj1itKZxtG2gjc6CCHKiMsyEgqxrCEyfeqUpump';
   if(!CA)return;
   document.getElementById('caVal').textContent=CA;
   document.getElementById('plate').hidden=false;
+  const url='https://pump.fun/coin/'+CA;
   const p=document.getElementById('fPump');
-  p.href='https://pump.fun/coin/'+CA; p.hidden=false;
+  p.href=url; p.hidden=false;
+  document.getElementById('caGo').href=url;
   document.getElementById('caCopy').onclick=function(){
     const b=this, was=b.textContent;
     navigator.clipboard.writeText(CA).then(()=>{
