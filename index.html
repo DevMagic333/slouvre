@@ -594,7 +594,7 @@ function readWords(t){
 }
 const F=n=>n.toFixed(1);
 
-let HANDS=0;
+let HANDS=0, SWARMN=0, PXFORCE=null;
 function wobble(pts,amt){return pts.map(p=>[p[0]+R(-amt,amt),p[1]+R(-amt,amt)]);}
 
 function blob(cx,cy,r,n,amt){ amt*=WOB;
@@ -621,6 +621,54 @@ function scrawl(x,y,len,segs){
   return d;
 }
 function ink(s,c){return `fill="none" stroke="${c||'#111'}" stroke-width="${F(s)}" stroke-linecap="round" stroke-linejoin="round"`;}
+
+/* blob() with the curves taken out. straight edges only — this is what
+   lets a cloudbank be built from cut paper instead of smoke. */
+function shard(cx,cy,r,n){
+  let d='';
+  const k=n||RI(3,6), off=R(0,6.283);
+  for(let i=0;i<k;i++){
+    const a=off+(i/k)*6.283+R(-.28,.28), rr=r*R(.58,1.3);
+    d+=(i?'L':'M')+F(cx+Math.cos(a)*rr)+' '+F(cy+Math.sin(a)*rr*R(.7,1.2));
+  }
+  return d+'Z';
+}
+
+/* the museum's own population, flattened to one ink. subjBrainlet bakes
+   skin and eyes into its fills, so a crowd of them in a single colour has
+   to be drawn separately. no face — the swarm is a headcount, not portraits. */
+function brainletSil(cx,cy,u,col){
+  const L=(k)=>`fill="none" stroke="${col}" stroke-width="${F(u*k)}" stroke-linecap="round" stroke-linejoin="round"`;
+  const hr=u*.30;
+  let g=`<path d="${blob(cx,cy-u*.34,hr,RI(6,9),u*.035)}" fill="${col}"/>`;
+  const by=cy+u*.22;
+  g+=`<path d="M${F(cx+R(-u*.04,u*.04))} ${F(cy-u*.06)} L${F(cx+R(-u*.06,u*.06))} ${F(by)}" ${L(.085)}/>`;
+  for(const d of [-1,1]){
+    const ex=cx+d*u*R(.22,.42), ey=cy+u*R(-.16,.2);
+    g+=`<path d="M${F(cx)} ${F(cy+u*.02)} Q${F(cx+d*u*R(.14,.3))} ${F(cy+u*R(-.16,.1))} ${F(ex)} ${F(ey)}" ${L(.07)}/>`;
+    for(let i=0;i<RI(2,4);i++){
+      const a=R(-1.5,1.5);
+      g+=`<path d="M${F(ex)} ${F(ey)} l${F(Math.cos(a)*u*R(.05,.12)*d)} ${F(Math.sin(a)*u*R(.05,.12))}" ${L(.05)}/>`;
+    }
+  }
+  for(const d of [-1,1])
+    g+=`<path d="M${F(cx)} ${F(by)} q${F(d*u*R(.02,.1))} ${F(u*.16)} ${F(d*u*R(.04,.16))} ${F(u*R(.28,.4))}" ${L(.075)}/>`;
+  return g;
+}
+
+/* an eye that has been looked at too long. the drip is the point. */
+function eyeball(cx,cy,u,col){
+  const w2=u, h2=u*R(.62,.85);
+  let g=`<ellipse cx="${F(cx)}" cy="${F(cy)}" rx="${F(w2)}" ry="${F(h2)}" fill="#F4F1E8" stroke="#111" stroke-width="${F(u*.12)}"/>`;
+  const ir=u*R(.42,.6);
+  g+=`<circle cx="${F(cx)}" cy="${F(cy)}" r="${F(ir)}" fill="${col}"/>`;
+  g+=`<circle cx="${F(cx)}" cy="${F(cy)}" r="${F(ir*.5)}" fill="#0C0C10"/>`;
+  g+=`<circle cx="${F(cx-ir*.3)}" cy="${F(cy-ir*.34)}" r="${F(ir*.18)}" fill="#FFF" opacity=".9"/>`;
+  for(let i=0;i<RI(1,3);i++)
+    g+=drip(cx+R(-w2*.7,w2*.7), cy+h2*.8, u*R(.8,2.4), col, u*R(.14,.3));
+  return g;
+}
+
 
 /* ---------- what they are wearing ---------- */
 const ACCS=[['none',.147],['glasses',.085],['sunglasses',.065],['cap',.065],['beanie',.035],
@@ -1688,32 +1736,436 @@ const SPRITES={
            "..DBBBBBD...","...DBBBD....","....DBD.....","....DBD.....",
            "....DBD.....","...DDDD.....","............"]
 };
+/* ============ pixel accessories ============ */
+/* The seven sprites are fixed drawings. Everything that makes one piece
+   differ from the next is stamped on top of them: hats, faces, held things,
+   clothes. Legend adds M metal, G gold, R red, W white, K black, 1/2/3
+   palette slots. */
+const PXANCH={
+  brainlet:{hy:0,hx:6,ey:4,my:7, by:11,sy:12},
+  coyote:  {hy:3,hx:5,ey:5,my:7, by:10,sy:11},
+  owl:     {hy:2,hx:5,ey:4,my:6, by:10,sy:11},
+  frog:    {hy:0,hx:5,ey:1,my:6, by:9, sy:10},
+  cactus:  {hy:0,hx:5,fx:6,ey:8,my:10,by:12,sy:12},
+  cube:    {hy:1,hx:5,ey:3,my:6, by:10,sy:11},
+  hand:    {hy:0,hx:5,ey:4,my:6, by:10,sy:11,noface:true}
+};
+
+const PXHEAD={
+  crown:   {g:["G.G.G.G","GGGGGGG","GGGGGGG"],drop:1},
+  horns:   {g:["R.....R","RR...RR",".RR.RR."],drop:2},
+  halo:    {g:["GGGGGGG","G.....G"],drop:-2},
+  tophat:  {g:["KKKKKKK","KKKKKKK","KKKKKKK","KKKKKKK","KKKKKKKKK"],drop:1},
+  cap:     {g:["..111..",".11111.","1111111","111111111"],drop:1},
+  mohawk:  {g:["...1...","..111..",".11111."],drop:1},
+  antenna: {g:["..M.M..","..M.M..","..MMM.."],drop:1},
+  sprout:  {g:["..2.2..",".22222.","..222..","...K..."],drop:1},
+  tree:    {g:["...2...","..222..",".22222.","2222222",".22222.","...K..."],drop:1},
+  helmet:  {g:["MMMMMMM","MMMMMMM","M.....M"],drop:2},
+  bandana: {g:["1111111","1.1.1.1","......11"],drop:3},
+  cone:    {g:["...1...","..111..",".11111.","1111111"],drop:1},
+  flame:   {g:["..R.R..",".RGRGR.","RGGGGGR",".GGGGG."],drop:2},
+  ears:    {g:["1.....1","11...11",".1...1."],drop:2},
+  antlers: {g:["W.....W","W.W.W.W",".WW.WW.","..W.W.."],drop:2}
+};
+
+const PXFACE={
+  shades:  {g:["KKKKKKKKK","K.KKKKK.K"],row:'eye'},
+  visor:   {g:["MMMMMMMMM","MEEEEEEEM"],row:'eye'},
+  eyepatch:{g:["KKKK...","..K...."],row:'eye',dx:-1},
+  scar:    {g:["..K....","..K...."],row:'eye',dx:1},
+  brow:    {g:["KK...KK"],row:'eye',dy:-1},
+  mask:    {g:["WWWWWWW","WWWWWWW","W.....W"],row:'mouth'},
+  fangs:   {g:["W.....W","W.....W"],row:'mouth',dy:1},
+  cig:     {g:["...WWWK"],row:'mouth',dx:3,dy:1},
+  rainbow: {g:["1231231","1231231"],row:'mouth',dy:1},
+  tongue:  {g:["..RR...","..RR..."],row:'mouth',dy:1}
+};
+
+const PXHELD={
+  sword:   {g:["..M..","..M..","..M..","..M..","..M..","GMMMG","..G.."],anchor:'side'},
+  trident: {g:["M.M.M","M.M.M","MMMMM","..M..","..M..","..M..","..G.."],anchor:'side'},
+  gun:     {g:["KKKKK","KKKKK","..K..","..KK."],anchor:'side'},
+  staff:   {g:["..2..",".222.","..M..","..M..","..M..","..M.."],anchor:'side'},
+  flag:    {g:["M1111","M1111","M....","M....","M...."],anchor:'side'},
+  bone:    {g:["W.W..","WWWWW","W.W.."],anchor:'side'},
+  torch:   {g:["..R..",".RGR.","..G..","..K..","..K.."],anchor:'side'}
+};
+
+const PXBODY={
+  jersey:  {g:["1111111","1.###.1","1111111"],num:true},
+  jacket:  {g:["2222222","2K...K2","2222222"]},
+  chain:   {g:["G.G.G.G",".G.G.G."]},
+  cape:    {g:["R1111111R","R.......R","R.......R"]},
+  pack:    {g:["K2222222K","K2.....2K"]},
+  tie:     {g:["...1...","...1...","..111.."]}
+};
+
+function pxStamp(grid,art,gx,gy){
+  for(let y=0;y<art.length;y++)for(let x=0;x<art[y].length;x++){
+    const c=art[y][x]; if(c==='.')continue;
+    const ry=gy+y, rx=gx+x;
+    if(ry<0||ry>=grid.length||rx<0||rx>=grid[0].length)continue;
+    grid[ry][rx]=c;
+  }
+}
+
+/* dresses a sprite and returns the padded grid plus what it ended up wearing */
+function pxDress(which,sp){
+  const PAD=6, sh=sp.length, sw=sp[0].length;
+  const H=sh+PAD*2, W=sw+PAD*2;
+  const grid=[];
+  for(let y=0;y<H;y++){const row=[];for(let x=0;x<W;x++)row.push('.');grid.push(row);}
+  for(let y=0;y<sh;y++)for(let x=0;x<sw;x++)grid[PAD+y][PAD+x]=sp[y][x];
+  const an=PXANCH[which]||{hy:0,hx:Math.floor(sw/2),ey:4,by:sh-4,sy:sh-3};
+  const worn=[];
+  const cx=PAD+an.hx;
+
+  if(chance(.72)){
+    const k=P(Object.keys(PXHEAD)), a=PXHEAD[k];
+    pxStamp(grid,a.g,cx-Math.floor(a.g[0].length/2),PAD+an.hy-a.g.length+a.drop);
+    worn.push(k);
+  }
+  if(chance(.5)&&!an.noface){
+    const k=P(Object.keys(PXFACE)), a=PXFACE[k];
+    const row=a.row==='mouth'?an.my:an.ey, fcx=PAD+(an.fx===undefined?an.hx:an.fx);
+    pxStamp(grid,a.g,fcx-Math.floor(a.g[0].length/2)+(a.dx||0),PAD+row+(a.dy||0));
+    worn.push(k);
+  }
+  if(chance(.42)){
+    const k=P(Object.keys(PXHELD)), a=PXHELD[k];
+    const left=chance(.5);
+    const gx=left?PAD-a.g[0].length+1:PAD+sw-1;
+    pxStamp(grid,left?a.g.map(r=>[...r].reverse().join('')):a.g,gx,PAD+an.sy-a.g.length+2);
+    worn.push(k);
+  }
+  if(chance(.46)){
+    const k=P(Object.keys(PXBODY)), a=PXBODY[k];
+    pxStamp(grid,a.g.map(r=>r.replace(/#/g,'K')),cx-Math.floor(a.g[0].length/2),PAD+an.by);
+    worn.push(k);
+  }
+  /* crop back to what is actually drawn, or the padding eats the picture */
+  let x0=W,x1=-1,y0=H,y1=-1;
+  for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(grid[y][x]!=='.'){
+    if(x<x0)x0=x; if(x>x1)x1=x; if(y<y0)y0=y; if(y>y1)y1=y;}
+  const out=[];
+  for(let y=y0;y<=y1;y++)out.push(grid[y].slice(x0,x1+1));
+  return {grid:out,worn};
+}
+
+/* ============ pixel patterns ============ */
+/* Generated, not copied. Fourteen families, each with its own randomised
+   period, palette and phase, plus an optional four-way mirror that turns
+   any of them into a rug. */
+function pxPattern(G){
+  const cols=[];for(let i=0;i<RI(2,4);i++)cols.push(P(PAL));
+  const base=chance(.55)?P(['#14141A','#101016','#1C1622','#0E1014']):P(BG);
+  const fam=P(['checker','brick','diagonal','chevron','rings','diamond','cross',
+               'maze','rays','blocks','tetro','dots','bars','quilt','weave']);
+  const a=RI(2,5), b=RI(2,6), ph=RI(0,5), mir=chance(.42);
+  const c0=cols[0], c1=cols[1%cols.length], c2=cols[2%cols.length];
+  const half=G/2, cc=(G-1)/2;
+  const cell=[];
+  for(let i=0;i<G*G;i++)cell.push(null);
+  const tetro=[];
+  if(fam==='tetro'||fam==='blocks'){
+    for(let i=0;i<RI(8,20);i++)
+      tetro.push([RI(0,G-2),RI(0,G-2),RI(1,4),RI(1,4),P(cols)]);
+  }
+  const at=(x0,y0)=>{
+    let x=x0,y=y0;
+    if(mir){x=x<half?x:G-1-x;y=y<half?y:G-1-y;}
+    const dx=x0-cc, dy=y0-cc;
+    switch(fam){
+      case 'checker':  return ((x/a|0)+(y/a|0))%2?c0:((x+y)%(a*3)<a?c1:null);
+      case 'brick':    return (y%a===0)?c0:((((x+((y/a|0)%2)*(b))/b|0))%2?c1:null);
+      case 'diagonal': return ((x+y+ph)%(a+b)<a)?c0:(((x+y+ph)%(a+b)<a+1)?c1:null);
+      case 'chevron':  {const z=(x+ (((y/a|0)%2)?y:-y));return ((z%(a+b)+a+b)%(a+b)<a)?c0:null;}
+      case 'rings':    {const r=Math.max(Math.abs(dx),Math.abs(dy));return (r%(a+b)<a)?(r%(2*(a+b))<a+b?c0:c1):null;}
+      case 'diamond':  {const r=Math.abs(dx)+Math.abs(dy);return (r%(a+b)<a)?c0:((r%(a+b)===a)?c2:null);}
+      case 'cross':    {const u=x%(a+b),v=y%(a+b);return (u<a&&v<a)?null:((u<a||v<a)?c0:c1);}
+      case 'maze':     {const u=x%(a+2),v=y%(a+2);return (v===0||u===0)?c0:((u===1&&v<a)?c1:((v===1&&u>1)?c1:null));}
+      case 'rays':     {const an2=Math.atan2(dy,dx);return ((an2*b/1.05|0)%2===0)?c0:(Math.abs(dx)+Math.abs(dy)<a*2?c1:null);}
+      case 'dots':     {const u=x%(a+b),v=y%(a+b);return (u<2&&v<2)?c0:((u===Math.floor((a+b)/2)&&v===Math.floor((a+b)/2))?c1:null);}
+      case 'bars':     return (x%(a+b)<a)?((y%(b*3)<b)?c1:c0):null;
+      case 'quilt':    {const u=(x/a|0),v=(y/a|0);return ((u*7+v*13+ph)%5===0)?c0:(((u*3+v*5)%7===0)?c1:null);}
+      case 'weave':    {const u=x%(a*2),v=y%(a*2);return (u<a)!==(v<a)?c0:((u+v)%3===0?c1:null);}
+      default: return null;
+    }
+  };
+  return {name:fam, at:(x,y)=>{
+    if(fam==='tetro'||fam==='blocks'){
+      for(let i=tetro.length-1;i>=0;i--){
+        const t=tetro[i];
+        if(x>=t[0]&&x<t[0]+t[2]&&y>=t[1]&&y<t[1]+t[3]){
+          if(fam==='blocks'&&(x===t[0]||y===t[1]))return '#141018';
+          return t[4];
+        }
+      }
+      return null;
+    }
+    return at(x,y);
+  }, base};
+}
+
+/* ============ pixel scenery ============ */
+/* Small things that get stamped into scenes. Same legend as the sprites,
+   plus 1/2/3 for palette slots handed in by the scene. */
+const PXPROP={
+  car:      ["..DDD..",".DEEED.","DDDDDDD",".K...K."],
+  truck:    ["..DDDDD",".DEEDDD","DDDDDDD",".K..K.."],
+  plane:    ["...M...","MMMMMMM","...M...","..MMM.."],
+  bird:     ["D...D",".DDD."],
+  pine:     ["..2..",".222.","22222","..K.."],
+  tall:     ["..2..",".222.","22222",".222.","..K..","..K.."],
+  palm:     ["2.2.2",".222.","..K..","..K..","..K.."],
+  cact:     ["2.2","222",".2.",".2."],
+  sun:      [".GGG.","GGGGG","GGGGG","GGGGG",".GGG."],
+  moon:     [".WW..","W..W.","W...W",".W..W","..WW."],
+  cloud:    [".WWW.","WWWWW"],
+  pump:     ["DD","ME","DD","DD"],
+  sign:     ["11111","1M2M1","11111","..M..","..M..","..M.."],
+  boat:     ["..M..","..M..","WMMMW",".DDD."],
+  house:    ["..R..",".RRR.","RRRRR","1E1E1","11K11"],
+  lamp:     ["GGG",".M.",".M.",".M."],
+  rig:      ["DDDDD","DKKKD","..M..","..M.."]
+};
+
+/* A scene painted straight onto the cell grid. Nine kinds, each drawn with
+   the same handful of primitives — nothing here needs a model either. */
+function pxScene(Gx,Gy){
+  const C=new Array(Gx*Gy).fill(null);
+  const set=(x,y,c)=>{x|=0;y|=0;if(x>=0&&x<Gx&&y>=0&&y<Gy&&c)C[y*Gx+x]=c;};
+  const rect=(x,y,w,h,c)=>{for(let j=0;j<h;j++)for(let i=0;i<w;i++)set(x+i,y+j,c);};
+  const stamp=(k,x,y,m)=>{const a=PXPROP[k];
+    for(let j=0;j<a.length;j++)for(let i=0;i<a[j].length;i++){
+      const ch=a[j][i]; if(ch==='.')continue; set(x+i,y+j,m[ch]||m.B);}};
+
+  const night=chance(.42);
+  const sky=night?P(['#101830','#0D1426','#161034','#0A1020'])
+                 :P(['#BFE0F0','#D8E8F2','#F2D9C0','#CFE4D8','#E8DCC0']);
+  const p1=P(PAL), p2=P(PAL), p3=P(PAL);
+  const dark=night?'#0B0C14':'#20202A';
+  const white='#F4F1E8', gold='#E3B23C', metal='#C9CDD4', red='#C43A3A';
+  const M={B:p1,D:dark,E:night?gold:'#BFE0F0',W:white,G:gold,M:metal,R:red,K:dark,'1':p1,'2':p2,'3':p3};
+  rect(0,0,Gx,Gy,sky);
+  if(night)for(let i=0;i<RI(Gx,Gx*3);i++)set(RI(0,Gx-1),RI(0,(Gy*.6)|0),chance(.15)?gold:white);
+  const kind=PXFORCE||P(['city','mountains','waterfall','road','gasstation','coast','forest','desert','skyway']);
+  const hz=(Gy*R(.52,.72))|0;
+  const ground=night?P(['#1A1E24','#161C1A','#201A26']):P(['#7FA05A','#9AA86A','#C0A878','#8FA894']);
+
+  /* something in the sky, whatever the scene */
+  if(kind!=='skyway'){
+    if(night&&chance(.7))stamp('moon',RI(1,Gx-7),RI(1,4),M);
+    else if(chance(.65))stamp('sun',RI(1,Gx-7),RI(1,4),M);
+    for(let i=0;i<RI(0,3);i++)stamp('cloud',RI(0,Gx-5),RI(1,Math.max(2,hz-6)),M);
+  }
+
+  if(kind==='city'){
+    rect(0,hz,Gx,Gy-hz,ground);
+    let x=RI(-2,0);
+    while(x<Gx){
+      const bw=RI(2,6), bh=RI((Gy*.18)|0,(Gy*.5)|0);
+      const c=P([p1,p2,p3,dark]);
+      rect(x,hz-bh,bw,bh,c);
+      for(let j=hz-bh+1;j<hz-1;j+=2)for(let i=x+1;i<x+bw-1;i+=2)
+        if(chance(night?.6:.3))set(i,j,night?gold:'#2A2A34');
+      if(chance(.25))rect(x+((bw/2)|0),hz-bh-RI(1,3),1,RI(1,3),metal);
+      x+=bw+RI(0,1);
+    }
+    /* the street */
+    rect(0,Gy-RI(2,4),Gx,4,dark);
+    if(chance(.7))stamp(chance(.5)?'car':'truck',RI(0,Gx-8),Gy-RI(3,5),M);
+    if(chance(.4))stamp('plane',RI(0,Gx-8),RI(1,4),M);
+  }else if(kind==='mountains'){
+    const ranges=RI(2,3);
+    for(let r=0;r<ranges;r++){
+      const base=hz+r*RI(1,3), col=r===ranges-1?P([p1,p2]):P(['#5A6070','#6A7080','#7A6E84','#4C5A64']);
+      let x=RI(-4,0);
+      while(x<Gx){
+        const pw=RI(6,14), ph=RI((Gy*.2)|0,(Gy*.42)|0);
+        for(let j=0;j<ph;j++){
+          const half=((j/ph)*pw/2)|0;
+          rect(x+(pw/2|0)-half,base-ph+j,half*2+1,1,j<ph*.22?white:col);
+        }
+        x+=RI((pw*.5)|0,pw);
+      }
+    }
+    rect(0,hz+RI(2,5),Gx,Gy,ground);
+    for(let i=0;i<RI(2,6);i++)stamp(chance(.5)?'pine':'tall',RI(0,Gx-5),Gy-RI(5,8),M);
+  }else if(kind==='waterfall'){
+    const cw=RI((Gx*.22)|0,(Gx*.36)|0), gap=RI((Gx*.18)|0,(Gx*.3)|0);
+    const cliff=P(['#5E5A52','#6A5E56','#4E5A52','#6E6258']);
+    const top=RI(1,(Gy*.16)|0), pool=Gy-RI(3,6);
+    rect(0,top,cw,pool-top,cliff);
+    rect(cw+gap,top,Gx-(cw+gap),pool-top,cliff);
+    const wat=P(['#8FC8E0','#A8D8E8','#7FB8D8']);
+    rect(cw,top,gap,pool-top,wat);
+    for(let i=0;i<RI(gap*2,gap*6);i++)set(cw+RI(0,gap-1),RI(top,pool-1),white);
+    rect(0,pool,Gx,Gy-pool,wat);
+    for(let i=0;i<RI(6,18);i++)set(RI(0,Gx-1),pool+RI(0,2),white);
+    for(let i=0;i<RI(1,4);i++)stamp('pine',chance(.5)?RI(0,Math.max(0,cw-5)):RI(cw+gap,Gx-5),top-RI(2,4),M);
+  }else if(kind==='road'){
+    /* the tarmac has to read against the verge, and at night that means
+       the verge goes dark and the road goes grey, not both black */
+    const verge=night?P(['#14301E','#122818','#1A2620']):ground;
+    const tar=night?P(['#4A4A56','#42424E']):P(['#3A3A44','#44444E','#2E2E38']);
+    rect(0,hz,Gx,Gy-hz,verge);
+    const cx=(Gx*R(.42,.58))|0;
+    for(let j=hz;j<Gy;j++){
+      const t=(j-hz)/Math.max(1,Gy-hz), rw=Math.max(1,(1+t*Gx*.42)|0);
+      rect(cx-rw,j,rw*2,1,tar);
+      set(cx-rw-1,j,white); set(cx+rw,j,white);
+      if(((j-hz)%4)<2)rect(cx,j,Math.max(1,(t*2.2)|0),1,white);
+    }
+    for(let i=0;i<RI(2,5);i++)stamp('lamp',chance(.5)?RI(0,3):RI(Gx-4,Gx-3),hz-RI(0,3),M);
+    if(chance(.85))stamp(chance(.5)?'car':'truck',cx-3,Gy-RI(5,7),M);
+    for(let i=0;i<RI(0,3);i++)stamp('bird',RI(0,Gx-5),RI(1,5),M);
+  }else if(kind==='gasstation'){
+    rect(0,hz,Gx,Gy-hz,ground);
+    /* the forecourt: concrete, painted lines, a kerb. without it the
+       bottom half of the frame is a flat nothing. */
+    const apron=night?P(['#2A2C32','#26282E']):P(['#C6C6C0','#BEBEB8','#CFCBBE']);
+    const road=Gy-RI(3,5);
+    rect(0,hz+RI(0,2),Gx,road-hz,apron);
+    rect(0,road,Gx,6,dark);
+    for(let x=1;x<Gx;x+=RI(5,9))rect(x,road+1,RI(2,4),1,white);
+    const bx=RI(1,Math.max(2,(Gx*.3)|0)), bw=RI((Gx*.32)|0,(Gx*.46)|0);
+    const ct=hz-RI(6,10);
+    /* the shop, beside the canopy */
+    const shw=RI(4,8), shx=(bx+bw+2<Gx-shw)?bx+bw+2:Math.max(0,bx-shw-2);
+    rect(shx,hz-RI(4,6),shw,hz-(hz-RI(4,6)),P([p2,p3,white]));
+    rect(shx,hz-RI(4,6),shw,1,red);
+    for(let i=1;i<shw-1;i+=2)set(shx+i,hz-2,night?gold:'#7FA8C0');
+    rect(bx,ct,bw,2,red);
+    rect(bx,ct+2,bw,1,white);
+    rect(bx+1,ct+3,1,hz-ct-3,metal);
+    rect(bx+bw-2,ct+3,1,hz-ct-3,metal);
+    for(let i=0;i<RI(2,4);i++)stamp('pump',bx+2+i*RI(3,5),hz-4,M);
+    /* bays painted on the concrete */
+    for(let i=0;i<RI(2,5);i++)rect(RI(0,Gx-1),hz+RI(2,5),1,RI(2,4),white);
+    stamp('sign',RI(0,Math.max(1,bx-6)),hz-RI(7,10),M);
+    if(chance(.8))stamp('car',RI(bx,Math.max(bx+1,Gx-8)),road-RI(3,5),M);
+    if(chance(.5))stamp(chance(.5)?'car':'truck',RI(0,Gx-8),road+RI(0,1),M);
+  }else if(kind==='coast'){
+    const sea=P(['#3E7FA8','#4A8FB0','#2E6E92','#5AA0B8']);
+    rect(0,hz,Gx,Gy-hz,sea);
+    for(let i=0;i<RI(Gx,Gx*2);i++)set(RI(0,Gx-1),RI(hz,Gy-1),white);
+    rect(0,Gy-RI(2,5),Gx,5,P(['#E0CFA8','#D8C69A']));
+    if(chance(.75))stamp('boat',RI(2,Gx-7),hz-RI(1,3),M);
+    for(let i=0;i<RI(1,4);i++)stamp('bird',RI(0,Gx-5),RI(2,Math.max(3,hz-4)),M);
+    for(let i=0;i<RI(0,2);i++)stamp('palm',RI(0,Gx-5),Gy-RI(6,9),M);
+  }else if(kind==='forest'){
+    rect(0,hz,Gx,Gy-hz,ground);
+    for(let r=0;r<RI(2,4);r++)
+      for(let i=0;i<RI(3,8);i++)
+        stamp(chance(.5)?'pine':'tall',RI(-1,Gx-3),hz-RI(0,4)+r*RI(2,4),M);
+    if(chance(.4))stamp('house',RI(1,Gx-6),hz+RI(0,3),M);
+    for(let i=0;i<RI(0,3);i++)stamp('bird',RI(0,Gx-5),RI(1,5),M);
+  }else if(kind==='desert'){
+    const sands=['#E0C078','#D8B070','#C8A468','#E8CE90','#D0A860'];
+    rect(0,hz,Gx,Gy-hz,P(sands));
+    for(let b=0;b<RI(2,4);b++){
+      const y=hz+b*RI(2,5), amp=RI(1,4), per=RI(6,16), ph=RI(0,9), c=P(sands);
+      for(let x=0;x<Gx;x++){
+        const top=y+((Math.sin((x+ph)/per*3.14159)*amp)|0);
+        rect(x,top,1,Gy-top,c);
+      }
+    }
+    for(let i=0;i<RI(3,7);i++)stamp('cact',RI(0,Gx-4),Gy-RI(5,10),M);
+    if(chance(.4))stamp('rig',RI(0,Gx-6),hz-RI(2,4),M);
+    if(chance(.5))stamp('car',RI(0,Gx-8),Gy-RI(3,5),M);
+  }else{ /* skyway — nothing under it but more air */
+    /* banded cloud decks, so the frame has structure instead of scatter */
+    for(let b=0;b<RI(3,5);b++){
+      const y=((Gy/5)*b+RI(0,2))|0, c=chance(.4)?P(['#E8D8E8','#F2E2D0','#D8E4F2']):white;
+      for(let i=0;i<RI(2,5);i++){
+        const x=RI(-2,Gx-3), wdt=RI(3,9);
+        rect(x,y,wdt,1,c); rect(x+1,y+1,Math.max(1,wdt-2),1,c);
+      }
+    }
+    if(night&&chance(.6))stamp('moon',RI(1,Gx-7),RI(1,4),M);
+    else if(chance(.7))stamp('sun',RI(1,Gx-7),RI(1,4),M);
+    for(let i=0;i<RI(2,4);i++){
+      const px=RI(0,Gx-8), py=RI(2,Gy-6);
+      stamp('plane',px,py,M);
+      for(let t=1;t<RI(3,9);t++)set(px-t,py+1,white);
+    }
+    for(let i=0;i<RI(4,10);i++)stamp('bird',RI(0,Gx-5),RI(1,Gy-3),M);
+  }
+  return {cells:C,name:kind};
+}
+
 function buildPixel(ox,oy,w,h,names){
   let s='';
-  const names2=Object.keys(SPRITES);
-  const which=P(names2);
-  if(names)names.push(which);
-  const sp=SPRITES[which];
-  const sh=sp.length, sw2=sp[0].length;
-  /* the grid is sized so the sprite sits comfortably with room around it */
-  const G2=Math.max(sw2,sh)+RI(3,9);
-  const cw2=w/G2, ch2=h/G2;
-  const gx0=Math.floor((G2-sw2)/2), gy0=Math.floor((G2-sh)/2);
+  /* three ways this goes: a dressed figure, a scene, or a figure standing
+     in one. */
+  const roll=R(0,1), asScene=roll<.34, asBoth=roll>=.34&&roll<.52;
+  let g=null,sw2=0,sh=0;
+  if(!asScene){
+    const which=P(Object.keys(SPRITES));
+    if(names)names.push(which);
+    const dressed=pxDress(which,SPRITES[which]);
+    g=dressed.grid; sh=g.length; sw2=g[0].length;
+    if(dressed.worn.length)ACC=dressed.worn[0];
+  }
+  /* cells are square: a banner gets a wider grid, not stretched pixels */
+  const Gs=asScene?RI(22,34):(asBoth?Math.max(sh+RI(6,12),24):Math.max(sw2,sh)+RI(3,8));
+  const cell=Math.min(w,h)/Gs;
+  const Gx=Math.max(6,Math.round(w/cell)), Gy=Math.max(6,Math.round(h/cell));
+  const cw2=w/Gx, ch2=h/Gy;
   const body=P(PAL), dark=P(['#1A1A22','#16161C','#241C28']);
   const accent=P(PAL), eyeW='#F4F1E8', pup='#111';
-  const COLS={B:body,D:dark,E:eyeW,P:pup,A:accent};
-  s+=`<rect x="${F(ox)}" y="${F(oy)}" width="${F(w)}" height="${F(h)}" fill="${P(BG)}"/>`;
-  const X=i=>ox+i*cw2, Y=j=>oy+j*ch2;
-  for(let y=0;y<sh;y++)for(let x=0;x<sw2;x++){
-    const c=sp[y][x]; if(c==='.')continue;
-    s+=`<rect x="${F(X(gx0+x))}" y="${F(Y(gy0+y))}" width="${F(cw2+.6)}" height="${F(ch2+.6)}" fill="${COLS[c]||body}"/>`;
+  const COLS={B:body,D:dark,E:eyeW,P:pup,A:accent,
+              M:'#C9CDD4',G:'#E3B23C',R:'#C43A3A',W:'#F4F1E8',K:'#14141A',
+              '1':P(PAL),'2':P(PAL),'3':P(PAL)};
+  let cells=new Array(Gx*Gy).fill(null), baseFill=P(BG), pat=null;
+  if(asScene||asBoth){
+    const sc=pxScene(Gx,Gy);
+    cells=sc.cells;
+    if(names&&asScene)names.push(sc.name);
+  }else{
+    pat=chance(.66)?pxPattern(Gs):null;
+    if(pat){
+      baseFill=pat.base;
+      for(let y=0;y<Gy;y++)for(let x=0;x<Gx;x++){
+        const c=pat.at(x%Gs,y%Gs); if(c)cells[y*Gx+x]=c;
+      }
+    }
   }
-  /* loose cells around it — the corrupted-cartridge look */
-  for(let i=0;i<RI(8,26);i++){
-    const rx=RI(0,G2-1), ry=RI(0,G2-1);
-    const inside=(rx>=gx0&&rx<gx0+sw2&&ry>=gy0&&ry<gy0+sh&&sp[ry-gy0][rx-gx0]!=='.');
-    if(inside)continue;
-    s+=`<rect x="${F(X(rx))}" y="${F(Y(ry))}" width="${F(cw2+.6)}" height="${F(ch2+.6)}" fill="${P([body,accent,P(PAL),P(BG)])}" opacity="${F(R(.5,1))}"/>`;
+  /* place the figure */
+  let gx0=0,gy0=0;
+  if(g){
+    gx0=asBoth?RI(1,Math.max(1,Gx-sw2-1)):Math.floor((Gx-sw2)/2);
+    gy0=asBoth?Math.max(0,Gy-sh-RI(1,4)):Math.floor((Gy-sh)/2);
+    if(pat&&chance(.42)){
+      const m=RI(0,1);
+      for(let y=gy0-m;y<gy0+sh+m;y++)for(let x=gx0-m;x<gx0+sw2+m;x++)
+        if(x>=0&&x<Gx&&y>=0&&y<Gy)cells[y*Gx+x]=pat.base;
+    }
+    for(let y=0;y<sh;y++)for(let x=0;x<sw2;x++){
+      const c=g[y][x]; if(c==='.')continue;
+      const rx=gx0+x, ry=gy0+y;
+      if(rx>=0&&rx<Gx&&ry>=0&&ry<Gy)cells[ry*Gx+rx]=COLS[c]||body;
+    }
+  }
+  s+=`<rect x="${F(ox)}" y="${F(oy)}" width="${F(w)}" height="${F(h)}" fill="${baseFill}"/>`;
+  /* runs of one colour become one rect — a sky row is 90 cells otherwise */
+  for(let y=0;y<Gy;y++){
+    let x=0;
+    while(x<Gx){
+      const c=cells[y*Gx+x];
+      if(!c){x++;continue;}
+      let n=1; while(x+n<Gx&&cells[y*Gx+x+n]===c)n++;
+      s+=`<rect x="${F(ox+x*cw2)}" y="${F(oy+y*ch2)}" width="${F(cw2*n+.6)}" height="${F(ch2+.6)}" fill="${c}"/>`;
+      x+=n;
+    }
+  }
+  /* loose cells — the corrupted-cartridge look */
+  for(let i=0;i<((pat||asScene||asBoth)?RI(3,10):RI(8,26));i++){
+    const rx=RI(0,Gx-1), ry=RI(0,Gy-1);
+    if(g&&rx>=gx0&&rx<gx0+sw2&&ry>=gy0&&ry<gy0+sh&&g[ry-gy0][rx-gx0]!=='.')continue;
+    s+=`<rect x="${F(ox+rx*cw2)}" y="${F(oy+ry*ch2)}" width="${F(cw2+.6)}" height="${F(ch2+.6)}" fill="${P([body,accent,P(PAL),P(BG)])}" opacity="${F(R(.5,1))}"/>`;
   }
   return s;
 }
@@ -1820,19 +2272,23 @@ function grainDefs(id,kind){
 function generate(){
   const w=CW,h=CH;let s='';
   TR={};
+  SWARMN=0;
   const dark=(FORCE&&FORCE.ground==='nocturne')?true:chance(.16);
   const gid='g'+Math.floor(RNG()*1e6);
   const names=[];
-  const COMPW=[['center',.0857],['scatter',.069],['diptych',.063],['tiny',.055],
-               ['crowd',.069],['portrait',.0936],['landscape',.1426],['panels',.1488],
-               ['illumination',.0578],['pixel',.0333],['aurora',.0569],
-               ['woodcut',.045],['cubist',.045],['optical',.035]];
+  const COMPW=[['pixel',.5000],
+               ['center',.0382],['scatter',.0307],['diptych',.0281],['tiny',.0244],
+               ['crowd',.0307],['portrait',.0416],['landscape',.0635],['panels',.0662],
+               ['illumination',.0257],['aurora',.0253],
+               ['woodcut',.0200],['cubist',.0200],['optical',.0156],
+               ['radial',.0196],['mirror',.0175],['embersea',.0175],['swarm',.0154]];
   let mode=(()=>{let r=R(0,1);for(const[k,w]of COMPW){if((r-=w)<=0)return k;}return 'center';})();
   if(FORCE&&FORCE.composition)mode=FORCE.composition;
   if(BANNER&&!(FORCE&&FORCE.composition)){
-    /* wide formats want a horizon or a grid — both read across 1500x500 */
+    /* wide formats want a horizon or a grid — both read across 1500x500,
+       and so does a pixel skyline */
     const b=R(0,1);
-    mode = b<.62 ? 'landscape' : (b<.84 ? 'panels' : mode);
+    mode = b<.40 ? 'landscape' : (b<.58 ? 'panels' : (b<.84 ? 'pixel' : mode));
   }
   TR.composition=mode;
   SPECIES=null;
@@ -2001,6 +2457,193 @@ function generate(){
     TR.ground='nocturne';
     /* a silhouette or two standing in it, sometimes */
     picks = chance(.55) ? [[w*R(.3,.7), baseY+h*R(.02,.1), R(.34,.62)*Math.min(fx,fy)]] : [];
+  }else if(mode==='radial'){
+    /* One object, cloned around a ring and turned to face the middle. Flat
+       saturated ground — the repetition does the work, not the depth. */
+    const flat=P(['#F2725E','#F0A03D','#5EC4F2','#F25E9E','#8CDC5E','#EFD23D','#C98AF2']);
+    s+=`<rect width="${w}" height="${h}" fill="${flat}"/>`;
+    const cx0=w*.5, cy0=h*R(.46,.54);
+    const n=RI(7,11), ring=Math.min(w,h)*R(.30,.37);
+    /* the ring has to be one thing repeated — subjObject rolls a different
+       prop on every call, which reads as debris, not as a pattern */
+    let e=pickSubject();
+    for(let g=0;g<4&&e[1]==='object';g++)e=pickSubject();
+    const sc=R(.46,.60)*Math.min(fx,fy);
+    const bolt=P(PAL);
+    for(let i=0;i<n;i++){
+      const a=i/n*6.2832-1.5708;
+      const px=cx0+Math.cos(a)*ring, py=cy0+Math.sin(a)*ring;
+      s+=`<g transform="rotate(${F(a*57.2958+90)} ${F(px)} ${F(py)})">${e[0](px,py,sc)}</g>`;
+      names.push(e[1]);
+      if(chance(.7)){
+        const bx=cx0+Math.cos(a)*ring*1.46, by=cy0+Math.sin(a)*ring*1.46;
+        const u=Math.min(w,h)*.045;
+        s+=`<path d="M${F(bx-u)} ${F(by-u*1.4)} L${F(bx+u*.2)} ${F(by-u*.2)} L${F(bx-u*.5)} ${F(by)} L${F(bx+u)} ${F(by+u*1.4)}" ${ink(u*.55,bolt)}/>`;
+      }
+    }
+    /* a second, smaller ring turned half a step, when one isn't enough */
+    if(chance(.3)&&n<=8){
+      const n2=n, r2=ring*R(.52,.62), sc2=sc*R(.52,.66);
+      for(let i=0;i<n2;i++){
+        const a=(i+.5)/n2*6.2832-1.5708;
+        const px=cx0+Math.cos(a)*r2, py=cy0+Math.sin(a)*r2;
+        s+=`<g transform="rotate(${F(a*57.2958+90)} ${F(px)} ${F(py)})">${e[0](px,py,sc2)}</g>`;
+      }
+      SWARMN=n2;
+    }
+    TR.ground='radial';
+    picks=[[cx0,cy0,R(.62,.86)*Math.min(fx,fy)]];
+    SWARMN=(SWARMN||0)+n+1;
+  }else if(mode==='swarm'){
+    /* The same body, counted out in rows — and one of them singled out.
+       The exception is the picture; the other sixty are the sentence. */
+    const pale=chance(.78);
+    const col=pale?P(['#F4F1EA','#EDE8DC','#E8E4D6']):'#121014';
+    const back=pale?P(['#0B0B0D','#0C0910','#0A0D0C']):P(BG.filter(c=>c[1]>'8'));
+    s+=`<rect width="${w}" height="${h}" fill="${back}"/>`;
+    const cols=Math.max(4,Math.round(RI(5,8)*Math.sqrt(w/h)));
+    const rows=Math.max(4,Math.round(cols*h/w));
+    const cw2=w/cols, ch2=h/rows;
+    const u=Math.min(cw2,ch2)*R(.86,1.04);
+    const lit=RI(Math.floor(cols*rows*.2),Math.floor(cols*rows*.8));
+    const mark=(()=>{const r=R(0,1);
+      if(r<.40)return 'framed'; if(r<.72)return 'vacancy'; return 'specimen';})();
+    let k=0, litp=null;
+    for(let r=0;r<rows;r++)for(let c=0;c<cols;c++,k++){
+      const px=(c+.5)*cw2+R(-cw2*.2,cw2*.2), py=(r+.5)*ch2+R(-ch2*.18,ch2*.18);
+      if(k===lit){litp=[px,py];continue;}
+      /* upright, tilted a little. all-angles reads as a different picture. */
+      s+=`<g transform="rotate(${F(R(-22,22))} ${F(px)} ${F(py)})">${brainletSil(px,py,u*R(.82,1.1),col)}</g>`;
+    }
+    if(litp){
+      const [px,py]=litp;
+      if(mark==='framed'){
+        /* one of them has been accessioned. the frame is the whole event. */
+        const fw=cw2*R(1.5,1.8), fh=ch2*R(1.5,1.8), bw2=Math.min(fw,fh)*.085;
+        s+=`<rect x="${F(px-fw/2)}" y="${F(py-fh/2)}" width="${F(fw)}" height="${F(fh)}" fill="#0D0A06"/>`;
+        s+=`<rect x="${F(px-fw/2)}" y="${F(py-fh/2)}" width="${F(fw)}" height="${F(fh)}" fill="none" stroke="#C9A227" stroke-width="${F(bw2)}"/>`;
+        s+=`<rect x="${F(px-fw/2+bw2)}" y="${F(py-fh/2+bw2)}" width="${F(fw-bw2*2)}" height="${F(fh-bw2*2)}" fill="none" stroke="#8A6D18" stroke-width="${F(bw2*.35)}"/>`;
+        s+=brainletSil(px,py,Math.min(fw,fh)*.62,'#E8D9A8');
+      }else if(mark==='vacancy'){
+        /* deaccessioned. what is left is the label. */
+        const lw=cw2*R(.9,1.15), lh=ch2*R(.34,.44);
+        s+=`<rect x="${F(px-lw/2)}" y="${F(py-lh/2)}" width="${F(lw)}" height="${F(lh)}" fill="#F4F1E8" stroke="#111" stroke-width="${F(lh*.08)}"/>`;
+        for(let i=0;i<2;i++)
+          s+=`<path d="M${F(px-lw*.34)} ${F(py-lh*.14+i*lh*.28)} L${F(px+lw*R(.1,.34))} ${F(py-lh*.14+i*lh*.28)}" ${ink(lh*.09,'#333')}/>`;
+        s+=`<path d="M${F(px)} ${F(py+lh*.5)} L${F(px+R(-cw2*.06,cw2*.06))} ${F(py+ch2*.3)}" ${ink(lh*.07,col)} opacity=".5"/>`;
+      }else{
+        /* the only one anybody looked at long enough to see in colour */
+        const keep=ACC; ACC=pickAcc();
+        s+=subjBrainlet(px,py-u*.16,u*.0095*R(.92,1.08));
+        ACC=keep;
+      }
+    }
+    TR.ground='swarm field';
+    names.push('brainlet');
+    picks=[]; SWARMN=cols*rows;
+  }else if(mode==='mirror'){
+    /* Built once into the top-left quadrant, then reflected twice.
+       Symmetry is the cheapest way to make nonsense look deliberate. */
+    const qw=w/2, qh=h/2;
+    s+=`<rect width="${w}" height="${h}" fill="${P(BG.filter(c=>c[1]>'8'))}"/>`;
+    let q='';
+    for(let i=0;i<RI(3,6);i++){
+      const bx=R(qw*.2,qw*1.02), by=R(qh*.15,qh*1.02), br=R(qw*.12,qw*.34), bc=P(PAL);
+      q+=`<path d="${blob(bx,by,br,RI(7,11),br*.4)}" fill="${bc}" opacity="${F(R(.6,.95))}"/>`;
+      for(let d=0;d<RI(1,3);d++)q+=drip(bx+R(-br,br),by+br*.7,R(br*.4,br*1.6),bc,R(2,7));
+    }
+    const e=pickSubject(); names.push(e[1]);
+    q+=e[0](qw*R(.5,.78), qh*R(.52,.8), R(.42,.62)*Math.min(fx,fy));
+    for(let i=0;i<RI(1,3);i++)
+      q+=eyeball(R(qw*.3,qw*.95), R(qh*.25,qh*.9), Math.min(qw,qh)*R(.1,.2), P(PAL));
+    s+=`<g>${q}</g>`;
+    s+=`<g transform="translate(${F(w)},0) scale(-1,1)">${q}</g>`;
+    s+=`<g transform="translate(0,${F(h)}) scale(1,-1)">${q}</g>`;
+    s+=`<g transform="translate(${F(w)},${F(h)}) scale(-1,-1)">${q}</g>`;
+    TR.ground='mirrored';
+    picks=[]; SWARMN=4;
+  }else if(mode==='embersea'){
+    /* Night sea. Starfield, a lit cloudbank, one light laid down the water.
+       Painted flat — no filters, so it survives every renderer. */
+    const deep=P(['#07060A','#0A0508','#060809','#08060C']);
+    /* how the picture is built: smoke, cut paper, or cut paper on a grid */
+    const build=(()=>{const r=R(0,1);
+      if(r<.34)return 'organic'; if(r<.70)return 'faceted'; return 'mosaic';})();
+    const geo=build!=='organic';
+    const mass=(px,py,pr,n)=>geo?shard(px,py,pr,n):blob(px,py,pr,RI(8,12),pr*.26);
+    const glow=P(['#E2412B','#DC341F','#C7362B','#DE5A1F','#B8283A']);
+    s+=`<rect width="${w}" height="${h}" fill="${deep}"/>`;
+    const hz=h*R(.70,.80);
+    const sx=w*R(.38,.62), sy=hz-h*R(.26,.42);
+    for(let i=0;i<Math.round(RI(120,240)*(w/300));i++){
+      const px=R(0,w), py=R(0,hz), z=R(.4,1.5);
+      s+=geo
+        ? `<rect x="${F(px-z)}" y="${F(py-z)}" width="${F(z*2)}" height="${F(z*2)}" fill="#FFF" opacity="${F(R(.2,.95))}"/>`
+        : `<circle cx="${F(px)}" cy="${F(py)}" r="${F(z)}" fill="#FFF" opacity="${F(R(.2,.95))}"/>`;
+    }
+    for(let i=0;i<RI(4,9);i++){
+      const px=R(0,w), py=R(0,hz*.9), z=R(1.4,3);
+      s+=`<path d="M${F(px-z*2.6)} ${F(py)} L${F(px+z*2.6)} ${F(py)} M${F(px)} ${F(py-z*2.6)} L${F(px)} ${F(py+z*2.6)}" ${ink(z*.5,'#FFF')} opacity=".8"/>`;
+    }
+    /* the cloudbank, lit from beneath. it banks along the horizon and
+       across the top — the middle stays open or the stars are wasted. */
+    const puff=(px,py,pr)=>{
+      let g=`<path d="${mass(px,py,pr)}" fill="#140609" opacity="${F(R(.88,1))}"/>`;
+      g+=`<path d="${mass(px+R(-pr*.18,pr*.18),py+pr*R(.2,.42),pr*R(.46,.7))}" fill="${glow}" opacity="${F(R(.4,.85))}"/>`;
+      if(chance(.45))
+        g+=`<path d="${mass(px+R(-pr*.2,pr*.2),py+pr*R(.34,.52),pr*R(.16,.32),3)}" fill="#F2A06B" opacity="${F(R(.25,.55))}"/>`;
+      return g;
+    };
+    const unit=Math.min(w,h);
+    const bank=(y0,thick,rows)=>{
+      for(let b=0;b<rows;b++){
+        const by=y0+b*thick*R(.5,.75);
+        const cnt=Math.round(RI(9,15)*(w/300));
+        for(let i=0;i<cnt;i++)
+          s+=puff((i/cnt)*w*1.14-w*.07+R(-w*.05,w*.05),
+                  by+R(-thick*.35,thick*.35), unit*R(.10,.19));
+      }
+    };
+    bank(hz-unit*R(.07,.13), unit*R(.05,.08), RI(1,2));
+    bank(h*R(-.05,.02), unit*R(.045,.07), RI(1,2));
+    /* one or two strays in the open sky, no more */
+    for(let i=0;i<RI(0,2);i++)
+      s+=puff(R(0,w), R(h*.26,hz-unit*.3), unit*R(.04,.07));
+    /* the light itself, and the cross it throws */
+    const fl=Math.min(w,h);
+    s+=`<path d="M${F(sx-fl*.34)} ${F(sy)} L${F(sx+fl*.34)} ${F(sy)}" ${ink(1.1,'#FFD9C2')} opacity=".55"/>`;
+    s+=`<path d="M${F(sx)} ${F(sy-fl*.16)} L${F(sx)} ${F(sy+fl*.16)}" ${ink(1.1,'#FFD9C2')} opacity=".55"/>`;
+    s+=`<circle cx="${F(sx)}" cy="${F(sy)}" r="${F(fl*.035)}" fill="${glow}" opacity=".45"/>`;
+    s+=`<circle cx="${F(sx)}" cy="${F(sy)}" r="${F(fl*.014)}" fill="#FFF3E2"/>`;
+    /* the water */
+    s+=`<rect x="0" y="${F(hz)}" width="${w}" height="${F(h-hz)}" fill="#0A0407"/>`;
+    const slivers=Math.round(RI(46,80)*((h-hz)/90));
+    for(let i=0;i<slivers;i++){
+      const t=i/slivers, py=hz+(h-hz)*t;
+      const wd=fl*(.010+t*R(.07,.15))*R(.5,1.25);
+      const jx=sx+R(-wd*.5,wd*.5);
+      s+=`<rect x="${F(jx-wd)}" y="${F(py)}" width="${F(wd*2)}" height="${F(R(.7,2))}" fill="${t<.3?'#FFD2B0':glow}" opacity="${F((1-t*.5)*R(.35,.95))}"/>`;
+    }
+    for(let i=0;i<RI(6,14);i++){
+      const py=hz+(h-hz)*R(0,1);
+      s+=`<rect x="${F(R(0,w))}" y="${F(py)}" width="${F(R(6,fl*.16))}" height="${F(R(.8,2))}" fill="${glow}" opacity="${F(R(.12,.4))}"/>`;
+    }
+    if(build==='mosaic'){
+      /* the whole thing cut into squares and put back slightly wrong */
+      const cell=unit*R(.07,.13);
+      const gc=Math.ceil(w/cell), gr2=Math.ceil(h/cell);
+      for(let r=0;r<gr2;r++)for(let c=0;c<gc;c++){
+        if(chance(.80))continue;
+        const tone=chance(.55)?glow:(chance(.5)?'#F2A06B':'#05040A');
+        s+=`<rect x="${F(c*cell)}" y="${F(r*cell)}" width="${F(cell)}" height="${F(cell)}" fill="${tone}" opacity="${F(R(.06,.22))}"/>`;
+      }
+      for(let c=1;c<gc;c++)
+        s+=`<rect x="${F(c*cell)}" y="0" width="${F(Math.max(.5,cell*.035))}" height="${h}" fill="#030206" opacity="${F(R(.3,.55))}"/>`;
+      for(let r=1;r<gr2;r++)
+        s+=`<rect x="0" y="${F(r*cell)}" width="${w}" height="${F(Math.max(.5,cell*.035))}" fill="#030206" opacity="${F(R(.3,.55))}"/>`;
+    }
+    TR.ground=build==='organic'?'nocturne':(build==='faceted'?'faceted':'mosaic');
+    picks = chance(.35) ? [[w*R(.14,.86), hz+ (h-hz)*R(.1,.35), R(.26,.44)*Math.min(fx,fy)]] : [];
   }else if(mode==='illumination'){
     /* The manuscript page. The frame is always the frame; what it holds
        is whichever style the roll lands on. */
@@ -2096,7 +2739,7 @@ function generate(){
     s+=`<rect width="${w}" height="${h}" filter="url(#${gid})" opacity="${F(gr==='glitter'?R(.75,1):R(.35,.60))}" pointer-events="none"/>`;
   }
   TR.subject=names.length?[...new Set(names)].sort().join(' + '):'scenery';
-  TR.figures=String(picks.length);
+  TR.figures=String(SWARMN||picks.length);
   TR.species=SPECIES||'\u2014';
   TR.accessory=ACC||'none';
   TR.hands=HANDS?String(HANDS):'—';
@@ -2154,23 +2797,53 @@ function generate(){
 /* ============ rarity ============ */
 /* every trait carries its own odds; the score is the sum of their
    inverses, which is how the rest of the market does it too. */
+/* Measured, not declared. Regenerated from 40,000 gallery rolls after
+   every change to the engine — see the note in the handoff. */
 const ODDS={
-  subject:{brainlet:.26,object:.20,block:.13,animal:.13,cactus:.11,hand:.11,anime:.06},
-  composition:{center:.15,scatter:.12,diptych:.11,tiny:.10,crowd:.12,portrait:.16,landscape:.24},
-  ground:{gradient:.21,aureole:.21,'colour field':.21,flat:.21,nocturne:.16},
-  condition:{pristine:.60,craquelure:.20,foxing:.12,overpainted:.06,'water damage':.02},
+  subject:{brainlet:0.1266,hand:0.0755,cactus:0.0711,scenery:0.0627,cube:0.0482,
+            object:0.0479,coyote:0.0479,owl:0.0472,frog:0.0461,block:0.0326,
+            animal:0.0311,mountains:0.0194,waterfall:0.0194,skyway:0.0193,road:0.0191,
+            desert:0.0189,forest:0.0188,coast:0.0186,city:0.0181,gasstation:0.018,
+            anime:0.0146},
+  composition:{pixel:0.4946,panels:0.0672,landscape:0.0644,portrait:0.0428,center:0.0358,
+                scatter:0.0315,diptych:0.0301,crowd:0.0296,illumination:0.0263,
+                aurora:0.0258,tiny:0.0247,radial:0.0203,woodcut:0.0202,cubist:0.0199,
+                embersea:0.0179,mirror:0.0179,optical:0.0158,swarm:0.0152},
+  ground:{pixelated:0.4946,nocturne:0.0737,gradient:0.0572,'colour field':0.0545,
+           flat:0.0538,aureole:0.0521,panelled:0.05,illuminated:0.0435,faceted:0.026,
+           radial:0.0203,relief:0.0202,mirrored:0.0179,tessellated:0.0158,
+           'swarm field':0.0152,mosaic:0.0053},
+  condition:{pristine:0.5998,craquelure:0.1987,foxing:0.1213,overpainted:0.0606,
+              'water damage':0.0196},
   surface:{none:.60,grain:.22,glitter:.18},
-  signature:{unsigned:.48,signed:.42,'signed and dated':.10},
-  inscription:{none:.66},
-  palette:{restrained:.29,mixed:.28,saturated:.43},
-  figures:{'0':.24,'1':.31,'2':.18,'3':.18,'4':.045,'5':.045},
-  hands:{'—':.80},
-  species:{'—':.40,human:.16,generic:.025,chicken:.025,bird:.025,long:.025,horned:.025,
-           bunny:.025,mouse:.025,tiger:.025,monkey:.025,worm:.025,
-           coyote:.025,owl:.025,frog:.025,croc:.025,
-           goat:.012,bull:.014,zombie:.011,alien:.012},
-  accessory:{none:.40,glasses:.12,sunglasses:.09,cap:.09,trench:.06,beanie:.05,jersey:.05,
-             beret:.04,rocker:.04,monocle:.02,cigarette:.025,cigar:.015,crown:.01}
+  signature:{unsigned:0.4815,signed:0.4163,'signed and dated':0.1021},
+  inscription:{none:0.6595,GALERIE:0.0224,SGNATURE:0.0221,MUSSEUM:0.0221,SLOUVER:0.0221,
+                'THE SLOURVE':0.0221,ORIGNAL:0.0216,SLOVRE:0.0215,EXHIBTION:0.0213,
+                SLOUVRE:0.0211,ARTISTE:0.0211,PAINTNG:0.0208,ARTT:0.0207,LIMITEDD:0.0205,
+                MASTERPEICE:0.0205,AUTHENTC:0.0204,COLLECTON:0.0203},
+  palette:{saturated:0.4274,mixed:0.2878,restrained:0.2848},
+  figures:{'0':0.6337,'1':0.2004,'2':0.057,'3':0.0304,'4':0.0279,'5':0.0109,
+            '10':0.0052,'11':0.0048,'36':0.0041,'49':0.004,'25':0.0039,'12':0.0037,
+            '9':0.0034,'8':0.0033,'64':0.0032,'15':0.0014,'17':0.0013,'7':0.0008,
+            '6':0.0007},
+  hands:{'—':0.9436,'8':0.015,'7':0.0143,'5':0.0138,'6':0.0132},
+  species:{'—':0.7541,human:0.147,alien:0.0089,zombie:0.0084,croc:0.006,long:0.006,
+            monkey:0.0056,horned:0.0056,worm:0.0056,bunny:0.0055,coyote:0.0054,
+            bird:0.0054,frog:0.0053,mouse:0.0053,tiger:0.0052,generic:0.0051,
+            owl:0.0051,chicken:0.0049,bull:0.0029,goat:0.0026},
+  accessory:{none:0.1004,cap:0.0584,glasses:0.0564,sunglasses:0.0455,horns:0.0341,
+              bandana:0.0333,halo:0.0313,trench:0.031,antlers:0.0291,jersey:0.0271,
+              beanie:0.0239,crown:0.0233,rocker:0.0211,beret:0.0204,headphones:0.0179,
+              ninja:0.0179,visor:0.0177,antenna:0.0162,helmet:0.0161,tophat:0.0159,
+              mohawk:0.0157,cone:0.0156,pirate:0.0155,sprout:0.0155,ears:0.0155,
+              topknot:0.0154,robot:0.0153,tree:0.0153,flame:0.0152,spartan:0.0147,
+              viking:0.0142,chef:0.0141,wizard:0.0133,cigarette:0.0129,ghost:0.0126,
+              jester:0.0124,laurel:0.012,bucket:0.0117,monocle:0.0104,astronaut:0.0092,
+              plague:0.0086,cigar:0.0085,fangs:0.0044,tongue:0.0043,scar:0.0042,
+              rainbow:0.004,shades:0.004,brow:0.0039,mask:0.0038,eyepatch:0.0037,
+              cig:0.0037,staff:0.0034,bone:0.0032,flag:0.0032,sword:0.0032,torch:0.003,
+              gun:0.0028,cape:0.0027,pack:0.0027,trident:0.0026,tie:0.0026,chain:0.0024,
+              jacket:0.0021}
 };
 function oddsOf(k,v){
   const t=ODDS[k]; if(!t) return .5;
@@ -2295,7 +2968,14 @@ const D={
          chicken:'gallina',bird:'p\u00e1jaro',long:'alargado',horned:'con cuernos',generic:'gen\u00e9rico',
          glasses:'lentes',sunglasses:'lentes de sol',cap:'gorra',beanie:'gorro',beret:'boina',
          trench:'gabardina',jersey:'jersey',rocker:'chaqueta de cuero',monocle:'mon\u00f3culo',
-         cigarette:'cigarro',cigar:'puro',crown:'corona'},
+         cigarette:'cigarro',cigar:'puro',crown:'corona',
+         radial:'radial',swarm:'enjambre',mirror:'espejo',embersea:'mar de brasas',
+         panels:'vi\u00f1etas',illumination:'iluminaci\u00f3n',pixel:'p\u00edxel',aurora:'aurora',
+         woodcut:'xilograf\u00eda',cubist:'cubista',optical:'\u00f3ptica',
+         tessellated:'teselado',pixelated:'pixelado',panelled:'en vi\u00f1etas',
+         illuminated:'iluminado',mirrored:'especular','swarm field':'enjambre',
+         faceted:'facetado',mosaic:'mosaico',
+         photographic:'fotogr\u00e1fico'},
     tA:['sin t\u00edtulo','estudio para','despu\u00e9s de','apuntes hacia','el','restos de'],
     tB:['descenso','el cuerpo','un umbral','apetito','la madre','ruptura','ausencia','hambre','la herida','salida','una peque\u00f1a traici\u00f3n','el padre','silencio','derrumbe'],
     med:['\u00f3leo','ceniza','l\u00e1tex','fieltro industrial','cera de abeja','pigmento','t\u00f3ner','\u00f3xido de hierro','cabello humano','conexi\u00f3n telef\u00f3nica','aceite de motor','yeso','polvo','crayola'],
