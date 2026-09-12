@@ -3152,7 +3152,9 @@ const CA='AndwTuj1itKZxtG2gjc6CCHKiMsyEgqxrCEyfeqUpump';
   };
 })();
 
-const MARK='$SLOUVRE';
+/* the mark on every export. a domain travels; a ticker only means
+   something to someone who already knows. */
+const MARK='theslouvre.com';
 function setMode(b){ if(BANNER===b)return; BANNER=b; CW=b?900:300; CH=300; rerender(); }
 function rerender(){
   if(cur.seed===null||cur.seed===undefined){newWork();return;}
@@ -3171,8 +3173,9 @@ function exportPNG(cb){
   const padX=BANNER?CW*.05:14, padY=BANNER?CH*.13:14;
   /* Georgia runs about .62em per character at this size. The old .55
      estimate made the plate narrower than its own text, so the last
-     letter fell off the edge on every export. */
-  const tw=MARK.length*fsz*.62+fsz*1.9;
+     letter fell off the edge on every export. Letter-spacing is counted
+     explicitly now, so the plate fits whatever MARK is set to. */
+  const tw=MARK.length*fsz*.62+(MARK.length-1)*fsz*.07+fsz*1.6;
   const px=CW-tw-padX, py=CH-padY-fsz*1.45;
   const plate=document.createElementNS(ns,'rect');
   plate.setAttribute('x',px);plate.setAttribute('y',py);
