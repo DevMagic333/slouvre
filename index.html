@@ -639,18 +639,6 @@ function scrawl(x,y,len,segs){
 }
 function ink(s,c){return `fill="none" stroke="${c||'#111'}" stroke-width="${F(s)}" stroke-linecap="round" stroke-linejoin="round"`;}
 
-/* blob() with the curves taken out. straight edges only — this is what
-   lets a cloudbank be built from cut paper instead of smoke. */
-function shard(cx,cy,r,n){
-  let d='';
-  const k=n||RI(3,6), off=R(0,6.283);
-  for(let i=0;i<k;i++){
-    const a=off+(i/k)*6.283+R(-.28,.28), rr=r*R(.58,1.3);
-    d+=(i?'L':'M')+F(cx+Math.cos(a)*rr)+' '+F(cy+Math.sin(a)*rr*R(.7,1.2));
-  }
-  return d+'Z';
-}
-
 /* the museum's own population, flattened to one ink. subjBrainlet bakes
    skin and eyes into its fills, so a crowd of them in a single colour has
    to be drawn separately. no face — the swarm is a headcount, not portraits. */
@@ -1751,7 +1739,79 @@ const SPRITES={
  hand:    ["..D.D.D.D...",".DBDBDBDBD..",".DBDBDBDBD..",".DBBBBBBBD..",
            "DBDBBBBBBBD.","DBBBBBBBBBD.","DBBBBBBBBBD.",".DBBBBBBBD..",
            "..DBBBBBD...","...DBBBD....","....DBD.....","....DBD.....",
-           "....DBD.....","...DDDD.....","............"]
+           "....DBD.....","...DDDD.....","............"],
+ mummy   :["...DDDDDD...","..DBBBBBBD..",".DBBBBBBBBD.",".DBDDBBBBBD.",
+           ".DBEPBBEPBD.",".DBBBBBBBBD.",".DDBBBBBBDD.","..DBBBBBBD..",
+           "...DBBBBD...","..DBBBBBBD..","..DBDDDDBD..","..DBBBBBBD..",
+           "..DBDDDDBD..","..DBBBBBBD..","..DD....DD.."],
+ angel   :["....DDDD....","...DBBBBD...","..DBBBBBBD..","..DBEBBEBD..",
+           "..DBPBBPBD..","...DBBBBD...","....DBBD....","AA.DBBBBD.AA",
+           "AAADBBBBDAAA","AAADBBBBDAAA","AA.DBBBBD.AA",".A.DBBBBD.A.",
+           "...DBBBBD...","...D.BB.D...","..DD.BB.DD.."],
+ robot   :[".....D......","....DAD.....","..DDDDDDDD..","..DBBBBBBD..",
+           "..DBEBBEBD..","..DBPBBPBD..","..DBBBBBBD..","..DBDDDDBD..",
+           "..DDDDDDDD..",".DBDBBBBDBD.","DBBDBBBBDBBD","DBBDBBBBDBBD",
+           ".DD.DDDD.DD.","....DBBD....","...DD..DD..."],
+ skull   :["...DDDDDD...","..DBBBBBBD..",".DBBBBBBBBD.",".DBDDBBDDBD.",
+           ".DBDDBBDDBD.",".DBBBBBBBBD.","..DBBDDBBD..","..DBBBBBBD..",
+           "..DDDDDDDD..","..DBDBDBDBD.","..DDDDDDDD..","....DBBD....",
+           "...DBBBBD...","...D....D...","..DD....DD.."],
+ ghost   :["....DDDD....","..DDBBBBDD..",".DBBBBBBBBD.",".DBBBBBBBBD.",
+           ".DBEPBBEPBD.",".DBBBBBBBBD.",".DBBBDDBBBD.",".DBBBBBBBBD.",
+           ".DBBBBBBBBD.",".DBBBBBBBBD.",".DBBBBBBBBD.",".DBBBBBBBBD.",
+           ".DBDBDBDBBD.",".DD.D.D.DDD.","............"],
+ alien   :["...DDDDDD...","..DBBBBBBD..",".DBBBBBBBBD.","DBBBBBBBBBBD",
+           "DBDDBBBBDDBD","DBDDBBBBDDBD","DBBBBBBBBBBD",".DBBBBBBBBD.",
+           "..DBBBBBBD..","...DBBBBD...","....DBBD....","...DBBBBD...",
+           "..DBBBBBBD..","..D......D..",".DD......DD."],
+ ninja    :["...DDDDDD...","..DBBBBBBD..",".DBBBBBBBBD.",".DBBBBBBBBD.",
+            ".DDDDDDDDDD.",".DAEPBBEPAD.",".DDDDDDDDDD.","..DBBBBBBD..",
+            "...DBBBBD...","..DBBBBBBD..",".DBBBBBBBBD.",".DBBDDDDBBD.",
+            ".DBBBBBBBBD.","..DD....DD..",".DD......DD."],
+ samurai  :["....DAAD....","..DDDAADDD..",".DAAAAAAAAD.","DAAAAAAAAAAD",
+            ".DBBBBBBBBD.",".DBEPBBEPBD.",".DBBBBBBBBD.",".DBDDDDDDBD.",
+            ".DBBBBBBBBD.","..DBBBBBBD..",".DBBBBBBBBD.","DBBDBBBBDBBD",
+            "DBBDBBBBDBBD",".DD.DDDD.DD.","..DD....DD.."],
+ knight   :["...DDDDDD...","..DAAAAAAD..","..DAAAAAAD..",".DAAAAAAAAD.",
+            ".DADDDDDDAD.",".DAAAAAAAAD.",".DADDDDDDAD.",".DAAAAAAAAD.",
+            "..DAAAAAAD..","...DAAAAD...",".DBDBBBBDBD.","DBBDBBBBDBBD",
+            "DBBDBBBBDBBD",".DD.DDDD.DD.","..DD....DD.."],
+ astro    :["...DDDDDD...","..DBBBBBBD..",".DBBBBBBBBD.",".DBDDDDDDBD.",
+            "DBDAAAAAADBD","DBDAAAAAADBD",".DBDDDDDDBD.",".DBBBBBBBBD.",
+            "..DBBBBBBD..",".DBDBBBBDBD.","DBBDBBBBDBBD","DBBDBBBBDBBD",
+            ".DD.DBBD.DD.","....DBBD....","..DDD..DDD.."],
+ jelly    :["....DDDD....","..DDBBBBDD..",".DBBBBBBBBD.","DBBBBBBBBBBD",
+            "DBBEPBBEPBBD","DBBBBBBBBBBD","DBBBBBBBBBBD",".DBDBDBDBBD.",
+            "..D.D.D.D...",".A.A.A.A.A..","A.A.A.A.A.A.",".A.A.A.A.A..",
+            "A.A.A.A.A.A.",".A.A.A.A.A..","..A.A.A.A..."],
+ star     :["...DD.......","...DBD......","..DBBD......","..DBBD...A.A",
+            "DDDBBBDDD...","DBBBBBBBBD.A",".DBEBBEBD...","..DBBBBBD..A",
+            "..DBBBBBD...",".DBBDDDBBD..",".DBD...DBD..","DBBD...DBBD.",
+            "DBD.....DBD.","DD.......DD.","............"],
+ moth     :["..D......D..","..DA....AD..","...DA..AD...","....DBBD....",
+            "DDD.DBBD.DDD","DAADDBBDDAAD","DAADDBBDDAAD","DAADDBBDDAAD",
+            "DAADDBBDDAAD",".DDDDBBDDDD.","..DADBBDAD..","....DBBD....",
+            "....DBBD....","....DDDD....","............"],
+ mushroom :["...DDDDDD...","..DAAAAAAD..",".DAADAADAAD.","DAAAAAAAAAAD",
+            "DAADAAAADAAD",".DAAAAAAAAD.","..DDDDDDDD..","...DBBBBD...",
+            "...DBEEBD...","...DBPPBD...","...DBBBBD...","...DBBBBD...",
+            "..DBBBBBBD..","..DDDDDDDD..","............"],
+ beacon   :["....DDDD....","...DAAAAD...","...DEEEED...","...DAAAAD...",
+            "..DDDDDDDD..","...DBBBBD...","...DAAAAD...","...DBBBBD...",
+            "..DAAAAAAD..","..DBBBBBBD..",".DAAAAAAAAD.",".DBBBBBBBBD.",
+            "DAAAAAAAAAAD","DDDDDDDDDDDD","............"],
+ teapot   :["............","....DDD.....","...DBBBD....","..DDDDDDD...",
+            ".DBBBBBBBD..","DBBBBBBBBBD.","DBBEBBEBBBDD","DBBBBBBBBBDA",
+            "DBBBBBBBBBDA","DBBBBBBBBBDD",".DBBBBBBBD..","..DDDDDDD...",
+            "...DD.DD....","............","............"],
+ cassette :["............",".DDDDDDDDDD.",".DBBBBBBBBD.",".DBBBBBBBBD.",
+            ".DDDDDDDDDD.",".DBDDDDDDBD.",".DBDAADAABD.",".DBDAADAABD.",
+            ".DBDDDDDDBD.",".DBBBBBBBBD.",".DBDBBBBDBD.",".DBBBBBBBBD.",
+            ".DDDDDDDDDD.","............","............"],
+ scarecrow:["....DDDD....","...DAAAAD...","..DDDDDDDD..","..DBBBBBBD..",
+            "..DBEBBEBD..","..DBBBBBBD..","..DBDDDDBD..","...DBBBBD...",
+            "DDDDDBBDDDDD","...ADBBDA...","...ADBBDA...","....DBBD....",
+            "....DBBD....","....DBBD....","....DDDD...."]
 };
 /* ============ pixel accessories ============ */
 /* The seven sprites are fixed drawings. Everything that makes one piece
@@ -1765,7 +1825,25 @@ const PXANCH={
   frog:    {hy:0,hx:5,ey:1,my:6, by:9, sy:10},
   cactus:  {hy:0,hx:5,fx:6,ey:8,my:10,by:12,sy:12},
   cube:    {hy:1,hx:5,ey:3,my:6, by:10,sy:11},
-  hand:    {hy:0,hx:5,ey:4,my:6, by:10,sy:11,noface:true}
+  hand:    {hy:0,hx:5,ey:4,my:6, by:10,sy:11,noface:true},
+  mummy:   {hy:0,hx:5,ey:4,my:6, by:10,sy:11},
+  angel:   {hy:0,hx:5,ey:3,my:5, by:8, sy:10},
+  robot:   {hy:2,hx:5,ey:4,my:7, by:10,sy:11},
+  skull:   {hy:0,hx:5,ey:3,my:9, by:12,sy:12},
+  ghost:   {hy:0,hx:5,ey:4,my:6, by:10,sy:11},
+  alien:   {hy:0,hx:5,ey:4,my:7, by:11,sy:11},
+  ninja:   {hy:0,hx:5,ey:5,my:8, by:10,sy:11},
+  samurai: {hy:0,hx:5,ey:5,my:7, by:11,sy:11},
+  knight:  {hy:0,hx:5,ey:4,my:6, by:11,sy:11},
+  astro:   {hy:0,hx:5,ey:4,my:6, by:10,sy:11},
+  jelly:   {hy:0,hx:5,ey:4,my:6, by:8, sy:8},
+  star:    {hy:0,hx:4,fx:5,ey:6,my:8, by:9, sy:9},
+  moth:    {hy:3,hx:5,ey:6,my:8, by:9, sy:9,noface:true},
+  mushroom:{hy:0,hx:5,ey:8,my:10,by:12,sy:11},
+  beacon:  {hy:0,hx:5,ey:5,my:7, by:11,sy:10,noface:true},
+  teapot:  {hy:1,hx:5,ey:6,my:8, by:9, sy:9},
+  cassette:{hy:1,hx:5,ey:6,my:8, by:9, sy:9,noface:true},
+  scarecrow:{hy:0,hx:5,ey:4,my:6, by:11,sy:9}
 };
 
 const PXHEAD={
@@ -1796,7 +1874,12 @@ const PXFACE={
   fangs:   {g:["W.....W","W.....W"],row:'mouth',dy:1},
   cig:     {g:["...WWWK"],row:'mouth',dx:3,dy:1},
   rainbow: {g:["1231231","1231231"],row:'mouth',dy:1},
-  tongue:  {g:["..RR...","..RR..."],row:'mouth',dy:1}
+  tongue:  {g:["..RR...","..RR..."],row:'mouth',dy:1},
+  earrings:{g:["G.......G"],row:'eye',dy:2},
+  tears:   {g:["3.....3","3.....3"],row:'eye',dy:2},
+  blush:   {g:["R.....R"],row:'eye',dy:2},
+  thirdeye:{g:["..EPE..","...P..."],row:'eye',dy:-3},
+  wink:    {g:["KKKK..."],row:'eye'}
 };
 
 const PXHELD={
@@ -1878,7 +1961,8 @@ function pxPattern(G){
   const cols=[];for(let i=0;i<RI(2,4);i++)cols.push(P(PAL));
   const base=chance(.55)?P(['#14141A','#101016','#1C1622','#0E1014']):P(BG);
   const fam=P(['checker','brick','diagonal','chevron','rings','diamond','cross',
-               'maze','rays','blocks','tetro','dots','bars','quilt','weave']);
+               'maze','rays','blocks','tetro','dots','bars','quilt','weave',
+               'fib','herring','scales','triangle','nested','sunray']);
   const a=RI(2,5), b=RI(2,6), ph=RI(0,5), mir=chance(.42);
   const c0=cols[0], c1=cols[1%cols.length], c2=cols[2%cols.length];
   const half=G/2, cc=(G-1)/2;
@@ -1888,6 +1972,25 @@ function pxPattern(G){
   if(fam==='tetro'||fam==='blocks'){
     for(let i=0;i<RI(8,20);i++)
       tetro.push([RI(0,G-2),RI(0,G-2),RI(1,4),RI(1,4),P(cols)]);
+  }
+  /* Fibonacci: carve the biggest square off the remaining rectangle, turn,
+     repeat. That is the spiral tiling — the squares come out 1,1,2,3,5,8. */
+  const fib=[];
+  if(fam==='fib'){
+    let rx=0,ry=0,rw=G,rh=G,side=RI(0,3);
+    while(rw>2&&rh>2&&fib.length<11){
+      /* carve the golden fraction, not the whole side — on a square grid
+         min(rw,rh) is the entire canvas and the first square eats it */
+      const sq=Math.max(2,Math.round(Math.min(rw,rh)*.618));
+      let px,py;
+      if(side===0){px=rx;py=ry;rx+=sq;rw-=sq;}
+      else if(side===1){px=rx;py=ry;ry+=sq;rh-=sq;}
+      else if(side===2){px=rx+rw-sq;py=ry;rw-=sq;}
+      else{px=rx;py=ry+rh-sq;rh-=sq;}
+      fib.push([px,py,sq,P(cols)]);
+      side=(side+1)%4;
+      if(sq<=1)break;
+    }
   }
   const at=(x0,y0)=>{
     let x=x0,y=y0;
@@ -1907,10 +2010,33 @@ function pxPattern(G){
       case 'bars':     return (x%(a+b)<a)?((y%(b*3)<b)?c1:c0):null;
       case 'quilt':    {const u=(x/a|0),v=(y/a|0);return ((u*7+v*13+ph)%5===0)?c0:(((u*3+v*5)%7===0)?c1:null);}
       case 'weave':    {const u=x%(a*2),v=y%(a*2);return (u<a)!==(v<a)?c0:((u+v)%3===0?c1:null);}
+      case 'herring':  {const b2=a+2,u=((x/b2)|0)+((y/b2)|0);
+                        return (u%2? (x+y)%b2<2 : (x-y+G*b2)%b2<2)?c0:((u%3===0)?c1:null);}
+      case 'scales':   {const rr=a+2,ox=((y/rr)|0)%2?rr/2:0;
+                        const u=((x+ox)%rr)-rr/2, v=(y%rr)-rr/2;
+                        const dd=Math.sqrt(u*u+v*v);
+                        return dd<rr*.5?(dd<rr*.3?c1:c0):null;}
+      case 'triangle': {const u=x%(a*2),v=y%(a*2),up=(((x/(a*2))|0)+((y/(a*2))|0))%2;
+                        return (up? u>=v : u+v>=a*2)?c0:((u+v)%(a+1)===0?c2:c1);}
+      case 'nested':   {const r=Math.max(Math.abs(dx),Math.abs(dy));
+                        const step=(r/a)|0; return step%3===0?c0:(step%3===1?c1:null);}
+      case 'sunray':   {const an3=Math.atan2(dy,dx)+3.14159, rr2=Math.sqrt(dx*dx+dy*dy);
+                        const seg=((an3/(6.2832/(b*4)))|0)%3;
+                        return rr2<a?c2:(seg===0?c0:(seg===1?c1:null));}
       default: return null;
     }
   };
   return {name:fam, at:(x,y)=>{
+    if(fam==='fib'){
+      for(let i=fib.length-1;i>=0;i--){
+        const f=fib[i];
+        if(x>=f[0]&&x<f[0]+f[2]&&y>=f[1]&&y<f[1]+f[2]){
+          const edge=(x===f[0]||y===f[1]||x===f[0]+f[2]-1||y===f[1]+f[2]-1);
+          return edge?'#14101A':f[3];
+        }
+      }
+      return null;
+    }
     if(fam==='tetro'||fam==='blocks'){
       for(let i=tetro.length-1;i>=0;i--){
         const t=tetro[i];
@@ -1950,7 +2076,7 @@ const PXPROP={
 
 /* A scene painted straight onto the cell grid. Nine kinds, each drawn with
    the same handful of primitives — nothing here needs a model either. */
-function pxScene(Gx,Gy){
+function pxScene(Gx,Gy,withFigure){
   const C=new Array(Gx*Gy).fill(null);
   const set=(x,y,c)=>{x|=0;y|=0;if(x>=0&&x<Gx&&y>=0&&y<Gy&&c)C[y*Gx+x]=c;};
   const rect=(x,y,w,h,c)=>{for(let j=0;j<h;j++)for(let i=0;i<w;i++)set(x+i,y+j,c);};
@@ -1967,7 +2093,12 @@ function pxScene(Gx,Gy){
   const M={B:p1,D:dark,E:night?gold:'#BFE0F0',W:white,G:gold,M:metal,R:red,K:dark,'1':p1,'2':p2,'3':p3};
   rect(0,0,Gx,Gy,sky);
   if(night)for(let i=0;i<RI(Gx,Gx*3);i++)set(RI(0,Gx-1),RI(0,(Gy*.6)|0),chance(.15)?gold:white);
-  const kind=PXFORCE||P(['city','mountains','waterfall','road','gasstation','coast','forest','desert','skyway']);
+  /* the staged scenes are built around somebody standing in them, so they
+     are only on the table when a figure is actually coming */
+  const OPEN=['city','mountains','waterfall','road','gasstation','coast','forest','desert','skyway'];
+  const STAGED=['boxring','wonder','disco'];
+  const kind=PXFORCE||P(withFigure?OPEN.concat(STAGED,STAGED):OPEN);
+  let spot=null;
   const hz=(Gy*R(.52,.72))|0;
   const ground=night?P(['#1A1E24','#161C1A','#201A26']):P(['#7FA05A','#9AA86A','#C0A878','#8FA894']);
 
@@ -2092,6 +2223,92 @@ function pxScene(Gx,Gy){
     for(let i=0;i<RI(3,7);i++)stamp('cact',RI(0,Gx-4),Gy-RI(5,10),M);
     if(chance(.4))stamp('rig',RI(0,Gx-6),hz-RI(2,4),M);
     if(chance(.5))stamp('car',RI(0,Gx-8),Gy-RI(3,5),M);
+  }else if(kind==='boxring'){
+    /* somebody has to be standing in it, which is the whole point */
+    const dk=P(['#0A0A10','#0C0810','#100A0C']);
+    rect(0,0,Gx,Gy,dk);
+    for(let i=0;i<Math.round(RI(30,70)*(Gx/30));i++)
+      set(RI(0,Gx-1),RI(0,(Gy*.42)|0),chance(.25)?gold:P(['#2A2630','#332C38','#241F2A']));
+    const mat=hz+RI(0,2);
+    rect(0,mat,Gx,Gy-mat,P(['#C8B48A','#D8C69A','#B8A478','#9AB0C0']));
+    for(let x=0;x<Gx;x+=RI(6,10))rect(x,mat,1,Gy-mat,'#00000018');
+    const rope=P([p1,p2,red,white]);
+    for(let r=0;r<3;r++)rect(0,mat-3-r*RI(2,3),Gx,1,rope);
+    for(const px of [RI(0,2),Gx-RI(2,4)]){
+      rect(px,mat-10,1,12,metal);
+      rect(px-1,mat-11,3,1,p3);
+    }
+    for(let i=0;i<RI(1,3);i++){
+      const lx=RI(2,Gx-3);
+      rect(lx,0,1,RI(2,4),gold);
+      rect(lx-1,RI(2,4),3,1,'#FFF1C0');
+    }
+    spot=[(Gx/2)|0,Gy-RI(2,5)];
+  }else if(kind==='wonder'){
+    const w2=P(['pyramid','stonehenge','obelisk']);
+    const stone=P(['#B8A078','#A89878','#9E9488','#C0AC84']);
+    rect(0,hz,Gx,Gy-hz,night?ground:P(['#D8C08A','#C8B478','#9AA86A']));
+    let keepX=null;
+    if(w2==='pyramid'){
+      const ph=RI((Gy*.34)|0,(Gy*.5)|0), pc=(Gx*R(.26,.46))|0;
+      keepX=pc;
+      for(let j=0;j<ph;j++){
+        const half=((j/ph)*ph*1.15)|0;
+        rect(pc-half,hz-ph+j,half*2+1,1,(j%3===0)?'#00000022':stone);
+      }
+      for(let j=0;j<ph;j+=RI(2,4))rect(pc-((j/ph)*ph*1.15|0),hz-ph+j,1,1,'#00000030');
+    }else if(w2==='stonehenge'){
+      let x=RI(1,3);
+      while(x<Gx-4){
+        const uh=RI(6,11), uw=RI(2,3);
+        rect(x,hz-uh,uw,uh,stone);
+        rect(x+uw+RI(2,3),hz-uh,uw,uh,stone);
+        rect(x,hz-uh-2,uw*2+RI(4,6),2,stone);
+        x+=uw*2+RI(6,10);
+      }
+    }else{
+      const ox=(Gx*R(.24,.44))|0, oh=RI((Gy*.44)|0,(Gy*.64)|0);
+      keepX=ox;
+      for(let j=0;j<oh;j++){
+        const half=Math.max(1,(3-(j/oh)*2)|0);
+        rect(ox-half,hz-oh+j,half*2,1,stone);
+      }
+      rect(ox-1,hz-oh-2,2,2,gold);
+    }
+    for(let i=0;i<RI(0,3);i++)stamp('bird',RI(0,Gx-5),RI(1,6),M);
+    /* stand clear of whatever was just built */
+    spot=[keepX===null ? (Gx*R(.2,.8))|0
+                       : (keepX<Gx/2 ? (Gx*R(.66,.88))|0 : (Gx*R(.12,.34))|0),
+          Gy-RI(1,3)];
+  }else if(kind==='disco'){
+    rect(0,0,Gx,Gy,P(['#12081A','#160A20','#0E0A18']));
+    const floorY=hz+RI(0,3);
+    /* the floor, in perspective — the squares get wider as they come at you */
+    const fa=P([p1,p2,p3]), fb='#1A1020';
+    let y=floorY, band=2, row=0;
+    while(y<Gy){
+      const cw3=band, hgt=Math.max(1,(band*.6)|0);
+      for(let x=0;x<Gx;x+=cw3)
+        rect(x,y,cw3,hgt,(((x/cw3)|0)+row)%2?fa:fb);
+      y+=hgt; band+=RI(1,2); row++;
+    }
+    /* the ball, and what comes off it */
+    const bx=(Gx/2)|0, by2=RI(2,5), br=RI(2,4);
+    for(let j=-br;j<=br;j++)for(let i=-br;i<=br;i++)
+      if(i*i+j*j<=br*br)set(bx+i,by2+j,((i+j)%2)?'#E8ECF2':P([p1,p2,p3]));
+    rect(bx,0,1,by2-br,metal);
+    for(let r=0;r<RI(6,12);r++){
+      const an4=R(0,6.2832), len=R(Gx*.2,Gx*.6);
+      for(let t=br+1;t<len;t++){
+        if(chance(.45))continue;
+        set(bx+Math.cos(an4)*t,by2+Math.sin(an4)*t,chance(.5)?'#FFFFFF':P([p1,p2,p3]));
+      }
+    }
+    for(const sx2 of [RI(0,2),Gx-RI(3,5)]){
+      rect(sx2,floorY-RI(5,8),3,RI(5,8),'#1E1622');
+      rect(sx2+1,floorY-RI(4,6),1,1,p2);
+    }
+    spot=[(Gx*R(.25,.75))|0,Gy-RI(2,5)];
   }else{ /* skyway — nothing under it but more air */
     /* banded cloud decks, so the frame has structure instead of scatter */
     for(let b=0;b<RI(3,5);b++){
@@ -2110,7 +2327,7 @@ function pxScene(Gx,Gy){
     }
     for(let i=0;i<RI(4,10);i++)stamp('bird',RI(0,Gx-5),RI(1,Gy-3),M);
   }
-  return {cells:C,name:kind};
+  return {cells:C,name:kind,spot};
 }
 
 function buildPixel(ox,oy,w,h,names){
@@ -2127,7 +2344,7 @@ function buildPixel(ox,oy,w,h,names){
     if(dressed.worn.length)ACC=dressed.worn[0];
   }
   /* cells are square: a banner gets a wider grid, not stretched pixels */
-  const Gs=asScene?RI(22,34):(asBoth?Math.max(sh+RI(6,12),24):Math.max(sw2,sh)+RI(3,8));
+  const Gs=asScene?RI(22,34):(asBoth?Math.max(sh+RI(12,20),30):Math.max(sw2,sh)+RI(3,8));
   const cell=Math.min(w,h)/Gs;
   const Gx=Math.max(6,Math.round(w/cell)), Gy=Math.max(6,Math.round(h/cell));
   const cw2=w/Gx, ch2=h/Gy;
@@ -2136,11 +2353,11 @@ function buildPixel(ox,oy,w,h,names){
   const COLS={B:body,D:dark,E:eyeW,P:pup,A:accent,
               M:'#C9CDD4',G:'#E3B23C',R:'#C43A3A',W:'#F4F1E8',K:'#14141A',
               '1':P(PAL),'2':P(PAL),'3':P(PAL)};
-  let cells=new Array(Gx*Gy).fill(null), baseFill=P(BG), pat=null;
+  let cells=new Array(Gx*Gy).fill(null), baseFill=P(BG), pat=null, spot=null;
   if(asScene||asBoth){
-    const sc=pxScene(Gx,Gy);
-    cells=sc.cells;
-    if(names&&asScene)names.push(sc.name);
+    const sc=pxScene(Gx,Gy,asBoth);
+    cells=sc.cells; spot=sc.spot;
+    if(names)names.push(sc.name);
   }else{
     pat=chance(.66)?pxPattern(Gs):null;
     if(pat){
@@ -2153,8 +2370,14 @@ function buildPixel(ox,oy,w,h,names){
   /* place the figure */
   let gx0=0,gy0=0;
   if(g){
-    gx0=asBoth?RI(1,Math.max(1,Gx-sw2-1)):Math.floor((Gx-sw2)/2);
-    gy0=asBoth?Math.max(0,Gy-sh-RI(1,4)):Math.floor((Gy-sh)/2);
+    if(spot){
+      /* the scene said where somebody should stand */
+      gx0=Math.max(0,Math.min(Gx-sw2,spot[0]-(sw2>>1)));
+      gy0=Math.max(0,Math.min(Gy-sh,spot[1]-sh));
+    }else{
+      gx0=asBoth?RI(1,Math.max(1,Gx-sw2-1)):Math.floor((Gx-sw2)/2);
+      gy0=asBoth?Math.max(0,Gy-sh-RI(1,4)):Math.floor((Gy-sh)/2);
+    }
     if(pat&&chance(.42)){
       const m=RI(0,1);
       for(let y=gy0-m;y<gy0+sh+m;y++)for(let x=gx0-m;x<gx0+sw2+m;x++)
@@ -2294,11 +2517,10 @@ function generate(){
   const gid='g'+Math.floor(RNG()*1e6);
   const names=[];
   const COMPW=[['pixel',.5000],
-               ['center',.0382],['scatter',.0307],['diptych',.0281],['tiny',.0244],
-               ['crowd',.0307],['portrait',.0416],['landscape',.0635],['panels',.0662],
-               ['illumination',.0257],['aurora',.0253],
-               ['woodcut',.0200],['cubist',.0200],['optical',.0156],
-               ['radial',.0196],['mirror',.0175],['embersea',.0175],['swarm',.0154]];
+               ['center',.0418],['scatter',.0336],['diptych',.0307],['tiny',.0267],
+               ['crowd',.0336],['portrait',.0455],['landscape',.0694],['panels',.0724],
+               ['illumination',.0281],['woodcut',.0219],['cubist',.0219],
+               ['optical',.0171],['radial',.0214],['mirror',.0191],['swarm',.0168]];
   let mode=(()=>{let r=R(0,1);for(const[k,w]of COMPW){if((r-=w)<=0)return k;}return 'center';})();
   if(FORCE&&FORCE.composition)mode=FORCE.composition;
   if(BANNER&&!(FORCE&&FORCE.composition)){
@@ -2437,43 +2659,6 @@ function generate(){
     }
     TR.ground='tessellated';
     picks = chance(.45) ? [[w*R(.32,.68), h*R(.42,.62), R(.5,.8)*Math.min(fx,fy)]] : [];
-  }else if(mode==='aurora'){
-    /* Night, and something happening at the bottom of it. Glow is drawn
-       as stacked shapes rather than a blur filter — filters are the least
-       portable thing in SVG and this has to survive every browser. */
-    const ink=P(['#06070C','#0A0610','#080C0A','#0C0810']);
-    s+=`<rect width="${w}" height="${h}" fill="${ink}"/>`;
-    const glowCols=P([['#4DFF7A','#3DE0FF','#FF3D6E'],['#8BFF3D','#3D7AFF','#FF9A3D'],
-                      ['#3DFFD4','#C43DFF','#FFE03D']]);
-    /* the specks, falling in loose vertical runs */
-    const runs=RI(14,34);
-    for(let r=0;r<runs;r++){
-      const x=R(0,w), top=R(0,h*.72), len=RI(2,7), col=P(glowCols);
-      const cw2=R(2.5,5.5)*(w/300), chh=R(3,7)*(h/300);
-      for(let i=0;i<len;i++){
-        const y=top+i*chh*R(1.1,2.2);
-        if(y>h*.92)break;
-        const a=R(.25,1)*(1-i/len*.6);
-        s+=`<rect x="${F(x-cw2*.9)}" y="${F(y-chh*.7)}" width="${F(cw2*2.8)}" height="${F(chh*2.4)}" fill="${col}" opacity="${F(a*.16)}"/>`;
-        s+=`<rect x="${F(x)}" y="${F(y)}" width="${F(cw2)}" height="${F(chh)}" fill="${col}" opacity="${F(a)}"/>`;
-      }
-    }
-    /* the ribbons */
-    const bands=RI(5,10), baseY=h*R(.6,.78);
-    const ribbon=P([['#2E7D4F','#8E2B2B','#2E4A8E','#5E2E8E'],
-                    ['#1F6E52','#B8452B','#2B4FB8','#8E2B6E'],
-                    ['#3A7D2E','#7D2E5A','#2E5A7D','#7D5A2E']]);
-    for(let b=0;b<bands;b++){
-      const off=b*h*R(.02,.045), amp=h*R(.05,.13), ph=R(0,6.28), fr=R(1.2,2.6);
-      let d=`M0 ${F(h)}L0 ${F(baseY+off+Math.sin(ph)*amp)}`;
-      for(let x=0;x<=w;x+=w/14)
-        d+=`L${F(x)} ${F(baseY+off+Math.sin(ph+x/w*fr*6.28)*amp)}`;
-      d+=`L${F(w)} ${F(h)}Z`;
-      s+=`<path d="${d}" fill="${ribbon[b%ribbon.length]}" opacity="${F(R(.55,.92))}"/>`;
-    }
-    TR.ground='nocturne';
-    /* a silhouette or two standing in it, sometimes */
-    picks = chance(.55) ? [[w*R(.3,.7), baseY+h*R(.02,.1), R(.34,.62)*Math.min(fx,fy)]] : [];
   }else if(mode==='radial'){
     /* One object, cloned around a ring and turned to face the middle. Flat
        saturated ground — the repetition does the work, not the depth. */
@@ -2579,88 +2764,6 @@ function generate(){
     s+=`<g transform="translate(${F(w)},${F(h)}) scale(-1,-1)">${q}</g>`;
     TR.ground='mirrored';
     picks=[]; SWARMN=4;
-  }else if(mode==='embersea'){
-    /* Night sea. Starfield, a lit cloudbank, one light laid down the water.
-       Painted flat — no filters, so it survives every renderer. */
-    const deep=P(['#07060A','#0A0508','#060809','#08060C']);
-    /* how the picture is built: smoke, cut paper, or cut paper on a grid */
-    const build=(()=>{const r=R(0,1);
-      if(r<.34)return 'organic'; if(r<.70)return 'faceted'; return 'mosaic';})();
-    const geo=build!=='organic';
-    const mass=(px,py,pr,n)=>geo?shard(px,py,pr,n):blob(px,py,pr,RI(8,12),pr*.26);
-    const glow=P(['#E2412B','#DC341F','#C7362B','#DE5A1F','#B8283A']);
-    s+=`<rect width="${w}" height="${h}" fill="${deep}"/>`;
-    const hz=h*R(.70,.80);
-    const sx=w*R(.38,.62), sy=hz-h*R(.26,.42);
-    for(let i=0;i<Math.round(RI(120,240)*(w/300));i++){
-      const px=R(0,w), py=R(0,hz), z=R(.4,1.5);
-      s+=geo
-        ? `<rect x="${F(px-z)}" y="${F(py-z)}" width="${F(z*2)}" height="${F(z*2)}" fill="#FFF" opacity="${F(R(.2,.95))}"/>`
-        : `<circle cx="${F(px)}" cy="${F(py)}" r="${F(z)}" fill="#FFF" opacity="${F(R(.2,.95))}"/>`;
-    }
-    for(let i=0;i<RI(4,9);i++){
-      const px=R(0,w), py=R(0,hz*.9), z=R(1.4,3);
-      s+=`<path d="M${F(px-z*2.6)} ${F(py)} L${F(px+z*2.6)} ${F(py)} M${F(px)} ${F(py-z*2.6)} L${F(px)} ${F(py+z*2.6)}" ${ink(z*.5,'#FFF')} opacity=".8"/>`;
-    }
-    /* the cloudbank, lit from beneath. it banks along the horizon and
-       across the top — the middle stays open or the stars are wasted. */
-    const puff=(px,py,pr)=>{
-      let g=`<path d="${mass(px,py,pr)}" fill="#140609" opacity="${F(R(.88,1))}"/>`;
-      g+=`<path d="${mass(px+R(-pr*.18,pr*.18),py+pr*R(.2,.42),pr*R(.46,.7))}" fill="${glow}" opacity="${F(R(.4,.85))}"/>`;
-      if(chance(.45))
-        g+=`<path d="${mass(px+R(-pr*.2,pr*.2),py+pr*R(.34,.52),pr*R(.16,.32),3)}" fill="#F2A06B" opacity="${F(R(.25,.55))}"/>`;
-      return g;
-    };
-    const unit=Math.min(w,h);
-    const bank=(y0,thick,rows)=>{
-      for(let b=0;b<rows;b++){
-        const by=y0+b*thick*R(.5,.75);
-        const cnt=Math.round(RI(9,15)*(w/300));
-        for(let i=0;i<cnt;i++)
-          s+=puff((i/cnt)*w*1.14-w*.07+R(-w*.05,w*.05),
-                  by+R(-thick*.35,thick*.35), unit*R(.10,.19));
-      }
-    };
-    bank(hz-unit*R(.07,.13), unit*R(.05,.08), RI(1,2));
-    bank(h*R(-.05,.02), unit*R(.045,.07), RI(1,2));
-    /* one or two strays in the open sky, no more */
-    for(let i=0;i<RI(0,2);i++)
-      s+=puff(R(0,w), R(h*.26,hz-unit*.3), unit*R(.04,.07));
-    /* the light itself, and the cross it throws */
-    const fl=Math.min(w,h);
-    s+=`<path d="M${F(sx-fl*.34)} ${F(sy)} L${F(sx+fl*.34)} ${F(sy)}" ${ink(1.1,'#FFD9C2')} opacity=".55"/>`;
-    s+=`<path d="M${F(sx)} ${F(sy-fl*.16)} L${F(sx)} ${F(sy+fl*.16)}" ${ink(1.1,'#FFD9C2')} opacity=".55"/>`;
-    s+=`<circle cx="${F(sx)}" cy="${F(sy)}" r="${F(fl*.035)}" fill="${glow}" opacity=".45"/>`;
-    s+=`<circle cx="${F(sx)}" cy="${F(sy)}" r="${F(fl*.014)}" fill="#FFF3E2"/>`;
-    /* the water */
-    s+=`<rect x="0" y="${F(hz)}" width="${w}" height="${F(h-hz)}" fill="#0A0407"/>`;
-    const slivers=Math.round(RI(46,80)*((h-hz)/90));
-    for(let i=0;i<slivers;i++){
-      const t=i/slivers, py=hz+(h-hz)*t;
-      const wd=fl*(.010+t*R(.07,.15))*R(.5,1.25);
-      const jx=sx+R(-wd*.5,wd*.5);
-      s+=`<rect x="${F(jx-wd)}" y="${F(py)}" width="${F(wd*2)}" height="${F(R(.7,2))}" fill="${t<.3?'#FFD2B0':glow}" opacity="${F((1-t*.5)*R(.35,.95))}"/>`;
-    }
-    for(let i=0;i<RI(6,14);i++){
-      const py=hz+(h-hz)*R(0,1);
-      s+=`<rect x="${F(R(0,w))}" y="${F(py)}" width="${F(R(6,fl*.16))}" height="${F(R(.8,2))}" fill="${glow}" opacity="${F(R(.12,.4))}"/>`;
-    }
-    if(build==='mosaic'){
-      /* the whole thing cut into squares and put back slightly wrong */
-      const cell=unit*R(.07,.13);
-      const gc=Math.ceil(w/cell), gr2=Math.ceil(h/cell);
-      for(let r=0;r<gr2;r++)for(let c=0;c<gc;c++){
-        if(chance(.80))continue;
-        const tone=chance(.55)?glow:(chance(.5)?'#F2A06B':'#05040A');
-        s+=`<rect x="${F(c*cell)}" y="${F(r*cell)}" width="${F(cell)}" height="${F(cell)}" fill="${tone}" opacity="${F(R(.06,.22))}"/>`;
-      }
-      for(let c=1;c<gc;c++)
-        s+=`<rect x="${F(c*cell)}" y="0" width="${F(Math.max(.5,cell*.035))}" height="${h}" fill="#030206" opacity="${F(R(.3,.55))}"/>`;
-      for(let r=1;r<gr2;r++)
-        s+=`<rect x="0" y="${F(r*cell)}" width="${w}" height="${F(Math.max(.5,cell*.035))}" fill="#030206" opacity="${F(R(.3,.55))}"/>`;
-    }
-    TR.ground=build==='organic'?'nocturne':(build==='faceted'?'faceted':'mosaic');
-    picks = chance(.35) ? [[w*R(.14,.86), hz+ (h-hz)*R(.1,.35), R(.26,.44)*Math.min(fx,fy)]] : [];
   }else if(mode==='illumination'){
     /* The manuscript page. The frame is always the frame; what it holds
        is whichever style the roll lands on. */
@@ -2762,8 +2865,8 @@ function generate(){
   TR.hands=HANDS?String(HANDS):'—';
 
   /* doodles in the margins, because someone always draws on it */
-  const DOOD=[['star',.20],['spiral',.16],['heart',.14],['arrow',.14],['smiley',.14],
-              ['x',.10],['cloud',.09],['cross',.015],['fish',.015]];
+  const DOOD=[['star',.205],['spiral',.165],['heart',.145],['arrow',.145],['smiley',.145],
+              ['x',.105],['cloud',.075],['fish',.015]];
   const pickDood=()=>{let r=R(0,1);for(const[k,w]of DOOD){if((r-=w)<=0)return k;}return 'star';};
   for(let i=0;i<(PH?RI(0,1):RI(0,Math.round(3*DENS)));i++){
     const k=pickDood(),x=R(14,w-14),y=R(14,h-14),z=R(.55,1.5),c=chance(.55)?'#111':P(PAL);
@@ -2777,6 +2880,47 @@ function generate(){
     else if(k==='smiley'){s+=`<circle cx="${F(x)}" cy="${F(y)}" r="${F(13*z)}" ${st}/><circle cx="${F(x-4.5*z)}" cy="${F(y-4*z)}" r="${F(1.6*z)}" fill="${c}"/><circle cx="${F(x+4.5*z)}" cy="${F(y-4*z)}" r="${F(1.6*z)}" fill="${c}"/><path d="M${F(x-6*z)} ${F(y+4*z)} q${F(6*z)} ${F(6*z)} ${F(12*z)} 0" ${st}/>`;}
     else if(k==='x'){s+=`<path d="M${F(x-10*z)} ${F(y-10*z)} l${F(20*z)} ${F(20*z)} M${F(x+10*z)} ${F(y-10*z)} l${F(-20*z)} ${F(20*z)}" ${st}/>`;}
     else{s+=`<path d="M${F(x-16*z)} ${F(y)} q${F(2*z)} ${F(-12*z)} ${F(12*z)} ${F(-8*z)} q${F(6*z)} ${F(-9*z)} ${F(15*z)} ${F(1*z)} q${F(9*z)} ${F(1*z)} ${F(5*z)} ${F(7*z)} Z" ${st}/>`;}
+  }
+
+  /* The cross gets its own roll rather than a slot in the pool above —
+     CROSS_ODDS is the one number that sets how often it turns up, and it
+     can't push the stars out. Small, marginal, never centred. */
+  const CROSS_ODDS=.07;
+  /* the rarer marks, each on its own roll at MARK_ODDS */
+  const MARK_ODDS=.07;
+  for(const glyph of ['infinity','anchor','torii']){
+    if(!chance(PH?MARK_ODDS*.5:MARK_ODDS))continue;
+    const z=R(.45,1.05), gc=chance(.5)?'#111':P(PAL);
+    const gx=R(w*.12,w*.88), gy=R(h*.12,h*.88);
+    const gs=`fill="none" stroke="${gc}" stroke-width="${F(R(1.3,2.5))}" stroke-linecap="round" stroke-linejoin="round" opacity="${F(R(.5,.9))}"`;
+    let d='';
+    if(glyph==='infinity'){
+      const a=9*z, b2=6*z;
+      d=`M${F(gx)} ${F(gy)} C${F(gx-a)} ${F(gy-b2)} ${F(gx-a*1.5)} ${F(gy+b2)} ${F(gx)} ${F(gy)}`+
+        ` C${F(gx+a)} ${F(gy-b2)} ${F(gx+a*1.5)} ${F(gy+b2)} ${F(gx)} ${F(gy)} Z`;
+    }else if(glyph==='anchor'){
+      d=`M${F(gx)} ${F(gy-8*z)} L${F(gx)} ${F(gy+12*z)}`+
+        ` M${F(gx-8*z)} ${F(gy-4*z)} L${F(gx+8*z)} ${F(gy-4*z)}`+
+        ` M${F(gx-9*z)} ${F(gy+3*z)} Q${F(gx-9*z)} ${F(gy+13*z)} ${F(gx)} ${F(gy+12*z)}`+
+        ` Q${F(gx+9*z)} ${F(gy+13*z)} ${F(gx+9*z)} ${F(gy+3*z)}`;
+      s+=`<circle cx="${F(gx)}" cy="${F(gy-11*z)}" r="${F(3.2*z)}" ${gs}/>`;
+    }else{
+      d=`M${F(gx-13*z)} ${F(gy-8*z)} Q${F(gx)} ${F(gy-11*z)} ${F(gx+13*z)} ${F(gy-8*z)}`+
+        ` M${F(gx-10*z)} ${F(gy-3*z)} L${F(gx+10*z)} ${F(gy-3*z)}`+
+        ` M${F(gx-7*z)} ${F(gy-9*z)} L${F(gx-8*z)} ${F(gy+12*z)}`+
+        ` M${F(gx+7*z)} ${F(gy-9*z)} L${F(gx+8*z)} ${F(gy+12*z)}`;
+    }
+    s+=`<path d="${d}" ${gs}/>`;
+  }
+  if(chance(PH?CROSS_ODDS*.5:CROSS_ODDS)){
+    const z=R(.4,1.0), c=chance(.5)?'#111':P(PAL);
+    const edge=chance(.72);
+    const x=edge?(chance(.5)?R(12,w*.2):R(w*.8,w-12)):R(w*.2,w*.8);
+    const y=edge?(chance(.5)?R(12,h*.24):R(h*.76,h-12)):R(h*.2,h*.8);
+    const up=14*z, dn=14*z, arm=8*z, bar=y-5*z;
+    s+=`<g transform="rotate(${F(R(-16,16))} ${F(x)} ${F(y)})">`+
+       `<path d="M${F(x)} ${F(y-up)} L${F(x)} ${F(y+dn)} M${F(x-arm)} ${F(bar)} L${F(x+arm)} ${F(bar+R(-1,1))}"`+
+       ` fill="none" stroke="${c}" stroke-width="${F(R(1.3,2.6))}" stroke-linecap="round" opacity="${F(R(.5,.9))}"/></g>`;
   }
 
   /* the tells */
@@ -2814,53 +2958,59 @@ function generate(){
 /* ============ rarity ============ */
 /* every trait carries its own odds; the score is the sum of their
    inverses, which is how the rest of the market does it too. */
-/* Measured, not declared. Regenerated from 40,000 gallery rolls after
-   every change to the engine — see the note in the handoff. */
+/* Measured, not declared. Regenerated by tools/regen-odds.js from
+   40,000 gallery rolls. */
 const ODDS={
-  subject:{brainlet:0.1266,hand:0.0755,cactus:0.0711,scenery:0.0627,cube:0.0482,
-            object:0.0479,coyote:0.0479,owl:0.0472,frog:0.0461,block:0.0326,
-            animal:0.0311,mountains:0.0194,waterfall:0.0194,skyway:0.0193,road:0.0191,
-            desert:0.0189,forest:0.0188,coast:0.0186,city:0.0181,gasstation:0.018,
-            anime:0.0146},
-  composition:{pixel:0.4946,panels:0.0672,landscape:0.0644,portrait:0.0428,center:0.0358,
-                scatter:0.0315,diptych:0.0301,crowd:0.0296,illumination:0.0263,
-                aurora:0.0258,tiny:0.0247,radial:0.0203,woodcut:0.0202,cubist:0.0199,
-                embersea:0.0179,mirror:0.0179,optical:0.0158,swarm:0.0152},
-  ground:{pixelated:0.4946,nocturne:0.0737,gradient:0.0572,'colour field':0.0545,
-           flat:0.0538,aureole:0.0521,panelled:0.05,illuminated:0.0435,faceted:0.026,
-           radial:0.0203,relief:0.0202,mirrored:0.0179,tessellated:0.0158,
-           'swarm field':0.0152,mosaic:0.0053},
-  condition:{pristine:0.5998,craquelure:0.1987,foxing:0.1213,overpainted:0.0606,
-              'water damage':0.0196},
-  surface:{none:.60,grain:.22,glitter:.18},
-  signature:{unsigned:0.4815,signed:0.4163,'signed and dated':0.1021},
-  inscription:{none:0.6595,GALERIE:0.0224,SGNATURE:0.0221,MUSSEUM:0.0221,SLOUVER:0.0221,
-                'THE SLOURVE':0.0221,ORIGNAL:0.0216,SLOVRE:0.0215,EXHIBTION:0.0213,
-                SLOUVRE:0.0211,ARTISTE:0.0211,PAINTNG:0.0208,ARTT:0.0207,LIMITEDD:0.0205,
-                MASTERPEICE:0.0205,AUTHENTC:0.0204,COLLECTON:0.0203},
+  subject:{brainlet:0.2135,object:0.1431,block:0.1063,animal:0.1023,cactus:0.1012,
+            hand:0.1005,anime:0.0522,scenery:0.042,forest:0.0257,skyway:0.0255,
+            waterfall:0.0252,road:0.0251,mountains:0.025,coast:0.0247,
+            gasstation:0.0246,desert:0.0245,city:0.0244,star:0.0141,beacon:0.0141,
+            cube:0.0141,scarecrow:0.0138,ghost:0.0137,mummy:0.0136,teapot:0.0135,
+            moth:0.0135,astro:0.0135,skull:0.0134,cassette:0.0134,boxring:0.0132,
+            robot:0.0132,owl:0.013,coyote:0.0129,frog:0.0129,alien:0.0129,
+            jelly:0.0128,angel:0.0128,mushroom:0.0126,disco:0.0125,ninja:0.0124,
+            samurai:0.0123,wonder:0.012,knight:0.0119},
+  composition:{pixel:0.4946,panels:0.0741,landscape:0.0694,portrait:0.048,center:0.0399,
+                scatter:0.0342,diptych:0.0331,crowd:0.0326,illumination:0.028,tiny:0.0262,
+                radial:0.0225,woodcut:0.0219,cubist:0.0219,mirror:0.0195,optical:0.0171,
+                swarm:0.0168},
+  ground:{pixelated:0.4946,gradient:0.0625,'colour field':0.0593,flat:0.059,
+           aureole:0.057,panelled:0.0548,illuminated:0.0474,nocturne:0.0457,
+           radial:0.0225,relief:0.0219,faceted:0.0219,mirrored:0.0195,
+           tessellated:0.0171,'swarm field':0.0168},
+  condition:{pristine:0.5996,craquelure:0.1994,foxing:0.1198,overpainted:0.0615,
+              'water damage':0.0197},
+  surface:{none:0.5972,grain:0.2235,glitter:0.1793},
+  signature:{unsigned:0.4797,signed:0.4214,'signed and dated':0.0988},
+  inscription:{none:0.6589,'THE SLOURVE':0.0227,SLOUVER:0.0221,SGNATURE:0.0219,
+                LIMITEDD:0.0219,ARTISTE:0.0219,COLLECTON:0.0215,ARTT:0.0214,
+                AUTHENTC:0.0213,GALERIE:0.0213,SLOVRE:0.0212,ORIGNAL:0.0211,
+                EXHIBTION:0.0209,MUSSEUM:0.0209,MASTERPEICE:0.0205,SLOUVRE:0.0204,
+                PAINTNG:0.02},
   palette:{saturated:0.4274,mixed:0.2878,restrained:0.2848},
-  figures:{'0':0.6337,'1':0.2004,'2':0.057,'3':0.0304,'4':0.0279,'5':0.0109,
-            '10':0.0052,'11':0.0048,'36':0.0041,'49':0.004,'25':0.0039,'12':0.0037,
-            '9':0.0034,'8':0.0033,'64':0.0032,'15':0.0014,'17':0.0013,'7':0.0008,
-            '6':0.0007},
-  hands:{'—':0.9436,'8':0.015,'7':0.0143,'5':0.0138,'6':0.0132},
-  species:{'—':0.7541,human:0.147,alien:0.0089,zombie:0.0084,croc:0.006,long:0.006,
-            monkey:0.0056,horned:0.0056,worm:0.0056,bunny:0.0055,coyote:0.0054,
-            bird:0.0054,frog:0.0053,mouse:0.0053,tiger:0.0052,generic:0.0051,
-            owl:0.0051,chicken:0.0049,bull:0.0029,goat:0.0026},
-  accessory:{none:0.1004,cap:0.0584,glasses:0.0564,sunglasses:0.0455,horns:0.0341,
-              bandana:0.0333,halo:0.0313,trench:0.031,antlers:0.0291,jersey:0.0271,
-              beanie:0.0239,crown:0.0233,rocker:0.0211,beret:0.0204,headphones:0.0179,
-              ninja:0.0179,visor:0.0177,antenna:0.0162,helmet:0.0161,tophat:0.0159,
-              mohawk:0.0157,cone:0.0156,pirate:0.0155,sprout:0.0155,ears:0.0155,
-              topknot:0.0154,robot:0.0153,tree:0.0153,flame:0.0152,spartan:0.0147,
-              viking:0.0142,chef:0.0141,wizard:0.0133,cigarette:0.0129,ghost:0.0126,
-              jester:0.0124,laurel:0.012,bucket:0.0117,monocle:0.0104,astronaut:0.0092,
-              plague:0.0086,cigar:0.0085,fangs:0.0044,tongue:0.0043,scar:0.0042,
-              rainbow:0.004,shades:0.004,brow:0.0039,mask:0.0038,eyepatch:0.0037,
-              cig:0.0037,staff:0.0034,bone:0.0032,flag:0.0032,sword:0.0032,torch:0.003,
-              gun:0.0028,cape:0.0027,pack:0.0027,trident:0.0026,tie:0.0026,chain:0.0024,
-              jacket:0.0021}
+  figures:{'0':0.6204,'1':0.1973,'2':0.0623,'3':0.0332,'4':0.0306,'5':0.0119,
+            '10':0.0056,'11':0.005,'36':0.0046,'12':0.0044,'49':0.0044,'25':0.0042,
+            '8':0.0037,'64':0.0037,'9':0.0036,'15':0.002,'17':0.0015,'6':0.0008,
+            '7':0.0008},
+  hands:{'—':0.9422,'8':0.0154,'7':0.0144,'5':0.0141,'6':0.0139},
+  species:{'—':0.7365,human:0.1589,alien:0.0092,zombie:0.009,long:0.0067,croc:0.0062,
+            worm:0.0062,monkey:0.006,frog:0.006,bird:0.0058,mouse:0.0058,
+            horned:0.0057,coyote:0.0056,bunny:0.0056,tiger:0.0055,chicken:0.0054,
+            generic:0.0053,owl:0.0051,goat:0.0028,bull:0.0027},
+  accessory:{none:0.1009,cap:0.0585,glasses:0.0565,sunglasses:0.0454,horns:0.0338,
+              bandana:0.0333,halo:0.0313,trench:0.0312,antlers:0.029,jersey:0.0273,
+              beanie:0.0238,crown:0.0234,rocker:0.0211,beret:0.0203,ninja:0.0179,
+              headphones:0.0177,antenna:0.0161,tophat:0.0161,helmet:0.0159,visor:0.0158,
+              mohawk:0.0158,cone:0.0156,pirate:0.0156,sprout:0.0156,tree:0.0155,
+              robot:0.0155,ears:0.0154,topknot:0.0154,flame:0.0152,spartan:0.0147,
+              chef:0.0141,viking:0.014,wizard:0.0132,cigarette:0.0129,ghost:0.0126,
+              jester:0.0124,laurel:0.012,bucket:0.0117,monocle:0.0106,astronaut:0.0091,
+              cigar:0.0086,plague:0.0085,staff:0.0034,sword:0.0032,bone:0.0032,
+              torch:0.0031,flag:0.0031,blush:0.0031,eyepatch:0.0031,brow:0.0029,
+              cape:0.0029,tongue:0.0029,wink:0.0028,fangs:0.0028,trident:0.0027,
+              gun:0.0027,scar:0.0026,thirdeye:0.0026,pack:0.0026,tie:0.0026,
+              earrings:0.0025,rainbow:0.0025,shades:0.0024,mask:0.0023,chain:0.0022,
+              tears:0.0022,cig:0.0022,jacket:0.0022}
 };
 function oddsOf(k,v){
   const t=ODDS[k]; if(!t) return .5;
@@ -3050,6 +3200,13 @@ function newWork(text){
   const band=[[180,900],[900,2400],[2400,6000],[6000,14000],[14000,40000],[40000,120000]][cur.rar.tier.t-1];
   cur.val=RI(band[0],band[1])*1000+RI(1,9)*100;
   render();
+  /* the address bar is the permalink. every piece is just its seed, so
+     anyone who copies the URL is copying the piece, not a picture of it. */
+  try{
+    const u=new URL(location.href);
+    u.searchParams.set('s',String(cur.seed));
+    history.replaceState(null,'',u);
+  }catch(e){}
 }
 
 function render(){
@@ -3171,11 +3328,17 @@ function exportPNG(cb){
   const ns='http://www.w3.org/2000/svg';
   const fsz=BANNER?CH*.062:10.5;
   const padX=BANNER?CW*.05:14, padY=BANNER?CH*.13:14;
-  /* Georgia runs about .62em per character at this size. The old .55
-     estimate made the plate narrower than its own text, so the last
-     letter fell off the edge on every export. Letter-spacing is counted
-     explicitly now, so the plate fits whatever MARK is set to. */
-  const tw=MARK.length*fsz*.62+(MARK.length-1)*fsz*.07+fsz*1.6;
+  /* Measure the text rather than estimating per-character width. Every
+     estimate was wrong in one direction or the other — too narrow clipped
+     the last letter, too wide left dead space at the end of the plate. */
+  const ls=fsz*.07;
+  let textW;
+  try{
+    const mc=document.createElement('canvas').getContext('2d');
+    mc.font=fsz+'px Georgia, serif';
+    textW=mc.measureText(MARK).width+(MARK.length-1)*ls;
+  }catch(e){ textW=MARK.length*fsz*.55+(MARK.length-1)*ls; }
+  const tw=textW+fsz*1.5;
   const px=CW-tw-padX, py=CH-padY-fsz*1.45;
   const plate=document.createElementNS(ns,'rect');
   plate.setAttribute('x',px);plate.setAttribute('y',py);
@@ -3226,9 +3389,11 @@ document.getElementById('shareBtn').onclick=()=>{
   exportPNG(async (bl,name)=>{
     btn.disabled=false;
     if(!bl)return;
+    /* the link regenerates this exact piece, which a flat PNG cannot */
+    const here=location.origin+location.pathname+'?s='+cur.seed;
     const line=(lang==='es')
-      ? 'Mi pieza de El Slouvre. theslouvre.com'
-      : 'My piece from The Slouvre. theslouvre.com';
+      ? 'Mi pieza de El Slouvre. '+here
+      : 'My piece from The Slouvre. '+here;
     try{
       const file=new File([bl],name,{type:'image/png'});
       if(navigator.canShare&&navigator.canShare({files:[file]})){
@@ -3492,13 +3657,31 @@ function setLang(){
   document.getElementById('es').setAttribute('aria-pressed',lang==='es');
   render();
 }
-newWork();
+/* arriving on a link: show that exact piece */
+const ARRIVED=(()=>{
+  try{
+    const s=new URL(location.href).searchParams.get('s');
+    if(s===null)return false;
+    const n=Number(s);
+    if(!Number.isFinite(n)||n<0||n>4294967295)return false;
+    newWork({seedOnly:n>>>0});
+    return true;
+  }catch(e){return false;}
+})();
+if(!ARRIVED)newWork();
 </script>
 
 <script>
 /* ================= the entrance ================= */
 (function(){
 const intro=document.getElementById('intro');
+/* The doors are for a first visit. People arriving on a link want the
+   piece, and regulars have already seen them. Decided here, acted on at
+   the bottom — everything below still has to be wired either way. */
+let seenBefore=false;
+try{ seenBefore=localStorage.getItem('slv.entered')==='1'; }catch(e){}
+const cameOnLink=(()=>{try{return new URL(location.href).searchParams.has('s');}catch(e){return false;}})();
+const skipDoors=seenBefore||cameOnLink;
 const beatEl=document.getElementById('beat');
 const vigEl=document.getElementById('vig');
 const tapEl=document.getElementById('tapHint');
@@ -3670,6 +3853,14 @@ document.getElementById('iEn').onclick=e=>{e.stopPropagation();startAudio();setI
 document.getElementById('iEs').onclick=e=>{e.stopPropagation();startAudio();setIntroLang('es');};
 
 skipEl.textContent=UI.en.skip;tapEl.textContent=UI.en.tap;
-setTimeout(()=>show(0),700);
+if(skipDoors){
+  /* straight in — the sound control still appears, muted until tapped */
+  done=true;
+  intro.classList.add('gone');
+  soundBtn.classList.add('show');
+}else{
+  try{ localStorage.setItem('slv.entered','1'); }catch(e){}
+  setTimeout(()=>show(0),700);
+}
 })();
 </script>
