@@ -48,9 +48,16 @@ const quote = v => (/^[A-Za-z_][A-Za-z0-9_]*$/.test(v) ? v : "'" + v.replace(/'/
 
 const block = KEYS.map(k => {
   let ent = T[k] || {};
-  /* combinations ("brainlet + cactus") are priced by multiplying the singles
-     in oddsOf, so only solo subjects are stored */
-  if (k === 'subject') ent = Object.fromEntries(Object.entries(ent).filter(([v]) => !v.includes(' + ')));
+  /* oddsOf prices a combination ("brainlet + city") by multiplying its parts,
+     so what gets stored per name is how often that name appears at all —
+     alone or in a pair. Storing only solo pieces left every name that can
+     ONLY occur in a pair with no entry, silently defaulting it to 5%. */
+  if (k === 'subject') {
+    const parts = {};
+    for (const [v, c] of Object.entries(ent))
+      for (const piece of v.split(' + ')) parts[piece] = (parts[piece] || 0) + c;
+    ent = parts;
+  }
   const rows = Object.entries(ent).sort((x, y) => y[1] - x[1])
     .map(([v, c]) => quote(v) + ':' + Math.max(0.0005, +(c / N).toFixed(4)));
   const lines = []; let cur = '';
