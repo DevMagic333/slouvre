@@ -611,7 +611,7 @@ function readWords(t){
 }
 const F=n=>n.toFixed(1);
 
-let HANDS=0, SWARMN=0, PXFORCE=null;
+let HANDS=0, SWARMN=0, PXFORCE=null, PXNEON=false;
 function wobble(pts,amt){return pts.map(p=>[p[0]+R(-amt,amt),p[1]+R(-amt,amt)]);}
 
 function blob(cx,cy,r,n,amt){ amt*=WOB;
@@ -1959,38 +1959,68 @@ function pxDress(which,sp){
    any of them into a rug. */
 function pxPattern(G){
   const cols=[];for(let i=0;i<RI(2,4);i++)cols.push(P(PAL));
-  const base=chance(.55)?P(['#14141A','#101016','#1C1622','#0E1014']):P(BG);
+  let base=chance(.55)?P(['#14141A','#101016','#1C1622','#0E1014']):P(BG);
+  /* Colourways: a locked two-tone that overrides the palette for the whole
+     pattern. One switch, so every family can wear them. */
+  const way=(()=>{const r=R(0,1);
+    if(r<.07)return 'blackred'; if(r<.14)return 'blackblue';
+    if(r<.21)return 'blackwhite'; return null;})();
+  if(way){
+    base=P(['#0A0A0C','#08080A','#0C0A0E']);
+    const ink2=way==='blackred'?P(['#E01B24','#C4161F','#FF2A35'])
+             :way==='blackblue'?P(['#1B6FE0','#2A5FD8','#1FA0E8'])
+             :P(['#F4F1EA','#FFFFFF','#E6E2D8']);
+    cols.length=0; cols.push(ink2,ink2,base==='#0A0A0C'?'#1A1A20':'#18181E');
+  }
   const fam=P(['checker','brick','diagonal','chevron','rings','diamond','cross',
                'maze','rays','blocks','tetro','dots','bars','quilt','weave',
-               'fib','herring','scales','triangle','nested','sunray']);
+               'fib','herring','scales','triangle','nested','sunray','plusgrid','rainbow']);
   const a=RI(2,5), b=RI(2,6), ph=RI(0,5), mir=chance(.42);
   const c0=cols[0], c1=cols[1%cols.length], c2=cols[2%cols.length];
   const half=G/2, cc=(G-1)/2;
   const cell=[];
   for(let i=0;i<G*G;i++)cell.push(null);
   const tetro=[];
-  if(fam==='tetro'||fam==='blocks'){
-    for(let i=0;i<RI(8,20);i++)
-      tetro.push([RI(0,G-2),RI(0,G-2),RI(1,4),RI(1,4),P(cols)]);
+  if(fam==='blocks'){
+    /* split the field, then split the pieces — every cell ends up inside
+       some rectangle, which is what the scattered version never managed */
+    const q=[[0,0,G,G]];
+    while(q.length){
+      const [qx,qy,qw,qh]=q.shift();
+      if((qw<=3||qh<=3)||(tetro.length>26)||(qw*qh<14&&chance(.55))){
+        tetro.push([qx,qy,qw,qh,P(cols)]); continue;
+      }
+      if(qw>=qh){const c=RI(2,qw-2); q.push([qx,qy,c,qh],[qx+c,qy,qw-c,qh]);}
+      else{const c=RI(2,qh-2); q.push([qx,qy,qw,c],[qx,qy+c,qw,qh-c]);}
+    }
+  }else if(fam==='tetro'){
+    /* a base coat first, then the pieces, so the field is never bare */
+    const bed=P(cols), rest=cols.filter(c=>c!==bed);
+    const pool=rest.length?rest:[P(PAL),P(PAL)];
+    tetro.push([0,0,G,G,bed]);
+    for(let i=0;i<RI(30,55);i++)
+      tetro.push([RI(0,G-2),RI(0,G-2),RI(2,6),RI(2,6),chance(.2)?'#14121A':P(pool)]);
   }
   /* Fibonacci: carve the biggest square off the remaining rectangle, turn,
      repeat. That is the spiral tiling — the squares come out 1,1,2,3,5,8. */
   const fib=[];
   if(fam==='fib'){
-    let rx=0,ry=0,rw=G,rh=G,side=RI(0,3);
-    while(rw>2&&rh>2&&fib.length<11){
-      /* carve the golden fraction, not the whole side — on a square grid
-         min(rw,rh) is the entire canvas and the first square eats it */
-      const sq=Math.max(2,Math.round(Math.min(rw,rh)*.618));
-      let px,py;
-      if(side===0){px=rx;py=ry;rx+=sq;rw-=sq;}
-      else if(side===1){px=rx;py=ry;ry+=sq;rh-=sq;}
-      else if(side===2){px=rx+rw-sq;py=ry;rw-=sq;}
-      else{px=rx;py=ry+rh-sq;rh-=sq;}
-      fib.push([px,py,sq,P(cols)]);
-      side=(side+1)%4;
-      if(sq<=1)break;
+    /* Grow the real spiral: each new square takes a whole side of the
+       bounding box, which is what makes the sides come out 1,1,2,3,5,8.
+       Carving fractions out of a square left gaps and read as debris. */
+    let x0b=0,y0b=0,x1b=1,y1b=1;
+    const raw=[[0,0,1]];
+    for(let i=0;i<RI(6,8);i++){
+      const bw=x1b-x0b, bh=y1b-y0b;
+      if(i%4===0){raw.push([x1b,y0b,bh]); x1b+=bh;}
+      else if(i%4===1){raw.push([x0b,y1b,bw]); y1b+=bw;}
+      else if(i%4===2){raw.push([x0b-bh,y0b,bh]); x0b-=bh;}
+      else{raw.push([x0b,y0b-bw,bw]); y0b-=bw;}
     }
+    const bw2=x1b-x0b, bh2=y1b-y0b, k2=Math.max(G/bw2,G/bh2);
+    for(const r of raw)
+      fib.push([Math.round((r[0]-x0b)*k2),Math.round((r[1]-y0b)*k2),
+                Math.max(1,Math.round(r[2]*k2)),P(cols)]);
   }
   const at=(x0,y0)=>{
     let x=x0,y=y0;
@@ -2023,6 +2053,21 @@ function pxPattern(G){
       case 'sunray':   {const an3=Math.atan2(dy,dx)+3.14159, rr2=Math.sqrt(dx*dx+dy*dy);
                         const seg=((an3/(6.2832/(b*4)))|0)%3;
                         return rr2<a?c2:(seg===0?c0:(seg===1?c1:null));}
+      case 'rainbow':  {
+                        /* every other cell white, the rest cycling through
+                           the spectrum, each row shifted one along — so the
+                           colours run in diagonals across the field */
+                        if((x0+y0)%2===1)return '#F4F1EA';
+                        const RB=['#2A5FD8','#39B54A','#E0341F','#F2C511','#F26A1B','#8A3FD0','#1FA0E8'];
+                        return RB[((((x0+y0)>>1)+ph)%RB.length+RB.length)%RB.length];}
+      case 'plusgrid':  {
+                        /* white crosses on a dark field, each with a
+                           different colour in its middle */
+                        const per=a+4, u=x0%per, v=y0%per, m=(per>>1);
+                        const cell=(((x0/per)|0)*7+(((y0/per)|0)*11))%PAL.length;
+                        if(u===m&&v===m)return PAL[cell];
+                        if(u===m||v===m)return '#F4F1EA';
+                        return null;}
       default: return null;
     }
   };
@@ -2348,18 +2393,23 @@ function buildPixel(ox,oy,w,h,names){
   const cell=Math.min(w,h)/Gs;
   const Gx=Math.max(6,Math.round(w/cell)), Gy=Math.max(6,Math.round(h/cell));
   const cw2=w/Gx, ch2=h/Gy;
-  const body=P(PAL), dark=P(['#1A1A22','#16161C','#241C28']);
-  const accent=P(PAL), eyeW='#F4F1E8', pup='#111';
+  /* Neon: only on a plain figure, never over a scene — a glow needs a dark
+     field behind it or it just looks smudged. Drawn as stacked translucent
+     rects rather than an SVG filter, so every renderer shows it. */
+  const NEON=['#1AF0C8','#FF2D9B','#2BD2FF','#B14DFF','#FFE04A','#39FF6A','#FF6A1A'];
+  const neon=(!asScene&&!asBoth)&&chance(.29); PXNEON=neon;
+  const body=neon?P(NEON):P(PAL), dark=neon?'#0A0A10':P(['#1A1A22','#16161C','#241C28']);
+  const accent=neon?P(NEON):P(PAL), eyeW='#F4F1E8', pup='#111';
   const COLS={B:body,D:dark,E:eyeW,P:pup,A:accent,
               M:'#C9CDD4',G:'#E3B23C',R:'#C43A3A',W:'#F4F1E8',K:'#14141A',
-              '1':P(PAL),'2':P(PAL),'3':P(PAL)};
-  let cells=new Array(Gx*Gy).fill(null), baseFill=P(BG), pat=null, spot=null;
+              '1':neon?P(NEON):P(PAL),'2':neon?P(NEON):P(PAL),'3':neon?P(NEON):P(PAL)};
+  let cells=new Array(Gx*Gy).fill(null), baseFill=neon?P(['#07070C','#0A0810','#06080C']):P(BG), pat=null, spot=null;
   if(asScene||asBoth){
     const sc=pxScene(Gx,Gy,asBoth);
     cells=sc.cells; spot=sc.spot;
     if(names)names.push(sc.name);
   }else{
-    pat=chance(.66)?pxPattern(Gs):null;
+    pat=(!neon&&chance(.66))?pxPattern(Gs):null;
     if(pat){
       baseFill=pat.base;
       for(let y=0;y<Gy;y++)for(let x=0;x<Gx;x++){
@@ -2383,7 +2433,7 @@ function buildPixel(ox,oy,w,h,names){
       for(let y=gy0-m;y<gy0+sh+m;y++)for(let x=gx0-m;x<gx0+sw2+m;x++)
         if(x>=0&&x<Gx&&y>=0&&y<Gy)cells[y*Gx+x]=pat.base;
     }
-    for(let y=0;y<sh;y++)for(let x=0;x<sw2;x++){
+    if(!neon)for(let y=0;y<sh;y++)for(let x=0;x<sw2;x++){
       const c=g[y][x]; if(c==='.')continue;
       const rx=gx0+x, ry=gy0+y;
       if(rx>=0&&rx<Gx&&ry>=0&&ry<Gy)cells[ry*Gx+rx]=COLS[c]||body;
@@ -2401,6 +2451,26 @@ function buildPixel(ox,oy,w,h,names){
       x+=n;
     }
   }
+  if(neon&&g){
+    /* two soft passes under the figure, then the figure crisp on top */
+    for(const [grow,op] of [[1.6,.13],[0.7,.22]])
+      for(let y=0;y<sh;y++)for(let x=0;x<sw2;x++){
+        const c=g[y][x]; if(c==='.'||c==='D'||c==='P')continue;
+        s+=`<rect x="${F(ox+(gx0+x-grow)*cw2)}" y="${F(oy+(gy0+y-grow)*ch2)}"`+
+           ` width="${F(cw2*(1+grow*2))}" height="${F(ch2*(1+grow*2))}"`+
+           ` fill="${COLS[c]||body}" opacity="${op}"/>`;
+      }
+    for(let y=0;y<sh;y++)for(let x=0;x<sw2;x++){
+      const c=g[y][x]; if(c==='.')continue;
+      s+=`<rect x="${F(ox+(gx0+x)*cw2)}" y="${F(oy+(gy0+y)*ch2)}" width="${F(cw2+.6)}" height="${F(ch2+.6)}" fill="${COLS[c]||body}"/>`;
+    }
+    /* a hot white core on the brightest cells sells the tube */
+    for(let y=0;y<sh;y++)for(let x=0;x<sw2;x++){
+      const c=g[y][x]; if(c!=='E'&&c!=='A')continue;
+      s+=`<rect x="${F(ox+(gx0+x+.28)*cw2)}" y="${F(oy+(gy0+y+.28)*ch2)}" width="${F(cw2*.44)}" height="${F(ch2*.44)}" fill="#FFFFFF" opacity=".75"/>`;
+    }
+  }
+
   /* loose cells — the corrupted-cartridge look */
   for(let i=0;i<((pat||asScene||asBoth)?RI(3,10):RI(8,26));i++){
     const rx=RI(0,Gx-1), ry=RI(0,Gy-1);
@@ -2799,7 +2869,7 @@ function generate(){
     }
   }else if(mode==='pixel'){
     s+=buildPixel(0,0,w,h,names);
-    TR.ground='pixelated'; picks=[];
+    TR.ground=PXNEON?'neon':'pixelated'; picks=[];
   }else if(mode==='panels'){
     /* one panel grid in eight gets the gilt treatment around it */
     if(chance(.14)){
@@ -2857,6 +2927,21 @@ function generate(){
     const gid='gr'+Math.floor(R(1000,99999));
     s+=`<defs>${grainDefs(gid,gr)}</defs>`;
     s+=`<rect width="${w}" height="${h}" filter="url(#${gid})" opacity="${F(gr==='glitter'?R(.75,1):R(.35,.60))}" pointer-events="none"/>`;
+    if(gr==='glitter'){
+      /* Drawn specks on top of the noise filter. The filter alone depends on
+         feTurbulence, which some renderers skip entirely and which comes out
+         invisible if the alpha threshold drifts. These always show. */
+      const n=Math.round(RI(90,240)*(w*h)/90000);
+      for(let i=0;i<n;i++){
+        const gx=R(0,w), gy=R(0,h), z=R(.7,2.1);
+        const c=P(['#FFFFFF','#FFF3C4','#FFE9A8','#FFD9F2','#D8F4FF']);
+        if(chance(.26))
+          s+=`<path d="M${F(gx)} ${F(gy-z*2.2)} L${F(gx+z*.6)} ${F(gy)} L${F(gx)} ${F(gy+z*2.2)} L${F(gx-z*.6)} ${F(gy)} Z`+
+             ` M${F(gx-z*2.2)} ${F(gy)} L${F(gx)} ${F(gy-z*.6)} L${F(gx+z*2.2)} ${F(gy)} L${F(gx)} ${F(gy+z*.6)} Z" fill="${c}" opacity="${F(R(.55,1))}"/>`;
+        else
+          s+=`<rect x="${F(gx)}" y="${F(gy)}" width="${F(z)}" height="${F(z)}" fill="${c}" opacity="${F(R(.4,.95))}"/>`;
+      }
+    }
   }
   TR.subject=names.length?[...new Set(names)].sort().join(' + '):'scenery';
   TR.figures=String(SWARMN||picks.length);
@@ -2974,19 +3059,19 @@ const ODDS={
                 scatter:0.0342,diptych:0.0331,crowd:0.0326,illumination:0.028,tiny:0.0262,
                 radial:0.0225,woodcut:0.0219,cubist:0.0219,mirror:0.0195,optical:0.0171,
                 swarm:0.0168},
-  ground:{pixelated:0.4946,gradient:0.0625,'colour field':0.0593,flat:0.059,
-           aureole:0.057,panelled:0.0548,illuminated:0.0474,nocturne:0.0457,
-           radial:0.0225,relief:0.0219,faceted:0.0219,mirrored:0.0195,
-           tessellated:0.0171,'swarm field':0.0168},
-  condition:{pristine:0.5996,craquelure:0.1994,foxing:0.1198,overpainted:0.0615,
-              'water damage':0.0197},
-  surface:{none:0.5972,grain:0.2235,glitter:0.1793},
-  signature:{unsigned:0.4797,signed:0.4214,'signed and dated':0.0988},
-  inscription:{none:0.6589,'THE SLOURVE':0.0227,SLOUVER:0.0221,SGNATURE:0.0219,
-                LIMITEDD:0.0219,ARTISTE:0.0219,COLLECTON:0.0215,ARTT:0.0214,
-                AUTHENTC:0.0213,GALERIE:0.0213,SLOVRE:0.0212,ORIGNAL:0.0211,
-                EXHIBTION:0.0209,MUSSEUM:0.0209,MASTERPEICE:0.0205,SLOUVRE:0.0204,
-                PAINTNG:0.02},
+  ground:{pixelated:0.4268,neon:0.0679,gradient:0.0625,'colour field':0.0593,
+           flat:0.059,aureole:0.057,panelled:0.0548,illuminated:0.0474,
+           nocturne:0.0457,radial:0.0225,relief:0.0219,faceted:0.0219,
+           mirrored:0.0195,tessellated:0.0171,'swarm field':0.0168},
+  condition:{pristine:0.6002,craquelure:0.2005,foxing:0.1199,overpainted:0.0596,
+              'water damage':0.0198},
+  surface:{none:0.5977,grain:0.2225,glitter:0.1799},
+  signature:{unsigned:0.4785,signed:0.4223,'signed and dated':0.0992},
+  inscription:{none:0.6611,SLOUVER:0.0226,SGNATURE:0.0221,GALERIE:0.0218,
+                'THE SLOURVE':0.0214,LIMITEDD:0.0213,SLOVRE:0.0213,ORIGNAL:0.0212,
+                AUTHENTC:0.0212,MUSSEUM:0.0211,EXHIBTION:0.0211,COLLECTON:0.021,
+                PAINTNG:0.0208,SLOUVRE:0.0207,ARTISTE:0.0207,MASTERPEICE:0.0203,
+                ARTT:0.0203},
   palette:{saturated:0.4274,mixed:0.2878,restrained:0.2848},
   figures:{'0':0.6204,'1':0.1973,'2':0.0623,'3':0.0332,'4':0.0306,'5':0.0119,
             '10':0.0056,'11':0.005,'36':0.0046,'12':0.0044,'49':0.0044,'25':0.0042,
@@ -3207,6 +3292,7 @@ function newWork(text){
     u.searchParams.set('s',String(cur.seed));
     history.replaceState(null,'',u);
   }catch(e){}
+  if(typeof primeShare==='function')primeShare();
 }
 
 function render(){
@@ -3383,8 +3469,37 @@ document.getElementById('saveBtn').onclick=()=>{
 /* The share sheet is the only way an image actually reaches a post —
    no site can attach a file to a tweet on the user's behalf. Where the
    sheet isn't available we hand over the file and open the composer. */
+/* The Web Share API only accepts a call made during the tap that triggered
+   it. Rendering the PNG first burns that permission — by the time the blob
+   exists the activation is gone, share() is refused, and we silently fall
+   through to the link-only path. So the PNG is rendered ahead of time and
+   share() is called on the tap itself, with nothing awaited before it. */
+let shareCache={seed:null,blob:null,name:null}, shareTimer=null;
+function primeShare(){
+  clearTimeout(shareTimer);
+  shareCache={seed:null,blob:null,name:null};
+  shareTimer=setTimeout(()=>{
+    const want=cur.seed;
+    try{ exportPNG((bl,name)=>{ if(bl&&cur.seed===want)shareCache={seed:want,blob:bl,name:name}; }); }
+    catch(e){}
+  },450);
+}
+
 document.getElementById('shareBtn').onclick=()=>{
   const btn=document.getElementById('shareBtn'), was=btn.textContent;
+  const hereNow=location.origin+location.pathname+'?s='+cur.seed;
+  const lineNow=(lang==='es')
+    ? 'Mi pieza de El Slouvre. '+hereNow
+    : 'My piece from The Slouvre. '+hereNow;
+  if(shareCache.seed===cur.seed&&shareCache.blob&&navigator.canShare){
+    try{
+      const f=new File([shareCache.blob],shareCache.name,{type:'image/png'});
+      if(navigator.canShare({files:[f]})){
+        navigator.share({files:[f],text:lineNow}).catch(()=>{});
+        return;
+      }
+    }catch(e){}
+  }
   btn.disabled=true;
   exportPNG(async (bl,name)=>{
     btn.disabled=false;
