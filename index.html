@@ -1788,10 +1788,10 @@ const SPRITES={
             "DDDBBBDDD...","DBBBBBBBBD.A",".DBEBBEBD...","..DBBBBBD..A",
             "..DBBBBBD...",".DBBDDDBBD..",".DBD...DBD..","DBBD...DBBD.",
             "DBD.....DBD.","DD.......DD.","............"],
- moth     :["..D......D..","..DA....AD..","...DA..AD...","....DBBD....",
-            "DDD.DBBD.DDD","DAADDBBDDAAD","DAADDBBDDAAD","DAADDBBDDAAD",
-            "DAADDBBDDAAD",".DDDDBBDDDD.","..DADBBDAD..","....DBBD....",
-            "....DBBD....","....DDDD....","............"],
+ bull     :["DD........DD","DAD......DAD",".DAD....DAD.","..DDDDDDDD..",
+            "..DBBBBBBD..",".DBBEBBEBBD.",".DBBPBBPBBD.",".DBBBBBBBBD.",
+            "..DBBBBBBD..","..DBDBBDBD..","..DBBBBBBD..","...DDAADD...",
+            "....DBBD....","...DBBBBD...","..DD....DD.."],
  mushroom :["...DDDDDD...","..DAAAAAAD..",".DAADAADAAD.","DAAAAAAAAAAD",
             "DAADAAAADAAD",".DAAAAAAAAD.","..DDDDDDDD..","...DBBBBD...",
             "...DBEEBD...","...DBPPBD...","...DBBBBD...","...DBBBBD...",
@@ -1811,7 +1811,39 @@ const SPRITES={
  scarecrow:["....DDDD....","...DAAAAD...","..DDDDDDDD..","..DBBBBBBD..",
             "..DBEBBEBD..","..DBBBBBBD..","..DBDDDDBD..","...DBBBBD...",
             "DDDDDBBDDDDD","...ADBBDA...","...ADBBDA...","....DBBD....",
-            "....DBBD....","....DBBD....","....DDDD...."]
+            "....DBBD....","....DBBD....","....DDDD...."],
+ snail    :["..........A.",".........DA.","...DDDDD.DD.","..DAAAAAD.D.",
+            ".DAADDDAAD..",".DADAAADAD..",".DADADADAD..",".DADAAADAD..",
+            ".DAADDDAADD.","..DAAAAADBBD","..DDDDDDBEBD",".DBBBBBBBBBD",
+            "DBBBBBBBBBBD","DDDDDDDDDDDD","............"],
+ toast    :["..DDDDDDDD..",".DAAAAAAAAD.","DAABBBBBBAAD","DABBBBBBBBAD",
+            "DABEBBBBEBAD","DABPBBBBPBAD","DABBBBBBBBAD","DABBBDDBBBAD",
+            "DABBBBBBBBAD","DABBBBBBBBAD","DABBBBBBBBAD","DAABBBBBBAAD",
+            ".DAAAAAAAAD.","..DDDDDDDD..","............"],
+ lollipop :["...DDDDDD...","..DAAAAAAD..",".DABBBBBBAD.","DAABAAAABAAD",
+            "DABAEBBEABAD","DABAPBBPABAD","DAABAAAABAAD",".DABBBBBBAD.",
+            "..DAAAAAAD..","...DDDDDD...","....DEED....","....DEED....",
+            "....DEED....","....DEED....","....DDDD...."],
+ cupcake  :[".....AA.....","....DAAD....","...DBBBBD...","..DBBBBBBD..",
+            ".DBBBBBBBBD.",".DBBEBBEBBD.",".DBBPBBPBBD.",".DBBBBBBBBD.",
+            "DDDDDDDDDDDD",".DADADADADD.",".DADADADADD.","..DADADADD..",
+            "..DADADADD..","...DDDDDD...","............"],
+ sunflower:["....DAAD....",".DDDAAAADDD.",".DAADDDDAAD.","DAADBBBBDAAD",
+            "DAADBEBEBDAD","DAADBPBPBDAD","DAADBBDBBDAD",".DAADDDDAAD.",
+            ".DDDAAAADDD.","....DAAD....",".....DD.....",".....DD.....",
+            "...DDDDD....",".....DD.....",".....DD....."],
+ ufo      :["....DDDD....","...DEEEED...","..DEBBBBED..","..DEBPBPBED.",
+            ".DDDDDDDDDD.","DAAAAAAAAAAD","DABABABABABD",".DAAAAAAAAD.",
+            "..DDDDDDDD..","...A....A...","..A......A..",".A........A.",
+            "............","............","............"],
+ penguin  :["...DDDDDD...","..DDDDDDDD..",".DDDEDDEDDD.",".DDDPDDPDDD.",
+            ".DDDDAADDDD.",".DDDBBBBDDD.","DDDBBBBBBDDD","DDDBBBBBBDDD",
+            "DDDBBBBBBDDD","DDDBBBBBBDDD",".DDDBBBBDDD.","..DDDDDDDD..",
+            "...AA..AA...","..AAA..AAA..","............"],
+ rocket   :[".....DD.....","....DAAD....","...DAAAAD...","...DBBBBD...",
+            "..DBBBBBBD..","..DBEBBEBD..","..DBPBBPBD..","..DBBBBBBD..",
+            "..DBBDDBBD..",".DABBBBBBAD.","DAADBBBBDAAD","DAADBBBBDAAD",
+            ".DDDDAADDDD.","....DAAD....",".....AA....."]
 };
 /* ============ pixel accessories ============ */
 /* The seven sprites are fixed drawings. Everything that makes one piece
@@ -1838,12 +1870,20 @@ const PXANCH={
   astro:   {hy:0,hx:5,ey:4,my:6, by:10,sy:11},
   jelly:   {hy:0,hx:5,ey:4,my:6, by:8, sy:8},
   star:    {hy:0,hx:4,fx:5,ey:6,my:8, by:9, sy:9},
-  moth:    {hy:3,hx:5,ey:6,my:8, by:9, sy:9,noface:true},
+  bull:    {hy:0,hx:5,ey:5,my:9, by:12,sy:11},
   mushroom:{hy:0,hx:5,ey:8,my:10,by:12,sy:11},
   beacon:  {hy:0,hx:5,ey:5,my:7, by:11,sy:10,noface:true},
   teapot:  {hy:1,hx:5,ey:6,my:8, by:9, sy:9},
   cassette:{hy:1,hx:5,ey:6,my:8, by:9, sy:9,noface:true},
-  scarecrow:{hy:0,hx:5,ey:4,my:6, by:11,sy:9}
+  scarecrow:{hy:0,hx:5,ey:4,my:6, by:11,sy:9},
+  snail:   {hy:2,hx:5,ey:10,my:11,by:11,sy:11,noface:true},
+  toast:   {hy:0,hx:5,ey:4,my:7, by:9, sy:9},
+  lollipop:{hy:0,hx:5,ey:4,my:7, by:10,sy:10},
+  cupcake: {hy:1,hx:5,ey:5,my:7, by:9, sy:9},
+  sunflower:{hy:0,hx:5,ey:4,my:6, by:10,sy:10},
+  ufo:     {hy:0,hx:5,ey:3,my:5, by:6, sy:6,noface:true},
+  penguin: {hy:0,hx:5,ey:2,my:4, by:7, sy:8},
+  rocket:  {hy:0,hx:5,ey:5,my:8, by:9, sy:10}
 };
 
 const PXHEAD={
@@ -1923,7 +1963,10 @@ function pxDress(which,sp){
 
   if(chance(.72)){
     const k=P(Object.keys(PXHEAD)), a=PXHEAD[k];
-    pxStamp(grid,a.g,cx-Math.floor(a.g[0].length/2),PAD+an.hy-a.g.length+a.drop);
+    let art=a.g;
+    if(chance(.4)){const m1=P(['1','2','3']),m2=P(['1','2','3','G']);
+      art=art.map(r=>r.replace(/M/g,m1).replace(/G/g,m2));}
+    pxStamp(grid,art,cx-Math.floor(a.g[0].length/2),PAD+an.hy-a.g.length+a.drop);
     worn.push(k);
   }
   if(chance(.5)&&!an.noface){
@@ -1936,7 +1979,12 @@ function pxDress(which,sp){
     const k=P(Object.keys(PXHELD)), a=PXHELD[k];
     const left=chance(.5);
     const gx=left?PAD-a.g[0].length+1:PAD+sw-1;
-    pxStamp(grid,left?a.g.map(r=>[...r].reverse().join('')):a.g,gx,PAD+an.sy-a.g.length+2);
+    let art=a.g;
+    /* half the time the metal and gold give way to palette colours, so the
+       same trident comes in a different finish on the next roll */
+    if(chance(.5)){const m1=P(['1','2','3']),m2=P(['1','2','3','G']);
+      art=art.map(r=>r.replace(/M/g,m1).replace(/G/g,m2));}
+    pxStamp(grid,left?art.map(r=>[...r].reverse().join('')):art,gx,PAD+an.sy-a.g.length+2);
     worn.push(k);
   }
   if(chance(.46)){
@@ -1957,8 +2005,10 @@ function pxDress(which,sp){
 /* Generated, not copied. Fourteen families, each with its own randomised
    period, palette and phase, plus an optional four-way mirror that turns
    any of them into a rug. */
-function pxPattern(G){
-  const cols=[];for(let i=0;i<RI(2,4);i++)cols.push(P(PAL));
+function pxPattern(G,avoid){
+  /* the wall never borrows the figure's own colours, or it swallows it */
+  const okPAL=avoid?PAL.filter(c=>avoid.indexOf(c)<0):PAL;
+  const cols=[];for(let i=0;i<RI(2,4);i++)cols.push(P(okPAL));
   let base=chance(.55)?P(['#14141A','#101016','#1C1622','#0E1014']):P(BG);
   /* Colourways: a locked two-tone that overrides the palette for the whole
      pattern. One switch, so every family can wear them. */
@@ -2058,8 +2108,11 @@ function pxPattern(G){
                            the spectrum, each row shifted one along — so the
                            colours run in diagonals across the field */
                         if((x0+y0)%2===1)return '#F4F1EA';
-                        const RB=['#2A5FD8','#39B54A','#E0341F','#F2C511','#F26A1B','#8A3FD0','#1FA0E8'];
-                        return RB[((((x0+y0)>>1)+ph)%RB.length+RB.length)%RB.length];}
+                        const RB=['#2A5FD8','#39B54A','#E0341F','#F2C511','#F26A1B','#8A3FD0','#1FA0E8','#FF5EA8'];
+                        /* random per cell, fixed per seed — no run, no diagonal */
+                        let hsh=(x0*374761393+y0*668265263+(ph+1)*1274126177)|0;
+                        hsh=Math.imul(hsh^(hsh>>>13),1274126177); hsh^=hsh>>>16;
+                        return RB[(hsh>>>0)%RB.length];}
       case 'plusgrid':  {
                         /* white crosses on a dark field, each with a
                            different colour in its middle */
@@ -2379,7 +2432,7 @@ function buildPixel(ox,oy,w,h,names){
   let s='';
   /* three ways this goes: a dressed figure, a scene, or a figure standing
      in one. */
-  const roll=R(0,1), asScene=roll<.34, asBoth=roll>=.34&&roll<.52;
+  const roll=R(0,1), asScene=roll<.15, asBoth=roll>=.15&&roll<.50;
   let g=null,sw2=0,sh=0;
   if(!asScene){
     const which=P(Object.keys(SPRITES));
@@ -2389,27 +2442,25 @@ function buildPixel(ox,oy,w,h,names){
     if(dressed.worn.length)ACC=dressed.worn[0];
   }
   /* cells are square: a banner gets a wider grid, not stretched pixels */
-  const Gs=asScene?RI(22,34):(asBoth?Math.max(sh+RI(12,20),30):Math.max(sw2,sh)+RI(3,8));
+  const Gs=asScene?RI(26,40):(asBoth?Math.max(sh+RI(12,20),30):Math.max(sw2,sh)+RI(3,8));
   const cell=Math.min(w,h)/Gs;
   const Gx=Math.max(6,Math.round(w/cell)), Gy=Math.max(6,Math.round(h/cell));
   const cw2=w/Gx, ch2=h/Gy;
   /* Neon: only on a plain figure, never over a scene — a glow needs a dark
      field behind it or it just looks smudged. Drawn as stacked translucent
      rects rather than an SVG filter, so every renderer shows it. */
-  const NEON=['#1AF0C8','#FF2D9B','#2BD2FF','#B14DFF','#FFE04A','#39FF6A','#FF6A1A'];
-  const neon=(!asScene&&!asBoth)&&chance(.29); PXNEON=neon;
-  const body=neon?P(NEON):P(PAL), dark=neon?'#0A0A10':P(['#1A1A22','#16161C','#241C28']);
-  const accent=neon?P(NEON):P(PAL), eyeW='#F4F1E8', pup='#111';
+  const body=P(PAL), dark=P(['#1A1A22','#16161C','#241C28']);
+  const accent=P(PAL), eyeW='#F4F1E8', pup='#111';
   const COLS={B:body,D:dark,E:eyeW,P:pup,A:accent,
               M:'#C9CDD4',G:'#E3B23C',R:'#C43A3A',W:'#F4F1E8',K:'#14141A',
-              '1':neon?P(NEON):P(PAL),'2':neon?P(NEON):P(PAL),'3':neon?P(NEON):P(PAL)};
-  let cells=new Array(Gx*Gy).fill(null), baseFill=neon?P(['#07070C','#0A0810','#06080C']):P(BG), pat=null, spot=null;
+              '1':P(PAL),'2':P(PAL),'3':P(PAL)};
+  let cells=new Array(Gx*Gy).fill(null), baseFill=P(BG), pat=null, spot=null;
   if(asScene||asBoth){
     const sc=pxScene(Gx,Gy,asBoth);
     cells=sc.cells; spot=sc.spot;
     if(names)names.push(sc.name);
   }else{
-    pat=(!neon&&chance(.66))?pxPattern(Gs):null;
+    pat=chance(.66)?pxPattern(Gs,[body,accent]):null;
     if(pat){
       baseFill=pat.base;
       for(let y=0;y<Gy;y++)for(let x=0;x<Gx;x++){
@@ -2425,15 +2476,20 @@ function buildPixel(ox,oy,w,h,names){
       gx0=Math.max(0,Math.min(Gx-sw2,spot[0]-(sw2>>1)));
       gy0=Math.max(0,Math.min(Gy-sh,spot[1]-sh));
     }else{
-      gx0=asBoth?RI(1,Math.max(1,Gx-sw2-1)):Math.floor((Gx-sw2)/2);
+      /* a plain figure sits centred, or leans to one side — the offset
+         ones read differently and that variety is worth keeping */
+      const lean=asBoth?0:(chance(.4)?(chance(.5)?-1:1):0);
+      const room=Math.max(0,Gx-sw2);
+      gx0=asBoth?RI(1,Math.max(1,Gx-sw2-1))
+          :(lean===0?Math.floor(room/2):(lean<0?Math.floor(room*R(.05,.25)):Math.floor(room*R(.75,.95))));
       gy0=asBoth?Math.max(0,Gy-sh-RI(1,4)):Math.floor((Gy-sh)/2);
     }
-    if(pat&&chance(.42)){
+    if(pat&&chance(.6)){
       const m=RI(0,1);
       for(let y=gy0-m;y<gy0+sh+m;y++)for(let x=gx0-m;x<gx0+sw2+m;x++)
         if(x>=0&&x<Gx&&y>=0&&y<Gy)cells[y*Gx+x]=pat.base;
     }
-    if(!neon)for(let y=0;y<sh;y++)for(let x=0;x<sw2;x++){
+    for(let y=0;y<sh;y++)for(let x=0;x<sw2;x++){
       const c=g[y][x]; if(c==='.')continue;
       const rx=gx0+x, ry=gy0+y;
       if(rx>=0&&rx<Gx&&ry>=0&&ry<Gy)cells[ry*Gx+rx]=COLS[c]||body;
@@ -2451,26 +2507,6 @@ function buildPixel(ox,oy,w,h,names){
       x+=n;
     }
   }
-  if(neon&&g){
-    /* two soft passes under the figure, then the figure crisp on top */
-    for(const [grow,op] of [[1.6,.13],[0.7,.22]])
-      for(let y=0;y<sh;y++)for(let x=0;x<sw2;x++){
-        const c=g[y][x]; if(c==='.'||c==='D'||c==='P')continue;
-        s+=`<rect x="${F(ox+(gx0+x-grow)*cw2)}" y="${F(oy+(gy0+y-grow)*ch2)}"`+
-           ` width="${F(cw2*(1+grow*2))}" height="${F(ch2*(1+grow*2))}"`+
-           ` fill="${COLS[c]||body}" opacity="${op}"/>`;
-      }
-    for(let y=0;y<sh;y++)for(let x=0;x<sw2;x++){
-      const c=g[y][x]; if(c==='.')continue;
-      s+=`<rect x="${F(ox+(gx0+x)*cw2)}" y="${F(oy+(gy0+y)*ch2)}" width="${F(cw2+.6)}" height="${F(ch2+.6)}" fill="${COLS[c]||body}"/>`;
-    }
-    /* a hot white core on the brightest cells sells the tube */
-    for(let y=0;y<sh;y++)for(let x=0;x<sw2;x++){
-      const c=g[y][x]; if(c!=='E'&&c!=='A')continue;
-      s+=`<rect x="${F(ox+(gx0+x+.28)*cw2)}" y="${F(oy+(gy0+y+.28)*ch2)}" width="${F(cw2*.44)}" height="${F(ch2*.44)}" fill="#FFFFFF" opacity=".75"/>`;
-    }
-  }
-
   /* loose cells — the corrupted-cartridge look */
   for(let i=0;i<((pat||asScene||asBoth)?RI(3,10):RI(8,26));i++){
     const rx=RI(0,Gx-1), ry=RI(0,Gy-1);
@@ -2518,10 +2554,13 @@ function buildPanels(ox,oy,w,h,names,skip){
 
 /* returns {svg, inner:[x,y,w,h], gold, deep} so callers can fill the middle */
 function buildFrame(w,h){
-  const deep=P(['#3A2018','#2A1C2E','#1E2A22','#32231A','#241E2E']);
-  const gold=P(['#C9A227','#B8923A','#D4B24C']);
-  const cream=P(['#EDE3C8','#E8DCC0','#F0E8D2']);
-  const accent=P(['#8E2B2B','#6E1A1A','#2E4A6E','#4A6E3A']);
+  /* half the frames wear the old gilt livery, the rest are built from the
+     palette so the same shape stops reading as the same picture */
+  const gilt=chance(.5);
+  const deep=gilt?P(['#3A2018','#2A1C2E','#1E2A22','#32231A','#241E2E']):P(['#14141A','#0E1014','#1C1622','#F0E6D2','#E6E6DC']);
+  const gold=gilt?P(['#C9A227','#B8923A','#D4B24C']):P(PAL);
+  const cream=gilt?P(['#EDE3C8','#E8DCC0','#F0E8D2']):P(PAL);
+  const accent=gilt?P(['#8E2B2B','#6E1A1A','#2E4A6E','#4A6E3A']):P(PAL);
   let s=`<rect width="${w}" height="${h}" fill="${deep}"/>`;
   const bands=RI(3,5);
   let inset=0;
@@ -2586,11 +2625,11 @@ function generate(){
   const dark=(FORCE&&FORCE.ground==='nocturne')?true:chance(.16);
   const gid='g'+Math.floor(RNG()*1e6);
   const names=[];
-  const COMPW=[['pixel',.5000],
-               ['center',.0418],['scatter',.0336],['diptych',.0307],['tiny',.0267],
-               ['crowd',.0336],['portrait',.0455],['landscape',.0694],['panels',.0724],
-               ['illumination',.0281],['woodcut',.0219],['cubist',.0219],
-               ['optical',.0171],['radial',.0214],['mirror',.0191],['swarm',.0168]];
+  const COMPW=[['pixel',.5500],
+               ['center',.0385],['scatter',.0310],['diptych',.0283],['tiny',.0246],
+               ['crowd',.0310],['portrait',.0419],['landscape',.0639],['panels',.0667],
+               ['illumination',.0130],['woodcut',.0202],['cubist',.0202],
+               ['optical',.0158],['radial',.0197],['mirror',.0176],['swarm',.0176]];
   let mode=(()=>{let r=R(0,1);for(const[k,w]of COMPW){if((r-=w)<=0)return k;}return 'center';})();
   if(FORCE&&FORCE.composition)mode=FORCE.composition;
   if(BANNER&&!(FORCE&&FORCE.composition)){
@@ -2869,7 +2908,7 @@ function generate(){
     }
   }else if(mode==='pixel'){
     s+=buildPixel(0,0,w,h,names);
-    TR.ground=PXNEON?'neon':'pixelated'; picks=[];
+    TR.ground='pixelated'; picks=[];
   }else if(mode==='panels'){
     /* one panel grid in eight gets the gilt treatment around it */
     if(chance(.14)){
@@ -2920,28 +2959,15 @@ function generate(){
   picks.forEach((p,ix)=>{const e=(forced&&ix===0)?forced:pickSubject();names.push(e[1]);s+=e[0](p[0],p[1],p[2]);});
 
   /* the surface the work is printed on */
-  const gr=(()=>{let r=R(0,1);
+  /* pixel pieces get no surface at all — grain and glitter read as
+     noise over hard edges and the figure disappears into it */
+  const gr=(()=>{if(mode==='pixel')return 'none';let r=R(0,1);
     if(r<.60)return 'none'; if(r<.82)return 'grain'; return 'glitter';})();
   TR.surface=gr;
   if(gr!=='none'){
     const gid='gr'+Math.floor(R(1000,99999));
     s+=`<defs>${grainDefs(gid,gr)}</defs>`;
     s+=`<rect width="${w}" height="${h}" filter="url(#${gid})" opacity="${F(gr==='glitter'?R(.75,1):R(.35,.60))}" pointer-events="none"/>`;
-    if(gr==='glitter'){
-      /* Drawn specks on top of the noise filter. The filter alone depends on
-         feTurbulence, which some renderers skip entirely and which comes out
-         invisible if the alpha threshold drifts. These always show. */
-      const n=Math.round(RI(90,240)*(w*h)/90000);
-      for(let i=0;i<n;i++){
-        const gx=R(0,w), gy=R(0,h), z=R(.7,2.1);
-        const c=P(['#FFFFFF','#FFF3C4','#FFE9A8','#FFD9F2','#D8F4FF']);
-        if(chance(.26))
-          s+=`<path d="M${F(gx)} ${F(gy-z*2.2)} L${F(gx+z*.6)} ${F(gy)} L${F(gx)} ${F(gy+z*2.2)} L${F(gx-z*.6)} ${F(gy)} Z`+
-             ` M${F(gx-z*2.2)} ${F(gy)} L${F(gx)} ${F(gy-z*.6)} L${F(gx+z*2.2)} ${F(gy)} L${F(gx)} ${F(gy+z*.6)} Z" fill="${c}" opacity="${F(R(.55,1))}"/>`;
-        else
-          s+=`<rect x="${F(gx)}" y="${F(gy)}" width="${F(z)}" height="${F(z)}" fill="${c}" opacity="${F(R(.4,.95))}"/>`;
-      }
-    }
   }
   TR.subject=names.length?[...new Set(names)].sort().join(' + '):'scenery';
   TR.figures=String(SWARMN||picks.length);
@@ -3046,56 +3072,57 @@ function generate(){
 /* Measured, not declared. Regenerated by tools/regen-odds.js from
    40,000 gallery rolls. */
 const ODDS={
-  subject:{brainlet:0.2135,object:0.1431,block:0.1063,animal:0.1023,cactus:0.1012,
-            hand:0.1005,anime:0.0522,scenery:0.042,forest:0.0257,skyway:0.0255,
-            waterfall:0.0252,road:0.0251,mountains:0.025,coast:0.0247,
-            gasstation:0.0246,desert:0.0245,city:0.0244,star:0.0141,beacon:0.0141,
-            cube:0.0141,scarecrow:0.0138,ghost:0.0137,mummy:0.0136,teapot:0.0135,
-            moth:0.0135,astro:0.0135,skull:0.0134,cassette:0.0134,boxring:0.0132,
-            robot:0.0132,owl:0.013,coyote:0.0129,frog:0.0129,alien:0.0129,
-            jelly:0.0128,angel:0.0128,mushroom:0.0126,disco:0.0125,ninja:0.0124,
-            samurai:0.0123,wonder:0.012,knight:0.0119},
-  composition:{pixel:0.4946,panels:0.0741,landscape:0.0694,portrait:0.048,center:0.0399,
-                scatter:0.0342,diptych:0.0331,crowd:0.0326,illumination:0.028,tiny:0.0262,
-                radial:0.0225,woodcut:0.0219,cubist:0.0219,mirror:0.0195,optical:0.0171,
-                swarm:0.0168},
-  ground:{pixelated:0.4268,neon:0.0679,gradient:0.0625,'colour field':0.0593,
-           flat:0.059,aureole:0.057,panelled:0.0548,illuminated:0.0474,
-           nocturne:0.0457,radial:0.0225,relief:0.0219,faceted:0.0219,
-           mirrored:0.0195,tessellated:0.0171,'swarm field':0.0168},
-  condition:{pristine:0.6002,craquelure:0.2005,foxing:0.1199,overpainted:0.0596,
-              'water damage':0.0198},
-  surface:{none:0.5977,grain:0.2225,glitter:0.1799},
-  signature:{unsigned:0.4785,signed:0.4223,'signed and dated':0.0992},
-  inscription:{none:0.6611,SLOUVER:0.0226,SGNATURE:0.0221,GALERIE:0.0218,
-                'THE SLOURVE':0.0214,LIMITEDD:0.0213,SLOVRE:0.0213,ORIGNAL:0.0212,
-                AUTHENTC:0.0212,MUSSEUM:0.0211,EXHIBTION:0.0211,COLLECTON:0.021,
-                PAINTNG:0.0208,SLOUVRE:0.0207,ARTISTE:0.0207,MASTERPEICE:0.0203,
-                ARTT:0.0203},
+  subject:{brainlet:0.198,object:0.1298,cactus:0.095,hand:0.0949,block:0.0927,
+            animal:0.0921,anime:0.0469,scenery:0.0409,disco:0.0265,wonder:0.0259,
+            boxring:0.0255,mountains:0.0226,desert:0.0224,forest:0.0223,road:0.0221,
+            skyway:0.022,city:0.022,coast:0.0217,waterfall:0.0208,gasstation:0.0206,
+            skull:0.0153,cupcake:0.0149,cassette:0.0148,knight:0.0148,penguin:0.0146,
+            sunflower:0.0146,mummy:0.0146,alien:0.0145,rocket:0.0144,cube:0.0144,
+            owl:0.0143,scarecrow:0.0143,robot:0.0142,angel:0.0141,snail:0.0141,
+            teapot:0.0141,toast:0.014,lollipop:0.014,samurai:0.0138,ufo:0.0138,
+            ninja:0.0137,jelly:0.0135,star:0.0135,beacon:0.0134,bull:0.0133,
+            coyote:0.0132,mushroom:0.0131,ghost:0.0131,frog:0.0131,astro:0.0127},
+  composition:{pixel:0.5424,panels:0.0673,landscape:0.0652,portrait:0.0422,center:0.0405,
+                crowd:0.0332,scatter:0.0324,diptych:0.0268,tiny:0.0245,cubist:0.0206,
+                radial:0.0204,woodcut:0.0199,mirror:0.0178,swarm:0.0176,optical:0.016,
+                illumination:0.013},
+  ground:{pixelated:0.5424,gradient:0.0585,flat:0.0557,'colour field':0.0549,
+           aureole:0.0534,panelled:0.0492,nocturne:0.0423,illuminated:0.0311,
+           faceted:0.0206,radial:0.0204,relief:0.0199,mirrored:0.0178,
+           'swarm field':0.0176,tessellated:0.016},
+  condition:{pristine:0.5984,craquelure:0.2,foxing:0.1211,overpainted:0.0609,
+              'water damage':0.0196},
+  surface:{none:0.8161,grain:0.1019,glitter:0.082},
+  signature:{unsigned:0.4805,signed:0.4177,'signed and dated':0.1017},
+  inscription:{none:0.6579,LIMITEDD:0.0228,ORIGNAL:0.0224,'THE SLOURVE':0.0221,
+                SLOUVER:0.0221,SGNATURE:0.0221,COLLECTON:0.0219,PAINTNG:0.0218,
+                SLOVRE:0.0216,EXHIBTION:0.0213,GALERIE:0.0213,ARTT:0.0208,
+                MASTERPEICE:0.0207,ARTISTE:0.0206,AUTHENTC:0.0203,SLOUVRE:0.0202,
+                MUSSEUM:0.0202},
   palette:{saturated:0.4274,mixed:0.2878,restrained:0.2848},
-  figures:{'0':0.6204,'1':0.1973,'2':0.0623,'3':0.0332,'4':0.0306,'5':0.0119,
-            '10':0.0056,'11':0.005,'36':0.0046,'12':0.0044,'49':0.0044,'25':0.0042,
-            '8':0.0037,'64':0.0037,'9':0.0036,'15':0.002,'17':0.0015,'6':0.0008,
-            '7':0.0008},
-  hands:{'—':0.9422,'8':0.0154,'7':0.0144,'5':0.0141,'6':0.0139},
-  species:{'—':0.7365,human:0.1589,alien:0.0092,zombie:0.009,long:0.0067,croc:0.0062,
-            worm:0.0062,monkey:0.006,frog:0.006,bird:0.0058,mouse:0.0058,
-            horned:0.0057,coyote:0.0056,bunny:0.0056,tiger:0.0055,chicken:0.0054,
-            generic:0.0053,owl:0.0051,goat:0.0028,bull:0.0027},
-  accessory:{none:0.1009,cap:0.0585,glasses:0.0565,sunglasses:0.0454,horns:0.0338,
-              bandana:0.0333,halo:0.0313,trench:0.0312,antlers:0.029,jersey:0.0273,
-              beanie:0.0238,crown:0.0234,rocker:0.0211,beret:0.0203,ninja:0.0179,
-              headphones:0.0177,antenna:0.0161,tophat:0.0161,helmet:0.0159,visor:0.0158,
-              mohawk:0.0158,cone:0.0156,pirate:0.0156,sprout:0.0156,tree:0.0155,
-              robot:0.0155,ears:0.0154,topknot:0.0154,flame:0.0152,spartan:0.0147,
-              chef:0.0141,viking:0.014,wizard:0.0132,cigarette:0.0129,ghost:0.0126,
-              jester:0.0124,laurel:0.012,bucket:0.0117,monocle:0.0106,astronaut:0.0091,
-              cigar:0.0086,plague:0.0085,staff:0.0034,sword:0.0032,bone:0.0032,
-              torch:0.0031,flag:0.0031,blush:0.0031,eyepatch:0.0031,brow:0.0029,
-              cape:0.0029,tongue:0.0029,wink:0.0028,fangs:0.0028,trident:0.0027,
-              gun:0.0027,scar:0.0026,thirdeye:0.0026,pack:0.0026,tie:0.0026,
-              earrings:0.0025,rainbow:0.0025,shades:0.0024,mask:0.0023,chain:0.0022,
-              tears:0.0022,cig:0.0022,jacket:0.0022}
+  figures:{'0':0.6548,'1':0.1754,'2':0.0553,'3':0.0314,'4':0.0291,'5':0.0115,
+            '10':0.0051,'36':0.0047,'49':0.0046,'11':0.0044,'25':0.0043,'12':0.0041,
+            '64':0.0039,'9':0.0036,'8':0.0034,'15':0.0017,'17':0.0013,'7':0.0007,
+            '6':0.0007},
+  hands:{'—':0.9456,'8':0.0155,'6':0.0137,'7':0.0131,'5':0.0121},
+  species:{'—':0.761,human:0.1451,zombie:0.0085,alien:0.0081,long:0.0061,
+            coyote:0.0057,bunny:0.0056,worm:0.0055,generic:0.0055,monkey:0.0054,
+            frog:0.0052,horned:0.0051,mouse:0.005,croc:0.0049,owl:0.0047,tiger:0.0046,
+            chicken:0.0046,bird:0.0045,bull:0.0025,goat:0.0024},
+  accessory:{none:0.0824,cap:0.0572,glasses:0.0459,horns:0.0369,sunglasses:0.0368,
+              bandana:0.0364,halo:0.0352,antlers:0.0325,crown:0.0283,trench:0.0261,
+              jersey:0.0231,antenna:0.0227,ears:0.0223,tree:0.0222,mohawk:0.0222,
+              cone:0.022,sprout:0.0219,helmet:0.0218,tophat:0.0215,flame:0.0213,
+              beanie:0.0198,beret:0.0168,rocker:0.0167,visor:0.0148,ninja:0.0144,
+              headphones:0.0143,pirate:0.013,robot:0.0124,topknot:0.0123,spartan:0.0122,
+              viking:0.0117,chef:0.0112,cigarette:0.0109,wizard:0.0106,ghost:0.0103,
+              jester:0.0103,laurel:0.0097,bucket:0.0095,monocle:0.0087,astronaut:0.0074,
+              cigar:0.0068,plague:0.0067,sword:0.0046,staff:0.0045,flag:0.0045,
+              bone:0.0044,torch:0.0044,blush:0.0042,trident:0.0042,brow:0.0041,
+              gun:0.0041,fangs:0.0041,wink:0.004,cape:0.004,scar:0.004,eyepatch:0.0039,
+              thirdeye:0.0038,shades:0.0038,tongue:0.0038,pack:0.0037,rainbow:0.0037,
+              cig:0.0036,tie:0.0034,earrings:0.0033,chain:0.0033,tears:0.0033,
+              jacket:0.0031,mask:0.003}
 };
 function oddsOf(k,v){
   const t=ODDS[k]; if(!t) return .5;
