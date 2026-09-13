@@ -611,7 +611,7 @@ function readWords(t){
 }
 const F=n=>n.toFixed(1);
 
-let HANDS=0, SWARMN=0, PXFORCE=null, PXNEON=false;
+let HANDS=0, SWARMN=0, PXFORCE=null, PXNEON=false, PXBOX=null;
 function wobble(pts,amt){return pts.map(p=>[p[0]+R(-amt,amt),p[1]+R(-amt,amt)]);}
 
 function blob(cx,cy,r,n,amt){ amt*=WOB;
@@ -1287,6 +1287,9 @@ function pickSubject(){
 let TR={};
 
 function condition(w,h){
+  /* pixel pieces stay pristine: an overpaint square on a 30-cell grid is
+     not a joke about restoration, it's just the figure gone */
+  if(TR.composition==='pixel'){TR.condition='pristine';return '';}
   let r=RNG();
   if(FORCE&&FORCE.condition)r={'craquelure':.7,'foxing':.85,'overpainted':.95,'water damage':.99}[FORCE.condition];
   let k,s='';
@@ -1784,10 +1787,10 @@ const SPRITES={
             "DBBEPBBEPBBD","DBBBBBBBBBBD","DBBBBBBBBBBD",".DBDBDBDBBD.",
             "..D.D.D.D...",".A.A.A.A.A..","A.A.A.A.A.A.",".A.A.A.A.A..",
             "A.A.A.A.A.A.",".A.A.A.A.A..","..A.A.A.A..."],
- star     :["...DD.......","...DBD......","..DBBD......","..DBBD...A.A",
-            "DDDBBBDDD...","DBBBBBBBBD.A",".DBEBBEBD...","..DBBBBBD..A",
-            "..DBBBBBD...",".DBBDDDBBD..",".DBD...DBD..","DBBD...DBBD.",
-            "DBD.....DBD.","DD.......DD.","............"],
+ star     :[".......DD...","......DBBD..","......DBBD..","A.....DBBD..",
+            "..DDDDDBBDDD","A.DBBBBBBBBD","...DBEBBEBD.","A...DPBBPD..",
+            "....DBDDBD..","A..DBBDDBBD.","...DBD..DBD.","..DBD....DBD",
+            ".DBD.....DBD",".DD.......DD","............"],
  bull     :["DD........DD","DAD......DAD",".DAD....DAD.","..DDDDDDDD..",
             "..DBBBBBBD..",".DBBEBBEBBD.",".DBBPBBPBBD.",".DBBBBBBBBD.",
             "..DBBBBBBD..","..DBDBBDBD..","..DBBBBBBD..","...DDAADD...",
@@ -1869,7 +1872,7 @@ const PXANCH={
   knight:  {hy:0,hx:5,ey:4,my:6, by:11,sy:11},
   astro:   {hy:0,hx:5,ey:4,my:6, by:10,sy:11},
   jelly:   {hy:0,hx:5,ey:4,my:6, by:8, sy:8},
-  star:    {hy:0,hx:4,fx:5,ey:6,my:8, by:9, sy:9},
+  star:    {hy:0,hx:7,fx:7,ey:6,my:8, by:9, sy:9},
   bull:    {hy:0,hx:5,ey:5,my:9, by:12,sy:11},
   mushroom:{hy:0,hx:5,ey:8,my:10,by:12,sy:11},
   beacon:  {hy:0,hx:5,ey:5,my:7, by:11,sy:10,noface:true},
@@ -2432,7 +2435,7 @@ function buildPixel(ox,oy,w,h,names){
   let s='';
   /* three ways this goes: a dressed figure, a scene, or a figure standing
      in one. */
-  const roll=R(0,1), asScene=roll<.15, asBoth=roll>=.15&&roll<.50;
+  const roll=R(0,1), asScene=roll<.15, asBoth=roll>=.15&&roll<.40;
   let g=null,sw2=0,sh=0;
   if(!asScene){
     const which=P(Object.keys(SPRITES));
@@ -2449,18 +2452,19 @@ function buildPixel(ox,oy,w,h,names){
   /* Neon: only on a plain figure, never over a scene — a glow needs a dark
      field behind it or it just looks smudged. Drawn as stacked translucent
      rects rather than an SVG filter, so every renderer shows it. */
-  const body=P(PAL), dark=P(['#1A1A22','#16161C','#241C28']);
-  const accent=P(PAL), eyeW='#F4F1E8', pup='#111';
+  const body=P(PAL), accent=P(PAL), eyeW='#F4F1E8', pup='#111';
+  let dark=P(['#1A1A22','#16161C','#241C28']);
   const COLS={B:body,D:dark,E:eyeW,P:pup,A:accent,
               M:'#C9CDD4',G:'#E3B23C',R:'#C43A3A',W:'#F4F1E8',K:'#14141A',
               '1':P(PAL),'2':P(PAL),'3':P(PAL)};
+  const lum=(hex)=>{const n=parseInt(hex.slice(1,7),16);return (.2126*(n>>16&255)+.7152*(n>>8&255)+.0722*(n&255))/255;};
   let cells=new Array(Gx*Gy).fill(null), baseFill=P(BG), pat=null, spot=null;
   if(asScene||asBoth){
     const sc=pxScene(Gx,Gy,asBoth);
     cells=sc.cells; spot=sc.spot;
     if(names)names.push(sc.name);
   }else{
-    pat=chance(.66)?pxPattern(Gs,[body,accent]):null;
+    pat=chance(.80)?pxPattern(Gs,[body,accent]):null;
     if(pat){
       baseFill=pat.base;
       for(let y=0;y<Gy;y++)for(let x=0;x<Gx;x++){
@@ -2484,16 +2488,27 @@ function buildPixel(ox,oy,w,h,names){
           :(lean===0?Math.floor(room/2):(lean<0?Math.floor(room*R(.05,.25)):Math.floor(room*R(.75,.95))));
       gy0=asBoth?Math.max(0,Gy-sh-RI(1,4)):Math.floor((Gy-sh)/2);
     }
-    if(pat&&chance(.6)){
+    if(pat&&chance(.42)){
       const m=RI(0,1);
       for(let y=gy0-m;y<gy0+sh+m;y++)for(let x=gx0-m;x<gx0+sw2+m;x++)
         if(x>=0&&x<Gx&&y>=0&&y<Gy)cells[y*Gx+x]=pat.base;
     }
+    /* the outline takes the opposite of whatever is actually behind the
+       figure — a dark line on a dark wall is how sprites disappear */
+    let L=0,n=0;
+    for(let y=Math.max(0,gy0);y<Math.min(Gy,gy0+sh);y++)for(let x=Math.max(0,gx0);x<Math.min(Gx,gx0+sw2);x++){
+      L+=lum(cells[y*Gx+x]||baseFill);n++;}
+    const behindDark=n?(L/n)<.42:false;
+    /* the line stays black — that's the look. what keeps a figure off a
+       dark wall is a bright body, so a dim one gets swapped out. */
+    if(behindDark&&lum(body)<.42){const bright=PAL.filter(c=>lum(c)>=.42);if(bright.length)COLS.B=P(bright);}
     for(let y=0;y<sh;y++)for(let x=0;x<sw2;x++){
       const c=g[y][x]; if(c==='.')continue;
       const rx=gx0+x, ry=gy0+y;
       if(rx>=0&&rx<Gx&&ry>=0&&ry<Gy)cells[ry*Gx+rx]=COLS[c]||body;
     }
+    PXBOX=[ox+gx0*cw2,oy+gy0*ch2,ox+(gx0+sw2)*cw2,oy+(gy0+sh)*ch2];
+    SWARMN=Math.max(SWARMN,1);
   }
   s+=`<rect x="${F(ox)}" y="${F(oy)}" width="${F(w)}" height="${F(h)}" fill="${baseFill}"/>`;
   /* runs of one colour become one rect — a sky row is 90 cells otherwise */
@@ -2621,7 +2636,7 @@ function grainDefs(id,kind){
 function generate(){
   const w=CW,h=CH;let s='';
   TR={};
-  SWARMN=0;
+  SWARMN=0; PXBOX=null;
   const dark=(FORCE&&FORCE.ground==='nocturne')?true:chance(.16);
   const gid='g'+Math.floor(RNG()*1e6);
   const names=[];
@@ -2979,8 +2994,14 @@ function generate(){
   const DOOD=[['star',.205],['spiral',.165],['heart',.145],['arrow',.145],['smiley',.145],
               ['x',.105],['cloud',.075],['fish',.015]];
   const pickDood=()=>{let r=R(0,1);for(const[k,w]of DOOD){if((r-=w)<=0)return k;}return 'star';};
+  /* nothing gets scribbled over a pixel figure — try a few spots, keep the
+     first one that misses its box */
+  const clear=(x,y,m)=>!PXBOX||x<PXBOX[0]-m||x>PXBOX[2]+m||y<PXBOX[1]-m||y>PXBOX[3]+m;
+  const spot=(m)=>{let x=R(14,w-14),y=R(14,h-14);
+    for(let t=0;t<8&&!clear(x,y,m);t++){x=R(14,w-14);y=R(14,h-14);}return [x,y];};
   for(let i=0;i<(PH?RI(0,1):RI(0,Math.round(3*DENS)));i++){
-    const k=pickDood(),x=R(14,w-14),y=R(14,h-14),z=R(.55,1.5),c=chance(.55)?'#111':P(PAL);
+    const k=pickDood(),[x,y]=spot(14),z=R(.55,1.5),c=chance(.55)?'#111':P(PAL);
+    if(!clear(x,y,14))continue;
     const st=`fill="none" stroke="${c}" stroke-width="${F(R(1.4,3.2))}" stroke-linecap="round" stroke-linejoin="round" opacity="${F(R(.6,1))}"`;
     if(k==='star'){let d='';for(let p=0;p<10;p++){const a=-Math.PI/2+p*Math.PI/5,r=(p%2?5.4:13)*z;d+=(p?'L':'M')+F(x+Math.cos(a)*r)+' '+F(y+Math.sin(a)*r);}s+=`<path d="${d}Z" ${st}/>`;}
     else if(k==='cross'){s+=`<path d="M${F(x+R(-1,1))} ${F(y-14*z)} L${F(x+R(-1,1))} ${F(y+14*z)} M${F(x-8*z)} ${F(y-5*z)} L${F(x+8*z)} ${F(y-5*z+R(-1,1))}" ${st}/>`;}
@@ -3002,7 +3023,8 @@ function generate(){
   for(const glyph of ['infinity','anchor','torii']){
     if(!chance(PH?MARK_ODDS*.5:MARK_ODDS))continue;
     const z=R(.45,1.05), gc=chance(.5)?'#111':P(PAL);
-    const gx=R(w*.12,w*.88), gy=R(h*.12,h*.88);
+    const [gx,gy]=spot(16);
+    if(!clear(gx,gy,16))continue;
     const gs=`fill="none" stroke="${gc}" stroke-width="${F(R(1.3,2.5))}" stroke-linecap="round" stroke-linejoin="round" opacity="${F(R(.5,.9))}"`;
     let d='';
     if(glyph==='infinity'){
@@ -3025,9 +3047,10 @@ function generate(){
   }
   if(chance(PH?CROSS_ODDS*.5:CROSS_ODDS)){
     const z=R(.4,1.0), c=chance(.5)?'#111':P(PAL);
-    const edge=chance(.72);
-    const x=edge?(chance(.5)?R(12,w*.2):R(w*.8,w-12)):R(w*.2,w*.8);
-    const y=edge?(chance(.5)?R(12,h*.24):R(h*.76,h-12)):R(h*.2,h*.8);
+    const edge=chance(.72)||!!PXBOX;
+    let x=edge?(chance(.5)?R(12,w*.2):R(w*.8,w-12)):R(w*.2,w*.8);
+    let y=edge?(chance(.5)?R(12,h*.24):R(h*.76,h-12)):R(h*.2,h*.8);
+    if(!clear(x,y,16)){const q=spot(16);x=q[0];y=q[1];}
     const up=14*z, dn=14*z, arm=8*z, bar=y-5*z;
     s+=`<g transform="rotate(${F(R(-16,16))} ${F(x)} ${F(y)})">`+
        `<path d="M${F(x)} ${F(y-up)} L${F(x)} ${F(y+dn)} M${F(x-arm)} ${F(bar)} L${F(x+arm)} ${F(bar+R(-1,1))}"`+
@@ -3037,7 +3060,12 @@ function generate(){
   /* the tells */
   if(chance(PH?.10:.34)){
     const t=P(GIBBER);TR.inscription=t;
-    s+=`<text x="${F(R(20,w-110))}" y="${F(R(40,h-20))}" font-family="Georgia,serif" font-size="${F(R(15,38))}" fill="${chance(.5)?'#111':P(PAL)}" opacity="${F(R(.5,.95))}" transform="rotate(${F(R(-14,14))} ${F(w/2)} ${F(h/2)})" letter-spacing="${F(R(-1,4))}">${t}</text>`;
+    /* on a pixel piece the word goes above or below the figure, never across it */
+    let tx=R(20,w-110), ty=R(40,h-20);
+    if(PXBOX){const above=PXBOX[1]>h*.35, below=PXBOX[3]<h*.72;
+      if(above&&(!below||chance(.5)))ty=R(24,Math.max(26,PXBOX[1]-6));
+      else if(below)ty=R(Math.min(h-20,PXBOX[3]+22),h-8);}
+    s+=`<text x="${F(tx)}" y="${F(ty)}" font-family="Georgia,serif" font-size="${F(R(15,38))}" fill="${chance(.5)?'#111':P(PAL)}" opacity="${F(R(.5,.95))}" transform="rotate(${F(R(-14,14))} ${F(w/2)} ${F(h/2)})" letter-spacing="${F(R(-1,4))}">${t}</text>`;
   }else TR.inscription='none';
 
   const sg=RNG();
@@ -3073,9 +3101,9 @@ function generate(){
    40,000 gallery rolls. */
 const ODDS={
   subject:{brainlet:0.198,object:0.1298,cactus:0.095,hand:0.0949,block:0.0927,
-            animal:0.0921,anime:0.0469,scenery:0.0409,disco:0.0265,wonder:0.0259,
-            boxring:0.0255,mountains:0.0226,desert:0.0224,forest:0.0223,road:0.0221,
-            skyway:0.022,city:0.022,coast:0.0217,waterfall:0.0208,gasstation:0.0206,
+            animal:0.0921,anime:0.0469,scenery:0.0409,disco:0.0195,mountains:0.0193,
+            forest:0.0187,desert:0.0186,coast:0.0185,skyway:0.0183,boxring:0.0181,
+            road:0.0181,city:0.0176,wonder:0.0176,waterfall:0.017,gasstation:0.0167,
             skull:0.0153,cupcake:0.0149,cassette:0.0148,knight:0.0148,penguin:0.0146,
             sunflower:0.0146,mummy:0.0146,alien:0.0145,rocket:0.0144,cube:0.0144,
             owl:0.0143,scarecrow:0.0143,robot:0.0142,angel:0.0141,snail:0.0141,
@@ -3090,17 +3118,16 @@ const ODDS={
            aureole:0.0534,panelled:0.0492,nocturne:0.0423,illuminated:0.0311,
            faceted:0.0206,radial:0.0204,relief:0.0199,mirrored:0.0178,
            'swarm field':0.0176,tessellated:0.016},
-  condition:{pristine:0.5984,craquelure:0.2,foxing:0.1211,overpainted:0.0609,
-              'water damage':0.0196},
-  surface:{none:0.8161,grain:0.1019,glitter:0.082},
-  signature:{unsigned:0.4805,signed:0.4177,'signed and dated':0.1017},
-  inscription:{none:0.6579,LIMITEDD:0.0228,ORIGNAL:0.0224,'THE SLOURVE':0.0221,
-                SLOUVER:0.0221,SGNATURE:0.0221,COLLECTON:0.0219,PAINTNG:0.0218,
-                SLOVRE:0.0216,EXHIBTION:0.0213,GALERIE:0.0213,ARTT:0.0208,
-                MASTERPEICE:0.0207,ARTISTE:0.0206,AUTHENTC:0.0203,SLOUVRE:0.0202,
-                MUSSEUM:0.0202},
+  condition:{pristine:0.8167,craquelure:0.0921,foxing:0.0544,overpainted:0.0279,
+              'water damage':0.0088},
+  surface:{none:0.8161,grain:0.102,glitter:0.0819},
+  signature:{unsigned:0.4798,signed:0.4189,'signed and dated':0.1014},
+  inscription:{none:0.6573,SGNATURE:0.0227,SLOVRE:0.0225,SLOUVER:0.0224,ORIGNAL:0.0222,
+                LIMITEDD:0.0221,GALERIE:0.0216,COLLECTON:0.0215,ARTISTE:0.0213,
+                PAINTNG:0.0212,'THE SLOURVE':0.0212,EXHIBTION:0.0209,SLOUVRE:0.0209,
+                AUTHENTC:0.0208,ARTT:0.0207,MUSSEUM:0.0207,MASTERPEICE:0.02},
   palette:{saturated:0.4274,mixed:0.2878,restrained:0.2848},
-  figures:{'0':0.6548,'1':0.1754,'2':0.0553,'3':0.0314,'4':0.0291,'5':0.0115,
+  figures:{'1':0.6386,'0':0.1915,'2':0.0553,'3':0.0314,'4':0.0291,'5':0.0115,
             '10':0.0051,'36':0.0047,'49':0.0046,'11':0.0044,'25':0.0043,'12':0.0041,
             '64':0.0039,'9':0.0036,'8':0.0034,'15':0.0017,'17':0.0013,'7':0.0007,
             '6':0.0007},
